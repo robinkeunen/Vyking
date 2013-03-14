@@ -1,0 +1,11 @@
+Vyking compiler
+
+Robin Keunen
+Pierre Vyncke
+
+This projects aime to develop a simple compiler for the Vyking langage.
+Vyking is a list-processing, functional programming language.
+The Syntax is inspired from Python.
+
+The compiler is written in Python and uses PLY lexer/parser.
+This file was modified by PyCharm 2.7.1 for binding GitHub repository

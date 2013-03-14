@@ -1,0 +1,14 @@
+\begin{thebibliography}{1}
+
+\bibitem{antlr_ply_pyparsing}
+more antlr - java, and comparisons to ply and pyparsing.
+\newblock
+  \url{http://www.dalkescientific.com/writings/diary/archive/2007/11/03/antlr_java.html},
+  2007.
+
+\bibitem{PLYtalk}
+David Beazley.
+\newblock Writing parsers and compilers with ply.
+\newblock \url{http://www.dabeaz.com/ply/PLYTalk.pdf}, February 2007.
+
+\end{thebibliography}

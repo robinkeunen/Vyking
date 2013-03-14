@@ -1,0 +1,198 @@
+% !TEX encoding = UTF-8
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+
+
+%math 
+\usepackage{amsmath}
+%\usepackage{amssymb} // Decommenter si le dernier n'est pas suffisant
+
+%Chimie
+\usepackage[version=3]{mhchem}
+%cf http://fr.wikibooks.org/wiki/LaTeX/%C3%89crire_des_formules_chimiques
+
+% Allows for temporary adjustment of side margins
+% Lorsque les tableaux sont trop grands
+\usepackage{chngpage}
+ \usepackage{multirow} 
+ 
+% provides filler text
+\usepackage{lipsum}
+% usage : \lipsum[1]
+
+% just makes the table prettier (see \toprule, \bottomrule, etc. commands below)
+\usepackage{booktabs}
+
+%Mise en page
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[top=3cm, bottom=3cm, left=4cm, right=3cm]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{placeins}
+
+\definecolor{gris}{gray}{0.5}
+\definecolor{code}{gray}{0.95}
+
+% Table des matières cliquable 
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks, % empécher latex de colorer les liens
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black, % couleur des liens dans la table des matières
+    urlcolor=blue
+}
+
+%Points dans la table des matières
+\usepackage{tocloft}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}} % Ligne de points dans la table des matières
+
+
+%Page de garde
+
+\newlength{\larg}
+\setlength{\larg}{14.5cm}
+
+% Pour corriger alignement, jouer avec la taille de tabular (± 6cm)
+\title{
+{\rule{\larg}{1mm}}\vspace{7mm}
+\begin{tabular}{p{7,6cm} r}
+ \multirow{3}{*}{\includegraphics[width=70px]{vyking-logo2.jpg}} & {\Huge {\bf Langage Vyking}} \\
+   & \\
+   & {\Large Lexing et parsing}
+\end{tabular}\\
+\vspace{2mm}
+{\rule{\larg}{1mm}}
+\vspace{2mm} \\
+\begin{tabular}{p{9.8cm} r}
+   & {\large \bf Compilateurs} \\
+   & {\large \bf INFO0085} \\
+   & {\large \bf \bsc{Pr. Pierre Geurts}}\\
+   & {\large \bf \bsc{Cyril Soldani}}\\
+   & {\large  \today}
+\end{tabular}\\
+\vspace{10cm}
+}
+\author{\begin{tabular}{p{13.7cm}}
+\bsc{Robin Keunen} s093137\\
+\bsc{Pierre Vyncke} s091918\\
+1\up{ème} Master Ingénieur Civil
+\end{tabular}\\
+\hline }
+\date{}
+
+\usepackage{times}
+\newcommand{\be}{\begin{enumerate}}
+\newcommand{\ee}{\end{enumerate}}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+
+\definecolor{quotationcolour}{HTML}{F0F0F0}
+\definecolor{quotationmarkcolour}{HTML}{1F3F81}
+
+% Double-line for start and end of epigraph.
+\newcommand{\epiline}{\hrule \vskip -.2em \hrule}
+% Massively humongous opening quotation mark.
+\newcommand{\hugequote}{%
+  \fontsize{42}{48}\selectfont \color{quotationmarkcolour} \textbf{``}
+  \vskip -.5em
+}
+
+% Beautify quotations.
+\newcommand{\epigraph}[2]{%
+  \bigskip
+  \begin{flushright}
+  \colorbox{quotationcolour}{%
+    \parbox{.60\textwidth}{%
+    \epiline \vskip 1em {\hugequote} \vskip -.5em
+    \parindent 2.2em
+    #1\begin{flushright}\textsc{#2}\end{flushright}
+    \epiline
+    }
+  }
+  \end{flushright}
+  \bigskip
+}
+
+\begin{document}
+
+% Titre
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+% Mise en page
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{\itshape \textcolor{gris}{Vyking - lexing et parsing}}
+\lfoot{\itshape \textcolor{gris}{INFO-0085 Compilateurs}}
+\cfoot{}
+\rfoot{\itshape \textcolor{gris}{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\newpage 
+
+\section{Introduction}
+
+\section{Trois versions de Vyking}
+    Pour séparer les difficultés dans la compilation du langage, nous travaillerons sur trois versions successives du langage.
+    La première, \emph{basic\_vyking} n'implémente que les fonctions de bases, le noyau du langage.
+    La deuxième, \emph{listed\_vyking} rajoute les listes et les opérateurs de liste.
+    La troisième et dernière version \emph{full\_vyking} implémentera les closures.
+    
+\section{Choix des outils}
+    Nous avons isolé quelques lexer/parser dans la multitudes des outils disponibles.
+    
+    \paragraph{ANTLR}
+        ANTLR est capable de générer du code Python pour le Parser, il dispose de beaucoup de documentation.
+        L'analyse est top-down, ce qui rend la génération d'erreur plus facile.
+        Cependant il vise les grammaires LL, nous ne voulions passer trop de temps à modifier la grammaire.
+        De plus, en lisant sur le web, il apparait que le code généré cause beaucoup d'appels de fonctions\cite{antlr_ply_pyparsing}.
+        Les appels sont bon marché en Java, le langage de base de ANTLR mais les appels sont chers en Python. 
+        D'autres outils sont plus efficaces et orientés Python.
+        
+    \paragraph{Plex}
+        Plex est assez populaire mais cet outil ne fait que l'analyse lexicale.
+        Nous préférons une solution intégrée pour ne pas devoir apprendre deux outils.
+        
+    \paragraph{PLY}     
+        PLY is an implementation of lex and yacc parsing tools for Python.                   
+        PLY est construit en Python pur, il n'est pas construit sur un noyau C.
+        Cette approche le rend plus lent que les outils construit en C mais il est plus efficace (en temps et espace)\cite{PLYtalk} que tous les autres outils Python.
+        Il existe beaucoup de ressources en ligne et l'outil fournit des outils de diagnostique.
+        Le report d'erreur était un des objectifs de développement pour PLY.        
+        D'un point de vue pédagogique, nous avons retenu ce choix car il nous permet de nous familiariser avec Lex et Yacc tout en conservant une approche pythonesque.
+        
+    \paragraph{} Nous avons retenu PLY, si nous avons assez de temps, nous essaierons de développer nos propres outils de lexing et/ou de parsing
+        
+\bibliography{vyking_bib}
+\bibliographystyle{plain}
+
+\end{document}	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
