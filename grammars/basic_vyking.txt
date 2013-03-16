@@ -2,38 +2,25 @@
 file_input = {NEWLINE | statement}, ENDMARKER
 
 keyword = 'return' | 'defun' 
-        | 'and' | 'or' | 'not' | 'is' 
+        | 'and' | 'or' | 'not'
         | 'if' | 'elif' | 'else'
-        | 'while' | 'for'
-        | 'map' | 'apply' | 'cons' | 'append' | 'list' 
-        | 'head' | 'tail | 'in';
+        | 'while'
         
 statement = (funcall
                     | if_stat
                     | while_stat
-                    | for_stat
                     | let_stat
                     | return_stat
                     | funcdef_stat
-                    | import_stat
                     ), NEWLINE;
      
-funcall = id, '(', [args], ')' | list_fun;
+funcall = id, '(', [args], ')';
 fundef = 'defun', id, parameters, ':', block;
 if_stat = 'if', test, ':', block, {'elif' test ':' block}, ['else' ':' block];
 while_stat = 'while', test, ':', block;
 for_stat = 'for', id, 'in', list, ':', block;
 let_stat = id, '=', (object | exp);
 return_stat = 'return', (exp | list);
-import_stat = 'from', id, 'import', name;
-
-list_fun = cons_fun | append_fun | list_fun | head_fun | tail_fun | map_fun;
-cons_fun = 'cons', '(', list, ')' | atom, '+', list;
-append_fun = 'append', '(', list, ')' | list, '+', list;
-list_fun = 'list', '(', list, ')';
-head_fun = 'head', '(', list, ')';
-tail_fun = 'tail', '(', list, ')';
-map_fun = 'map', '(', id, ',', list, ')';
 
 exp = add_exp;
 add_exp = mul_exp, {('+' | '-'), mul_exp};
@@ -64,9 +51,8 @@ bool = 'True' | 'False';
 
 (* complex types *)
 string = '"', {char | esc_char |"'" }, '"' | "'", {char | '"'}, "'";
-list = '[', {object, ','}, 'object', ']' | '[', ']' | list_fun;
 
-object = int | float | char | bool | string | list | id;
+object = int | float | char | bool | string | id;
 
 (* base cases *)
 id = (letter | '_'), { letter | digit | '_'} -keyword;
