@@ -2,12 +2,12 @@ __author__ = 'Robin Keunen'
 __author__ = 'Pierre Vyncke'
 
 import ply.lex as lex
-import test_units
+from test_units import lex_test
 from ply.lex import TOKEN
 
 # basic regex
-number = r'([\+-][1-9]\d*)|0'
-exponent = r'(e|E)' + number
+number = r'([\+-]?[1-9][0-9]*|0)'
+exponent = r'((e|E)' + number + r')'
 
 # Token definitions
 # Token defined as functions when an action is needed
@@ -22,7 +22,6 @@ t_ASSIGN = r'='
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_COLON  = r'\:'
-t_NEWLINE = r'\n'
 t_EQ = r'=='
 t_LOWER = r'<'
 t_GREATER = r'>'
@@ -31,16 +30,17 @@ t_GEQ = r'>='
 t_NEQ = r'!='
 
 
+@TOKEN(number)
+def t_INT(t):
+    t.value = int(t.value)
+    return t
+
+
 @TOKEN(number + r'\.\d*' + exponent + r'?')
 def t_FLOAT(t):
     t.value = float(t.value)
     return t
 
-
-@TOKEN(number)
-def t_INT(t):
-    t.value = int(t.value)
-    return t
 
 
 def t_BOOLEAN(t):
@@ -61,12 +61,28 @@ def t_COMMENT(t):
     pass
     # No return value. Token discarded
 
-t_ignore_whitespace = r'\s'
+
+def t_INDENT(t):
+    r'^\s+'
+    t.value = len(t.value)
+    return t
+
+
+# Ignores whitespaces in lines
+# Would be more efficient to use t_ignore but we need to track INDENT
+def t_WHITESPACE(t):
+    r'\s+'
+    return t
+
 
 # Track line number
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
+# tests for r on short string -> ok
+def t_NEWLINE(t):
+    r'(\n|\n\r|\r\n)+'
+    if 'r' in t.value:
+        t.lexer.lineno += len(t.value) * 2
+    else:
+        t.lexer.lineno += len(t.value)
     return t
 
 # Reserved keywords
@@ -100,7 +116,9 @@ tokens = ['ID',
           'GREATER',
           'LEQ',
           'GEQ',
-          'NEQ'] + list(reserved.values())
+          'NEQ',
+          'INDENT',
+          'WHITESPACE'] + list(reserved.values())
 
 # Compute column.
 #    input is the input text string
@@ -119,7 +137,5 @@ def t_error(t):
     t.lexer.skip(1)
 
 lexer = lex.lex()
-lex.input(test_units.exp1)
+lex_test(lexer)
 
-for tok in lexer:
-    print tok
