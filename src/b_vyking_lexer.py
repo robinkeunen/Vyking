@@ -5,6 +5,25 @@ import ply.lex as lex
 from test_units import lex_test
 from ply.lex import TOKEN
 
+# states (default is 'INITIAL')
+states = (
+    # bol triggered by NEWLINE at beginning of line
+    # inclusive states add rules over current state
+    ('bol', 'exclusive'),
+)
+
+def t_begin_bol(t):
+    r'start_bol'
+    #print 'begin bol'
+    t.lexer.begin('bol') # starts bol state
+
+
+def t_bol_end(t):
+    r'end_bol'
+    #print 'end bol'
+    t.lexer.begin('INITIAL') # back to initial state
+
+
 # basic regex
 number = r'([\+-]?[1-9][0-9]*|0)'
 exponent = r'((e|E)' + number + r')'
@@ -42,7 +61,6 @@ def t_FLOAT(t):
     return t
 
 
-
 def t_BOOLEAN(t):
     r'(True | False)'
     t.value = bool(t.value)
@@ -62,28 +80,30 @@ def t_COMMENT(t):
     # No return value. Token discarded
 
 
-def t_INDENT(t):
-    r'^\s+'
-    t.value = len(t.value)
+# Track line number
+def t_NEWLINE(t):
+    r'(\n|\n\r|\r\n)'
+    t.lexer.lineno += 1
+    t_begin_bol(t)
     return t
 
 
 # Ignores whitespaces in lines
-# Would be more efficient to use t_ignore but we need to track INDENT
-def t_WHITESPACE(t):
+t_ignore_WHITESPACE = r'\s+'
+
+# Only active in bol state
+def t_bol_INDENT(t):
     r'\s+'
+    t.value = len(t.value)
+    t_bol_end(t)
     return t
 
 
-# Track line number
-# tests for r on short string -> ok
-def t_NEWLINE(t):
-    r'(\n|\n\r|\r\n)+'
-    if 'r' in t.value:
-        t.lexer.lineno += len(t.value) * 2
-    else:
-        t.lexer.lineno += len(t.value)
-    return t
+# Exits bol state if character is not a whitespace
+def t_bol_exit(t):
+    r'.'
+    lexer.lexpos -= 1 # rewind one character
+    t_bol_end(t)
 
 # Reserved keywords
 reserved = {
@@ -117,14 +137,13 @@ tokens = ['ID',
           'LEQ',
           'GEQ',
           'NEQ',
-          'INDENT',
-          'WHITESPACE'] + list(reserved.values())
+          'INDENT'] + list(reserved.values())
 
 # Compute column.
 #    input is the input text string
 #    token is a token instance
-def find_column(input, token):
-    last_cr = input.rfind('\n', 0, token.lexpos)
+def find_column(token):
+    last_cr = lexer.lexdata.rfind('\n', 0, token.lexpos)
     if last_cr < 0:
         last_cr = 0
     column = (token.lexpos - last_cr) + 1
