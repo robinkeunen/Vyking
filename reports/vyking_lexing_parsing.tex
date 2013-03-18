@@ -171,6 +171,20 @@
         
     \paragraph{} Nous avons retenu PLY, si nous avons assez de temps, nous essaierons de développer nos propres outils de lexing et/ou de parsing
         
+        
+\section{Lexing de l'indentation}
+    Dans une syntaxe à la python, les espaces et l'indentation n'est significative qu'en début de ligne. Les transitions sont illustrées à la figure ??? (CF EVERNOTE bol state transition).
+    L'état \verb bol  est enclenché quand le lexer lit un retour à la ligne.
+    Une fois dans l'état \verb bol , 3 actions sont possibles : 
+    \begin{enumerate}
+    \item Lecture d'espace ou de tabulation : le token \verb INDENT  est émis, sa valeur est le nombre d'espaces. Une tabulation vaut 4 espaces par défaut.
+    \item Lecture d'un retour à la ligne, le lexer reste dans l'état \verb bol .
+    \item Lecture d'un autre caractère, retour à l'état précédent.
+    \end{enumerate}
+
+        
+    
+            
 \bibliography{vyking_bib}
 \bibliographystyle{plain}
 

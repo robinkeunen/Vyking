@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2011.7.3)  14 MAR 2013 14:22
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2011.7.3)  18 MAR 2013 12:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -684,7 +684,8 @@ Package tocloft Info: The document has section divisions on input line 43.
 (/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/times.sty
 Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
 )
-(/Users/roke/Dropbox/comp/proj/reports/.texpadtmp/vyking_lexing_parsing.aux)
+(/Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_lexing_parsing.au
+x)
 \openout1 = `vyking_lexing_parsing.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 121.
@@ -702,8 +703,7 @@ LaTeX Font Info:    ... okay on input line 121.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 121.
 LaTeX Font Info:    ... okay on input line 121.
 LaTeX Font Info:    Try loading font information for T1+ptm on input line 121.
-
-(/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1ptm.fd
+ (/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
 LaTeX Info: Redefining \degres on input line 121.
@@ -787,13 +787,14 @@ LaTeX Info: Redefining \ref on input line 121.
 LaTeX Info: Redefining \pageref on input line 121.
 LaTeX Info: Redefining \nameref on input line 121.
 
-(/Users/roke/Dropbox/comp/proj/reports/.texpadtmp/vyking_lexing_parsing.out)
-(/Users/roke/Dropbox/comp/proj/reports/.texpadtmp/vyking_lexing_parsing.out)
+(/Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_lexing_parsing.ou
+t)
+(/Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_lexing_parsing.ou
+t)
 \@outlinefile=\write3
 \openout3 = `vyking_lexing_parsing.out'.
 
-
-<vyking-logo2.jpg, id=16, 602.25pt x 602.25pt>
+ <vyking-logo2.jpg, id=20, 602.25pt x 602.25pt>
 File: vyking-logo2.jpg Graphic file (type jpg)
  <use vyking-logo2.jpg>
 Package pdftex.def Info: vyking-logo2.jpg used on input line 125.
@@ -841,13 +842,12 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 141.
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <10.95> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 153.
-
-(/Users/roke/Dropbox/comp/proj/reports/.texpadtmp/vyking_lexing_parsing.bbl
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 6.
-
-(/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1pcr.fd
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 177.
+ (/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
+(/Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_lexing_parsing.bb
+l
 Underfull \hbox (badness 2326) in paragraph at lines 4--8
 []\T1/ptm/m/n/10.95 more antlr - java, and com-pa-ri-sons to ply and py-par-sin
 g.  [][]$\T1/pcr/m/n/10.95 http : / / www .
@@ -859,8 +859,14 @@ Underfull \hbox (badness 10000) in paragraph at lines 4--8
 1 / 03 /
  []
 
-)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 177.
+
+Package Fancyhdr Warning: \headheight is too small (12.0pt): 
+ Make it at least 13.59999pt.
+ We now make it that large for the rest of the document.
+ This may cause the page layout to be inconsistent, however.
+
+[2])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 191.
 
 
 Package Fancyhdr Warning: \headheight is too small (12.0pt): 
@@ -868,33 +874,35 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
  We now make it that large for the rest of the document.
  This may cause the page layout to be inconsistent, however.
 
-[2]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 177.
- (/Users/roke/Dropbox/comp/proj/reports/.texpadtmp/vyking_lexing_parsing.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 177.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 177.
+[3]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 191.
+
+(/Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_lexing_parsing.au
+x)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 191.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 191.
 Package rerunfilecheck Info: File `vyking_lexing_parsing.out' has not changed.
 (rerunfilecheck)             Checksum: <no file>.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 177.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 191.
  ) 
 Here is how much of TeX's memory you used:
- 9935 strings out of 493633
- 141675 string characters out of 3143378
- 344912 words of memory out of 3000000
- 13055 multiletter control sequences out of 15000+200000
+ 9943 strings out of 493633
+ 141807 string characters out of 3143378
+ 345912 words of memory out of 3000000
+ 13058 multiletter control sequences out of 15000+200000
  49458 words of font info for 61 fonts, out of 3000000 for 9000
  831 hyphenation exceptions out of 8191
- 29i,16n,43p,226b,394s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 29i,16n,43p,226b,506s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2011/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2011/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2
 011/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2011/texmf-
 dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts
 /type1/urw/times/utmri8a.pfb>
-Output written on /Users/roke/Dropbox/comp/proj/reports/.texpadtmp/vyking_lexin
-g_parsing.pdf (2 pages, 121767 bytes).
+Output written on /Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_
+lexing_parsing.pdf (3 pages, 124040 bytes).
 PDF statistics:
- 65 PDF objects out of 1000 (max. 8388607)
- 55 compressed objects within 1 object stream
- 13 named destinations out of 1000 (max. 500000)
- 30 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 76 PDF objects out of 1000 (max. 8388607)
+ 65 compressed objects within 1 object stream
+ 18 named destinations out of 1000 (max. 500000)
+ 38 words of extra memory for PDF output out of 10000 (max. 10000000)
 
