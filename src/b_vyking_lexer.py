@@ -5,63 +5,61 @@ import ply.lex as lex
 from test_units import lex_test
 from ply.lex import TOKEN
 
+class BasicVykingLexer:
 
-# Reserved keywords
-reserved = {
-    'if':     'IF',
-    'elif':   'ELIF',
-    'else':   'ELSE',
-    'while':  'WHILE',
-    'and':    'AND',
-    'or':     'OR',
-    'not':    'NOT',
-    'defun':  'DEFUN',
-    'return': 'RETURN'
-}
+    # Reserved keywords
+    reserved = {
+        'if':     'IF',
+        'elif':   'ELIF',
+        'else':   'ELSE',
+        'while':  'WHILE',
+        'and':    'AND',
+        'or':     'OR',
+        'not':    'NOT',
+        'defun':  'DEFUN',
+        'return': 'RETURN'
+    }
 
-# Token list
-tokens = ['ID',
-          'INT',
-          'FLOAT',
-          'PLUS',
-          'INC',
-          'MINUS',
-          'DEC',
-          'TIMES',
-          'DIVIDE',
-          'ASSIGN',
-          'LPAREN',
-          'RPAREN',
-          'COLON',
-          'NEWLINE',
-          'EQ',
-          'LOWER',
-          'GREATER',
-          'LEQ',
-          'GEQ',
-          'NEQ',
-          'INDENT',
-          'COMMA'] + list(reserved.values())
-
-
-# states (default is 'INITIAL')
-states = (
-    # bol triggered by NEWLINE at beginning of line
-    # inclusive states add rules over current state
-    ('bol', 'exclusive'),
-)
+    # Token list
+    tokens = ['ID',
+              'INT',
+              'FLOAT',
+              'PLUS',
+              'INC',
+              'MINUS',
+              'DEC',
+              'TIMES',
+              'DIVIDE',
+              'ASSIGN',
+              'LPAREN',
+              'RPAREN',
+              'COLON',
+              'NEWLINE',
+              'EQ',
+              'LOWER',
+              'GREATER',
+              'LEQ',
+              'GEQ',
+              'NEQ',
+              'INDENT',
+              'COMMA'] + list(reserved.values())
 
 
-# lexer encapsulated in closure
-def b_viking_lexer():
+    # states (default is 'INITIAL')
+    states = (
+        # bol triggered by NEWLINE at beginning of line
+        # inclusive states add rules over current state
+        ('bol', 'exclusive'),
+    )
 
-    def t_begin_bol(t):
+
+    def t_begin_bol(self, t):
         r'start_bol'
         #print 'begin bol'
         t.lexer.begin('bol') # starts bol state
 
 
-    def t_bol_end(t):
+    def t_bol_end(self, t):
         r'end_bol'
         #print 'end bol'
         t.lexer.begin('INITIAL') # back to initial state
@@ -96,67 +94,68 @@ def b_viking_lexer():
     t_COMMA  = r','
 
 
+    # Ignores whitespaces in lines
+    t_ignore_WHITESPACE = r'\s+'
+
+
     @TOKEN(number + r'\.\d*' + exponent + r'?')
-    def t_FLOAT(t):
+    def t_FLOAT(self, t):
         t.value = float(t.value)
         return t
 
 
     @TOKEN(number)
-    def t_INT(t):
+    def t_INT(self, t):
         t.value = int(t.value)
         return t
 
 
-    def t_BOOLEAN(t):
+    def t_BOOLEAN(self, t):
         r'(True | False)'
         t.value = bool(t.value)
         return t
 
 
-    def t_ID(t):
+    def t_ID(self, t):
         r'[a-zA-Z_][a-zA-Z_0-9]*'
         # type is reserved keyword if found in reserved else 'ID'
-        t.type = reserved.get(t.value, 'ID')
+        t.type = self.reserved.get(t.value, 'ID')
         return t
 
 
-    def t_COMMENT(t):
+    def t_COMMENT(self, t):
         r'\#.*'
         pass
         # No return value. Token discarded
 
 
     # Track line number
-    def t_NEWLINE(t):
+    def t_NEWLINE(self, t):
         r'(\n|\n\r|\r\n)'
         t.lexer.lineno += 1
-        t_begin_bol(t)
+        self.t_begin_bol(t)
         return t
 
-
-    # Ignores whitespaces in lines
-    t_ignore_WHITESPACE = r'\s+'
 
     # Only active in bol state
-    def t_bol_INDENT(t):
+    def t_bol_INDENT(self, t):
         r'\s+'
         t.value = len(t.value)
-        t_bol_end(t)
+        self.t_bol_end(t)
         return t
 
 
-    def t_bol_NEWLINE(t):
+    def t_bol_NEWLINE(self, t):
         r'(\n|\n\r|\r\n)'
         t.lexer.lineno += 1
         return t
 
 
     # Exits bol state if character is not a whitespace
-    def t_bol_exit(t):
+    def t_bol_exit(self, t):
         r'.'
-        lexer.lexpos -= 1 # rewind one character
-        t_bol_end(t)
+        self.lexer.lexpos -= 1 # rewind one character
+        self.t_bol_end(t)
         t.type = 'INDENT'
         t.value = 0
         return t
@@ -165,7 +164,7 @@ def b_viking_lexer():
     # Compute column.
     #    input is the input text string
     #    token is a token instance
-    def find_column(token):
+    def find_column(self, token):
         last_cr = lexer.lexdata.rfind('\n', 0, token.lexpos)
         if last_cr < 0:
             last_cr = 0
@@ -175,18 +174,35 @@ def b_viking_lexer():
 
     # Error handling rule
     # Print offending character and skip
-    def t_error(t):
+    def t_error(self, t):
         print "Illegal character '%s'" % t.value[0]
         t.lexer.skip(1)
 
 
-    def t_bol_error(t):
+    def t_bol_error(self, t):
         print "Illegal character '%s'" % t.value[0]
         t.lexer.skip(1)
 
-    return lex.lex()
 
-lexer = b_viking_lexer()
+    def __init__(self):
+        self.lexer = lex.lex(module=self)
+
+
+    def input(self, data):
+        self.lexer.input(data)
+
+
+    def __iter__(self):
+        return self.lexer
+
+
+    def next(self):
+        for tok in self.lexer.token():
+            yield tok
+        raise StopIteration
+
+
+lexer = BasicVykingLexer()
 
 lex_test(lexer)
 
