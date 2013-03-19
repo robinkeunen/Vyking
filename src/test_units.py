@@ -19,13 +19,48 @@ defun slow_inverse(f, delta=1/128.):
             return x-delta
     return f_1 """
 
+find_bounds = """
+defun find_bounds(f, y):
+    x = 1.
+    while f(x) < y:
+        x = x*2.
+    if x == 1:
+        lo = 0
+    else:
+        lo = x/2.
+    return lo, x
+"""
+
+palindrome = """
+defun longest_subpalindrome_slice(text):
+    "Return (i, j) such that text[i:j] is the longest palindrome in text."
+
+    lower(text)
+    start, end = 0, 0
+    length = 0
+    for i, _ in enumerate(text):
+        s, e = grow_palindrome(text, i, i)
+        if e - s > length:
+            length = e - s
+            start, end = s, e
+        s, e = grow_palindrome(text, i, i + 1)
+        if e - s > length:
+            length = e - s
+            start, end = s, e
+
+    return start, end
+"""
+
+
 def lex_test(lexer):
     inputs = list()
     inputs.append(exp1)
     inputs.append(ifStmt)
     inputs.append(slow_inverse)
+    inputs.append(find_bounds)
+    inputs.append(palindrome)
 
-    extended_print = ('ID', 'INT', 'FLOAT')
+    extended_print = ('ID', 'INT', 'FLOAT', 'STRING')
 
     for data in inputs:
         lexer.input(data)

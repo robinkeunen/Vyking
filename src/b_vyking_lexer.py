@@ -6,6 +6,16 @@ from test_units import lex_test
 from ply.lex import TOKEN
 
 class BasicVykingLexer:
+    """
+    Lexer for the Basic Vyking language.
+    Basic Viking is a subset of the whole language.
+    Lists are not incorporated.
+    """
+
+    # basic regex
+    number = r'([\+-]?[1-9][0-9]*|0)'
+    exponent = r'((e|E)' + number + r')'
+
 
     # Reserved keywords
     reserved = {
@@ -20,10 +30,12 @@ class BasicVykingLexer:
         'return': 'RETURN'
     }
 
+
     # Token list
     tokens = ['ID',
               'INT',
               'FLOAT',
+              'STRING',
               'PLUS',
               'INC',
               'MINUS',
@@ -43,31 +55,6 @@ class BasicVykingLexer:
               'NEQ',
               'INDENT',
               'COMMA'] + list(reserved.values())
-
-
-    # states (default is 'INITIAL')
-    states = (
-        # bol triggered by NEWLINE at beginning of line
-        # inclusive states add rules over current state
-        ('bol', 'exclusive'),
-    )
-
-
-    def t_begin_bol(self, t):
-        r'start_bol'
-        #print 'begin bol'
-        t.lexer.begin('bol') # starts bol state
-
-
-    def t_bol_end(self, t):
-        r'end_bol'
-        #print 'end bol'
-        t.lexer.begin('INITIAL') # back to initial state
-
-
-    # basic regex
-    number = r'([\+-]?[1-9][0-9]*|0)'
-    exponent = r'((e|E)' + number + r')'
 
 
     # Token definitions
@@ -96,6 +83,44 @@ class BasicVykingLexer:
 
     # Ignores whitespaces in lines
     t_ignore_WHITESPACE = r'\s+'
+
+
+    # states (default is 'INITIAL')
+    states = (
+        # bol triggered by NEWLINE at beginning of line
+        # inclusive states add rules over current state
+        ('bol', 'exclusive'),
+    )
+
+
+    def __init__(self):
+        self.lexer = lex.lex(module=self)
+
+
+    def __iter__(self):
+        return self.lexer
+
+
+    def next(self):
+        for tok in self.lexer.token():
+            yield tok
+        raise StopIteration
+
+
+    def input(self, data):
+        self.lexer.input(data)
+
+
+    def t_begin_bol(self, t):
+        r'start_bol'
+        #print 'begin bol'
+        t.lexer.begin('bol') # starts bol state
+
+
+    def t_bol_end(self, t):
+        r'end_bol'
+        #print 'end bol'
+        t.lexer.begin('INITIAL') # back to initial state
 
 
     @TOKEN(number + r'\.\d*' + exponent + r'?')
@@ -134,6 +159,11 @@ class BasicVykingLexer:
         r'(\n|\n\r|\r\n)'
         t.lexer.lineno += 1
         self.t_begin_bol(t)
+        return t
+
+
+    def t_STRING(self, t):
+        r'(\'.*\'|".*")'
         return t
 
 
@@ -184,22 +214,6 @@ class BasicVykingLexer:
         t.lexer.skip(1)
 
 
-    def __init__(self):
-        self.lexer = lex.lex(module=self)
-
-
-    def input(self, data):
-        self.lexer.input(data)
-
-
-    def __iter__(self):
-        return self.lexer
-
-
-    def next(self):
-        for tok in self.lexer.token():
-            yield tok
-        raise StopIteration
 
 
 lexer = BasicVykingLexer()
