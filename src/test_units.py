@@ -51,6 +51,10 @@ defun longest_subpalindrome_slice(text):
     return start, end
 """
 
+stringtest = """
+st = r'string with \' and " into it'
+st2 = r"same here, try ' and this \" "
+"""
 
 def lex_test(lexer):
     inputs = list()
@@ -59,6 +63,7 @@ def lex_test(lexer):
     inputs.append(slow_inverse)
     inputs.append(find_bounds)
     inputs.append(palindrome)
+    inputs.append(stringtest)
 
     extended_print = ('ID', 'INT', 'FLOAT', 'STRING')
 

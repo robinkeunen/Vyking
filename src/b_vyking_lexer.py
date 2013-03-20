@@ -163,7 +163,13 @@ class BasicVykingLexer:
 
 
     def t_STRING(self, t):
-        r'(\'.*\'|".*")'
+        r'(\'(.|\\\')*\'|"(.|\\")*")'
+        return t
+
+
+    def t_bol_NEWLINE(self, t):
+        r'(\n|\n\r|\r\n)'
+        t.lexer.lineno += 1
         return t
 
 
@@ -174,11 +180,6 @@ class BasicVykingLexer:
         self.t_bol_end(t)
         return t
 
-
-    def t_bol_NEWLINE(self, t):
-        r'(\n|\n\r|\r\n)'
-        t.lexer.lineno += 1
-        return t
 
 
     # Exits bol state if character is not a whitespace
@@ -195,7 +196,7 @@ class BasicVykingLexer:
     #    input is the input text string
     #    token is a token instance
     def find_column(self, token):
-        last_cr = lexer.lexdata.rfind('\n', 0, token.lexpos)
+        last_cr = self.lexer.lexdata.rfind('\n', 0, token.lexpos)
         if last_cr < 0:
             last_cr = 0
         column = (token.lexpos - last_cr) + 1
@@ -216,7 +217,7 @@ class BasicVykingLexer:
 
 
 
-#lexer = BasicVykingLexer()
+lexer = BasicVykingLexer()
 
-#lex_test(lexer)
+lex_test(lexer)
 
