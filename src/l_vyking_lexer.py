@@ -5,8 +5,28 @@ __author__ = 'pierrevyncke'
 
 
 class ListedVykingLexer(BasicVykingLexer):
-    """ ce coup-ci, c'est bon je crois :)
-    """
+
+    reserved = {
+        'if':     'IF',
+        'elif':   'ELIF',
+        'else':   'ELSE',
+        'while':  'WHILE',
+        'and':    'AND',
+        'or':     'OR',
+        'not':    'NOT',
+        'defun':  'DEFUN',
+        'return': 'RETURN',
+        'is': 'IS',
+        'for': 'FOR',
+        'apply': 'APPLY',
+        'map': 'MAP',
+        'cons': 'CONS',
+        'append': 'APPEND',
+        'list': 'LIST',
+        'head': 'HEAD',
+        'tail': 'TAIL',
+        'in': 'IN'
+    }
 
 lexer = ListedVykingLexer()
 lex_test(lexer)
