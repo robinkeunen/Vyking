@@ -216,7 +216,7 @@ class BasicVykingLexer:
 
 
 
-lexer = BasicVykingLexer()
+#lexer = BasicVykingLexer()
 
-lex_test(lexer)
+#lex_test(lexer)
 
