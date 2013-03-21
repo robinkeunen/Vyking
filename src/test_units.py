@@ -31,26 +31,6 @@ defun find_bounds(f, y):
     return lo, x
 """
 
-palindrome = """
-defun longest_subpalindrome_slice(text):
-    "Return (i, j) such that text[i:j] is the longest palindrome in text."
-
-    lower(text)
-    start, end = 0, 0
-    length = 0
-    for i, _ in enumerate(text):
-        s, e = grow_palindrome(text, i, i)
-        if e - s > length:
-            length = e - s
-            start, end = s, e
-        s, e = grow_palindrome(text, i, i + 1)
-        if e - s > length:
-            length = e - s
-            start, end = s, e
-
-    return start, end
-"""
-
 stringtest = """
 st = r'string with \' and " into it'
 st2 = r"same here, try ' and this \" "
@@ -62,7 +42,6 @@ def lex_test(lexer):
     inputs.append(ifStmt)
     inputs.append(slow_inverse)
     inputs.append(find_bounds)
-    inputs.append(palindrome)
     inputs.append(stringtest)
 
     extended_print = ('ID', 'INT', 'FLOAT', 'STRING')
