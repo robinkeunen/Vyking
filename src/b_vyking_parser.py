@@ -15,16 +15,26 @@ class BasicVykingLexer:
     # Grammar rules
 
     def p_funcall(self, p):
-        '''funcall : id LPARENT args RPARENT
-                    | list_fun'''
-        if p[2] == '(':
-            # Premier cas
-        else:
-            # Second cas
+        """funcall : id LPARENT args RPARENT
+                    | list_fun"""
+        #if p[2] == '(':
+        #else:
 
     def p_fundef(self, p):
         'fundef : DEFUN id parameters COLON block'
-        # bla bla bla
+
+    def p_if_stat(self, p):
+        'if_stat : IF test COLON block'
+
+    def p_while_stat(self, p):
+        'while_stat : WHILE test COLON block'
+
+    def p_for_stat(self, p):
+        'for_stat : FOR id IN list COLON block'
+
+    def p_let_stat(self, p):
+        """let_stat : id ASSIGN object
+                    | id ASSIGN expression"""
 
 
 
