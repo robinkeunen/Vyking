@@ -14,8 +14,22 @@ class BasicVykingLexer:
 
     # Grammar rules
 
+    def p_funcall(self, p):
+        '''funcall : id LPARENT args RPARENT
+                    | list_fun'''
+        if p[2] == '(':
+            # Premier cas
+        else:
+            # Second cas
+
+    def p_fundef(self, p):
+        'fundef : DEFUN id parameters COLON block'
+        # bla bla bla
+
+
+
     def p_expression_plus(self, p):
-        'expression = expression PLUS term'
+        'expression : expression PLUS term'
         p[0] = p[1] + p[3]
 
     def p_expression_minus(self, p):
