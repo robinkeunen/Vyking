@@ -53,7 +53,7 @@ def lex_test(lexer):
         for tok in lexer:
             if tok.type == 'NEWLINE':
                 print tok.type
-            elif tok.type == 'INDENT':
+            elif tok.type == 'WS':
                 print '(' + tok.type + ', ' + str(tok.value) + ')',
             elif tok.type in extended_print:
                 print '(' + tok.type + ', ' + str(tok.value) + ')',

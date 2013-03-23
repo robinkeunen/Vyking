@@ -5,7 +5,11 @@ import ply.lex as lex
 from test_units import lex_test
 
 
-class BasicVykingLexer:
+class Lexer():
+    pass
+
+
+class BasicVykingLexer(Lexer):
     """
     Lexer for the Basic Vyking language.
     Basic Viking is a subset of the whole language.
@@ -51,7 +55,7 @@ class BasicVykingLexer:
               'LEQ',
               'GEQ',
               'NEQ',
-              'INDENT',
+              'WS',
               'COMMA'] + list(reserved.values())
 
     # Token definitions
@@ -157,8 +161,8 @@ class BasicVykingLexer:
         t.lexer.lineno += 1
         return t
 
-    # Only active in bol state
-    def t_bol_INDENT(self, t):
+    # Only active in bol state, tracks beginning of line indents.
+    def t_bol_WS(self, t):
         r'\s+'
         t.value = len(t.value)
         self.t_bol_end(t)
@@ -169,7 +173,7 @@ class BasicVykingLexer:
         r'.'
         self.lexer.lexpos -= 1  # rewind one character
         self.t_bol_end(t)
-        t.type = 'INDENT'
+        t.type = 'WS'
         t.value = 0
         return t
 
