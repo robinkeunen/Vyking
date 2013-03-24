@@ -182,6 +182,14 @@
     \item Lecture d'un autre caractère, retour à l'état précédent.
     \end{enumerate}
 
+\section{Filtre indentation}
+
+\section{Remarques}
+    Les 3 étapes lexing, filtre et parsing sont découplées.
+    Mais grâce à l'utilisation de générateur/itérateurs pour construire les classes \verb Lexer  et \verb IndentFilter , les performances sont améliorées.
+    En effet, au lieu de passer tout le programme dans le \verb Lexer  et de conserver tous les tokens en mémoire, puis de faire un passe complet à travers le filtre, le \verb Lexer génère les tokens un à un et le filtre ajoute les indent et dedent au vol.
+    
+    10ème règle de greespun
         
     
             

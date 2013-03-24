@@ -1,10 +1,13 @@
 __author__ = 'Robin Keunen'
 
 exp1 = "x = 3 + 42 * (s - t)"
+
 ifStmt = """
 if a == b:
     a = a + 1
-    return a"""
+    return a
+
+"""
 
 slow_inverse = """
 defun slow_inverse(f, delta=1/128.):
@@ -29,6 +32,10 @@ defun find_bounds(f, y):
     else:
         lo = x/2.
     return lo, x
+
+
+a
+
 """
 
 stringtest = """
@@ -36,30 +43,45 @@ st = r'string with \' and " into it'
 st2 = r"same here, try ' and this \" "
 """
 
-def lex_test(lexer):
-    inputs = list()
-    inputs.append(exp1)
-    inputs.append(ifStmt)
-    inputs.append(slow_inverse)
-    inputs.append(find_bounds)
-    inputs.append(stringtest)
+inputs = list()
+inputs.append(exp1)
+inputs.append(ifStmt)
+inputs.append(slow_inverse)
+inputs.append(find_bounds)
+inputs.append(stringtest)
 
-    extended_print = ('ID', 'INT', 'FLOAT', 'STRING')
+def lex_test(lexer, test_index = -1):
 
-    for data in inputs:
+    extended_print = ('ID', 'INT', 'FLOAT', 'STRING', 'WS')
+
+    if test_index == -1:
+        for data in inputs:
+            lexer.input(data)
+            lexer.lineno = 1
+            print data
+            for tok in lexer:
+                if tok.type == 'NEWLINE':
+                    print tok.type
+                elif tok.type == 'WS':
+                    print '(' + tok.type + ', ' + str(tok.value) + ')',
+                elif tok.type in extended_print:
+                    print '(' + tok.type + ', ' + str(tok.value) + ')',
+                else:
+                    print tok.type,
+            print "\n"
+    else:
+        data = inputs[test_index]
         lexer.input(data)
         lexer.lineno = 1
-        print data
+        print '"', data, '"'
+
         for tok in lexer:
             if tok.type == 'NEWLINE':
                 print tok.type
-            elif tok.type == 'WS':
-                print '(' + tok.type + ', ' + str(tok.value) + ')',
             elif tok.type in extended_print:
                 print '(' + tok.type + ', ' + str(tok.value) + ')',
             else:
                 print tok.type,
-        print "\n"
-
+        print '\n'
 
 

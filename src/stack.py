@@ -13,6 +13,19 @@ class Stack:
     def __init__(self):
         self.head = None
 
+    def __iter__(self):
+        return self
+
+    def __str__(self):
+        return 'top is ', self.read()
+
+    def next(self):
+        next_node = self.head
+        while node is not None:
+            yield next_node
+            next_node = next_node.next
+        raise StopIteration
+
     def empty(self):
         """
          Returns True if node is empty

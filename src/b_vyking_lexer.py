@@ -85,10 +85,11 @@ class BasicVykingLexer(Lexer):
     t_ignore_WHITESPACE = r'\s+'
 
     # states (default is 'INITIAL')
+    # exclusive has its own set of rules
+    # inclusive states add rules over current state
     states = (
         # bol triggered by NEWLINE at beginning of line
-        # inclusive states add rules over current state
-        ('bol', 'exclusive'),
+        ('bol', 'exclusive'),  # bol -> beginning if line
     )
 
 
@@ -101,11 +102,24 @@ class BasicVykingLexer(Lexer):
     def next(self):
         for tok in self.lexer.token():
             yield tok
+        yield self._new_token('NEWLINE', lexer.lineno)
         raise StopIteration
 
     def input(self, data):
         self.lexer.input(data)
 
+    def _new_token(self, type, lineno):
+        """Returns new token
+
+        Args:
+            type -- token type
+            lineno -- line number of token
+        """
+        tok = lex.LexToken()
+        tok.type = type
+        tok.value = None
+        tok.lineno = lineno
+        return tok
 
     def t_begin_bol(self, t):
         r'start_bol'
@@ -159,7 +173,14 @@ class BasicVykingLexer(Lexer):
     def t_bol_NEWLINE(self, t):
         r'(\n|\n\r|\r\n)'
         t.lexer.lineno += 1
-        return t
+        pass
+
+    # single line comments
+    def t_bol_COMMENT(self, t):
+        r'\s*\#.*'
+        #t.lexer.lineno += 1
+        pass
+        # token discarded
 
     # Only active in bol state, tracks beginning of line indents.
     def t_bol_WS(self, t):
@@ -176,6 +197,7 @@ class BasicVykingLexer(Lexer):
         t.type = 'WS'
         t.value = 0
         return t
+
 
     # Compute column.
     #    input is the input text string
@@ -198,6 +220,8 @@ class BasicVykingLexer(Lexer):
         t.lexer.skip(1)
 
 
-lexer = BasicVykingLexer()
 
-lex_test(lexer)
+# Usage
+if __name__=="__main__":
+    lexer = BasicVykingLexer()
+    lex_test(lexer, 1)
