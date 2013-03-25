@@ -132,7 +132,7 @@ class IndentFilter():
 
         # Yield DEDENTs at end of file
         while self.indent_level.pop() != 0:
-            yield self.DEDENT(self.lexer.lineno)
+            yield self.DEDENT(self.lexer.lexer.lineno)
         raise StopIteration
     
     def pretty_print_token(self, token):
@@ -152,6 +152,13 @@ class IndentFilter():
             print '(' + token.type + ', ' + str(token.value) + ')',
         else:
             print token.type,
+
+    def print_input(self, data):
+        lineno = 1
+        for line in data.split('\n'):
+            print lineno, line
+            lineno += 1
+        print '\n'
     
     def filter_test(self, test_index=-1):
         """Test the filter on inputs defined in test_units.py
@@ -164,32 +171,26 @@ class IndentFilter():
         if test_index == -1:
             for data in inputs:
                 self.lexer.input(data)
-                self.lexer.lineno = 1
-                lineno = 1
-                for line in data.split(sep='\n'):
-                    print lineno, line
-                print '\n'
+                self.lexer.lexer.lineno = 1  # init line numbering
+                self.indent_level.push(0)  # init stack
+                self.print_input(data)
 
-                for token in self:
+                for token in self.next():  # should work with for token in self
                     self.pretty_print_token(token)
                 print '\n'
         else:
             data = inputs[test_index]
             self.lexer.input(data)
-            self.lexer.lineno = 1
-            lineno = 1
-            for line in data.split('\n'):
-                print lineno, line
-                lineno += 1
-            print '\n'
+            self.lexer.lexer.lineno = 1
+            self.print_input(data)
 
-            for token in self.next():
+            for token in self.next():  # should work with for token in self
                 self.pretty_print_token(token)
             print '\n'
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     lexer = BasicVykingLexer()
-    filter = IndentFilter(lexer)
-    filter.filter_test(2)
+    indent_filter = IndentFilter(lexer)
+    indent_filter.filter_test()
 

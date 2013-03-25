@@ -222,6 +222,6 @@ class BasicVykingLexer(Lexer):
 
 
 # Usage
-if __name__=="__main__":
+if __name__ == "__main__":
     lexer = BasicVykingLexer()
     lex_test(lexer, 1)
