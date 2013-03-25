@@ -61,7 +61,7 @@ class IndentFilter():
         """
         return self.next_token()
 
-    def need_DEDENT(self, token):
+    def _need_DEDENT(self, token):
         """Returns True if DEDENT is needed"""
         if token.value > self.indent_level.read():
             raise VykingIndentationError(token.lineno,
@@ -86,11 +86,11 @@ class IndentFilter():
         tok.lineno = lineno
         return tok
 
-    def DEDENT(self, lineno):
+    def _DEDENT(self, lineno):
         """Returns DEDENT token"""
         return self._new_token("DEDENT", lineno)
 
-    def INDENT(self, lineno):
+    def _INDENT(self, lineno):
         """Returns INDENT token"""
         return self._new_token("INDENT", lineno)
 
@@ -112,8 +112,8 @@ class IndentFilter():
                     self.state = MAY_INDENT
                     yield token
                 elif token.type == "WS":
-                    while self.need_DEDENT(token):
-                        yield self.DEDENT(token.lineno - 1)
+                    while self._need_DEDENT(token):
+                        yield self._DEDENT(token.lineno - 1)
                 else:
                     yield token
             elif self.state == MAY_INDENT:
@@ -128,7 +128,7 @@ class IndentFilter():
                         # Store new indentation level
                         self.indent_level.push(token.value)
                         self.state = NO_INDENT
-                        yield self.INDENT(token.lineno)
+                        yield self._INDENT(token.lineno)
                     else:
                         raise VykingIndentationError(token.lineno,
                                                      self.indent_level.read() + 1,
@@ -140,10 +140,10 @@ class IndentFilter():
 
         # Yield DEDENTs at end of file
         while self.indent_level.pop() != 0:
-            yield self.DEDENT(self.lexer.lexer.lineno)
+            yield self._DEDENT(self.lexer.lexer.lineno)
         raise StopIteration
     
-    def pretty_print_token(self, token):
+    def _pretty_print_token(self, token):
         """Pretty prints token on stdout
         
         Args:
@@ -161,7 +161,7 @@ class IndentFilter():
         else:
             print token.type,
 
-    def print_input(self, data):
+    def _print_input(self, data):
         lineno = 1
         for line in data.split('\n'):
             print lineno, line
@@ -181,19 +181,19 @@ class IndentFilter():
                 self.lexer.input(data)
                 self.lexer.lexer.lineno = 1  # init line numbering
                 self.indent_level.push(0)  # init stack
-                self.print_input(data)
+                self._print_input(data)
 
                 for token in self:
-                    self.pretty_print_token(token)
+                    self._pretty_print_token(token)
                 print '\n'
         else:
             data = inputs[test_index]
             self.lexer.input(data)
             self.lexer.lexer.lineno = 1
-            self.print_input(data)
+            self._print_input(data)
 
             for token in self:
-                self.pretty_print_token(token)
+                self._pretty_print_token(token)
             print '\n'
 
 
