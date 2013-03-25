@@ -7,6 +7,7 @@ from src.test_units import inputs
 __author__ = 'Robin Keunen'
 __author__ = 'Pierre Vyncke'
 
+
 class VykingSyntaxError(Exception):
     pass
 
@@ -52,7 +53,13 @@ class IndentFilter():
         self.state = 0  # NO_INDENT level
 
     def __iter__(self):
-        return self
+        """Implemented as a generator object.
+
+        Automatically return an iterator object (technically, a generator object)
+        supplying the __iter__() and next() methods.
+
+        """
+        return self.next_token()
 
     def need_DEDENT(self, token):
         """Returns True if DEDENT is needed"""
@@ -87,15 +94,16 @@ class IndentFilter():
         """Returns INDENT token"""
         return self._new_token("INDENT", lineno)
 
-    def next(self):
+    def next_token(self):
+        """Returns next token from filtered lexer"""
         # Vyking has 3 indentation states.
         # - no colon hence no need to indent
         # - COLON was read, next rule must be a single line statement
         #   or a block statement
         # - NEWLINE was read after a colon, user must indent
         NO_INDENT = 0
-        MAY_INDENT = 1 # COLON was read
-        MUST_INDENT = 2 # COLON and NEWLINE were read
+        MAY_INDENT = 1  # COLON was read
+        MUST_INDENT = 2  # COLON and NEWLINE were read
 
         self.state = NO_INDENT
         for token in self.lexer:
@@ -175,7 +183,7 @@ class IndentFilter():
                 self.indent_level.push(0)  # init stack
                 self.print_input(data)
 
-                for token in self.next():  # should work with for token in self
+                for token in self:
                     self.pretty_print_token(token)
                 print '\n'
         else:
@@ -184,13 +192,14 @@ class IndentFilter():
             self.lexer.lexer.lineno = 1
             self.print_input(data)
 
-            for token in self.next():  # should work with for token in self
+            for token in self:
                 self.pretty_print_token(token)
             print '\n'
 
 
 if __name__ == "__main__":
     lexer = BasicVykingLexer()
+    #lexer.input(inputs[2])
     indent_filter = IndentFilter(lexer)
     indent_filter.filter_test()
-
+    #indent_filter.filter_test()
