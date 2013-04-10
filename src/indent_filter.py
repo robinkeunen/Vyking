@@ -1,3 +1,8 @@
+# -----------------------------------------------------------------------------
+# indent_filter.py
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
+
 from src.b_vyking_lexer import BasicVykingLexer
 from src.ply import lex
 from src.ply.debug_tools import trace
@@ -48,6 +53,11 @@ class IndentFilter():
          lexer must be an iterator of token
         """
         self.lexer = lexer
+        # Get token list and update it
+        self.tokens = self.lexer.tokens # __class__.tokens
+        self.tokens.append('INDENT')
+        self.tokens.append('DEDENT')
+        self.tokens.remove('WS')
         self.indent_level = Stack()
         self.indent_level.push(0)  # Initial level
         self.state = 0  # NO_INDENT level
@@ -59,42 +69,12 @@ class IndentFilter():
         supplying the __iter__() and next() methods.
 
         """
-        return self.next_token()
+        return self.token()
 
-    def _need_DEDENT(self, token):
-        """Returns True if DEDENT is needed"""
-        if token.value > self.indent_level.read():
-            raise VykingIndentationError(token.lineno,
-                                         self.indent_level.read(),
-                                         token.value)
-        elif token.value == self.indent_level.read():
-            return False
-        else:
-            self.indent_level.pop()
-            return True
+    def input(self, data):
+        self.lexer.input(data)
 
-    def _new_token(self, type, lineno):
-        """Returns new token
-
-        Args:
-            type -- token type
-            lineno -- line number of token
-        """
-        tok = lex.LexToken()
-        tok.type = type
-        tok.value = None
-        tok.lineno = lineno
-        return tok
-
-    def _DEDENT(self, lineno):
-        """Returns DEDENT token"""
-        return self._new_token("DEDENT", lineno)
-
-    def _INDENT(self, lineno):
-        """Returns INDENT token"""
-        return self._new_token("INDENT", lineno)
-
-    def next_token(self):
+    def token(self):
         """Returns next token from filtered lexer"""
         # Vyking has 3 indentation states.
         # - no colon hence no need to indent
@@ -142,6 +122,39 @@ class IndentFilter():
         while self.indent_level.pop() != 0:
             yield self._DEDENT(self.lexer.lexer.lineno)
         raise StopIteration
+
+    def _need_DEDENT(self, token):
+        """Returns True if DEDENT is needed"""
+        if token.value > self.indent_level.read():
+            raise VykingIndentationError(token.lineno,
+                                         self.indent_level.read(),
+                                         token.value)
+        elif token.value == self.indent_level.read():
+            return False
+        else:
+            self.indent_level.pop()
+            return True
+
+    def _new_token(self, token_type, lineno):
+        """Returns new token
+
+        Args:
+            type -- token type
+            lineno -- line number of token
+        """
+        tok = lex.LexToken()
+        tok.type = token_type
+        tok.value = None
+        tok.lineno = lineno
+        return tok
+
+    def _DEDENT(self, lineno):
+        """Returns DEDENT token"""
+        return self._new_token("DEDENT", lineno)
+
+    def _INDENT(self, lineno):
+        """Returns INDENT token"""
+        return self._new_token("INDENT", lineno)
     
     def _pretty_print_token(self, token):
         """Pretty prints token on stdout
@@ -201,5 +214,8 @@ if __name__ == "__main__":
     lexer = BasicVykingLexer()
     #lexer.input(inputs[2])
     indent_filter = IndentFilter(lexer)
-    indent_filter.filter_test()
+    print indent_filter.token()
+    print indent_filter.token()
+    print indent_filter.token()
+    indent_filter.filter_test(0)
     #indent_filter.filter_test()

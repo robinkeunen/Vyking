@@ -2,6 +2,12 @@ __author__ = 'Robin Keunen'
 
 exp1 = "x = 3 + 42 * (s - t)"
 
+exp2 = """
+s = 2
+t = 3
+x = 3 + 42 * (s - t)
+"""
+
 ifStmt = """
 if a == b:
     a = a + 1
@@ -45,6 +51,7 @@ st2 = r"same here, try ' and this \" "
 
 inputs = list()
 inputs.append(exp1)
+inputs.append(exp2)
 inputs.append(ifStmt)
 inputs.append(slow_inverse)
 inputs.append(find_bounds)
@@ -84,4 +91,6 @@ def lex_test(lexer, test_index = -1):
                 print tok.type,
         print '\n'
 
+def parse_test(parser, test_index = -1):
+    print("dummy")
 

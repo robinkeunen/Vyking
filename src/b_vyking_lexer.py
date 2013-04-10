@@ -1,5 +1,7 @@
-__author__ = 'Robin Keunen'
-__author__ = 'Pierre Vyncke'
+# -----------------------------------------------------------------------------
+# b_vyking_lexer.py
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
 
 import ply.lex as lex
 from test_units import lex_test
@@ -107,6 +109,9 @@ class BasicVykingLexer(Lexer):
 
     def input(self, data):
         self.lexer.input(data)
+
+    def token(self):
+        return self.lexer.token()
 
     def _new_token(self, type, lineno):
         """Returns new token
