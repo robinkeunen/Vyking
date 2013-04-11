@@ -26,7 +26,7 @@ class Parser(object):
 
     def __init__(self, lexer=None, **kw):
         self.debug = kw.get('debug', 0)
-        self.names = { }
+        self.names = {}
         try:
             modname = os.path.split(os.path.splitext(__file__)[0])[1] + "_" + self.__class__.__name__
         except:
@@ -43,6 +43,7 @@ class Parser(object):
             self.lexer = lexer
             self.tokens = self.lexer.tokens
 
+
         self.parser = yacc.yacc(module=self,
                                 debug=self.debug,
                                 debugfile=self.debugfile,
@@ -58,8 +59,12 @@ class Parser(object):
             self.parse(s)
 
     def parse(self,input=None, lexer=None, debug=0, tracking=0, tokenfunc=None):
-        self.parser.parse(input=input, lexer=self.lexer,
-                          debug=debug, tracking=tracking, tokenfunc=tokenfunc)
+        if lexer is None:
+            self.parser.parse(input=input, lexer=self.lexer,
+                              debug=debug, tracking=tracking, tokenfunc=tokenfunc)
+        else:
+            self.parser.parse(input=input, debug=debug,
+                              tracking=tracking, tokenfunc=tokenfunc)
 
 
 class BasicVykingParser(Parser):
@@ -70,7 +75,7 @@ class BasicVykingParser(Parser):
         #self.lexer = IndentFilter(BasicVykingLexer())
         self.tokens = self.lexer.tokens
 
-    # Grammar rules
+# Grammar rules
 
     #def p_empty(self, p):
     #     'empty :'
@@ -281,7 +286,7 @@ if __name__ == "__main__":
 
     parser = BasicVykingParser()
     print
-    result = parser.parse("3+2", tracking=1)
+    result = parser.parse("3+2", tracking=0, debug=1)
     print
     print result
 
