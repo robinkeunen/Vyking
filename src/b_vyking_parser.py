@@ -2,18 +2,18 @@
 # b_vyking_parser.py
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
-
+import logging
 import sys
 from src.indent_filter import IndentFilter
+import ply.lex as lex
+import ply.yacc as yacc
+import os
+from src.test_units import inputs
 
 sys.path.insert(0,"../..")
 
 if sys.version_info[0] >= 3:
     raw_input = input
-
-import ply.lex as lex
-import ply.yacc as yacc
-import os
 
 from b_vyking_lexer import BasicVykingLexer
 
@@ -58,12 +58,12 @@ class Parser(object):
             if not s: continue
             self.parse(s)
 
-    def parse(self,input=None, lexer=None, debug=0, tracking=0, tokenfunc=None):
+    def parse(self, input=None, lexer=None, debug=0, tracking=0, tokenfunc=None):
         if lexer is None:
-            self.parser.parse(input=input, lexer=self.lexer,
+            return self.parser.parse(input=input, lexer=self.lexer,
                               debug=debug, tracking=tracking, tokenfunc=tokenfunc)
         else:
-            self.parser.parse(input=input, debug=debug,
+            return self.parser.parse(input=input, debug=debug,
                               tracking=tracking, tokenfunc=tokenfunc)
 
 
@@ -72,7 +72,6 @@ class BasicVykingParser(Parser):
     def __init__(self, **kw):
         mylexer = IndentFilter(BasicVykingLexer())
         super(BasicVykingParser, self).__init__(lexer=mylexer, **kw)
-        #self.lexer = IndentFilter(BasicVykingLexer())
         self.tokens = self.lexer.tokens
 
 # Grammar rules
@@ -84,16 +83,24 @@ class BasicVykingParser(Parser):
     # def p_file_input(self, p):
     #     """file_input : NEWLINE ENDMARKER
     #                   | statement ENDMARKER"""
-    #
+
+    # def p_statement_list(self, p):
+    #     'statement_list : statement NEWLINE statement_list'
+    #     p[0] = (p[1],) + p[3]
+
+    # def p_statement(self, p):
+    #     'statement : assign_statement NEWLINE'
+    #     p[0] = p[1]
+
     # def p_statement(self, p):
     #     """statement : funcall NEWLINE
-    #                  | if_stat NEWLINE
-    #                  | while_stat NEWLINE
-    #                  | for_stat NEWLINE
-    #                  | let_stat NEWLINE
-    #                  | return_stat NEWLINE
-    #                  | funcdef_stat NEWLINE
-    #                  | import_stat NEWLINE"""
+    #                  | if_statement NEWLINE
+    #                  | while_statement NEWLINE
+    #                  | for_statement NEWLINE
+    #                  | assign_statement NEWLINE
+    #                  | return_statement NEWLINE
+    #                  | funcdef_statement NEWLINE
+    #                  | import_statement NEWLINE"""
     #
     # def p_funcall(self, p):
     #     """funcall : id LPARENT args RPARENT
@@ -105,26 +112,29 @@ class BasicVykingParser(Parser):
     # def p_fundef(self, p):
     #     'fundef : DEFUN id parameters COLON block'
     #
-    # def p_if_stat(self, p):
-    #     """if_stat : IF test COLON block elif_stat
-    #                | IF test COLON block elif_stat ELSE COLON block"""
+    # def p_if_statement(self, p):
+    #     """if_statement : IF test COLON block elif_statement
+    #                | IF test COLON block elif_statement ELSE COLON block"""
     #
-    # def p_elif_stat(self, p):
-    #     """elif_stat : ELIF test COLON block
+    # def p_elif_statement(self, p):
+    #     """elif_statement : ELIF test COLON block
     #                  | empty"""
     #
-    # def p_while_stat(self, p):
-    #     'while_stat : WHILE test COLON block'
+    # def p_while_statement(self, p):
+    #     'while_statement : WHILE test COLON block'
     #
-    # # def p_for_stat(self, p):
-    # #     'for_stat : FOR id IN list COLON block'
+    # # def p_for_statement(self, p):
+    # #     'for_statement : FOR id IN list COLON block'
     #
-    # def p_let_stat(self, p):
-    #     """let_stat : id ASSIGN object
-    #                 | id ASSIGN exp"""
-    #
-    # def p_return_stat(self, p):
-    #     """return_stat : RETURN exp
+    #"""assign_statement : id ASSIGN object
+    #                   | id ASSIGN exp"""
+
+    # def p_assign_statement(self, p):
+    #     """assign_statement : ID ASSIGN expression"""
+    #     p[0] = ("ASSIGN", ("ID", p[1]), p[3])
+
+    # def p_return_statement(self, p):
+    #     """return_statement : RETURN exp
     #                    | RETURN list"""
     #
 
@@ -243,38 +253,46 @@ class BasicVykingParser(Parser):
     #             | digit
     #             | ' '"""
 
+    precedence = (
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'TIMES', 'DIVIDE'),
+        ('right', 'UMINUS')  # unary minus operator
+    )
 
-    def p_expression_plus(self, p):
-        'expression : expression PLUS term'
-        p[0] = ('+', p[1], p[3])
+    def p_assignment(self, p):
+        """
+        assignment : ID ASSIGN expression
+        """
+        p[0] = ('ASSIGN', ('ID', p[1]), p[3])
 
-    def p_expression_minus(self, p):
-        'expression : expression MINUS term'
-        p[0] = ('-', p[1], p[3])
+    def p_expression_binop(self, p):
+        """
+        expression : expression PLUS expression
+                  | expression MINUS expression
+                  | expression TIMES expression
+                  | expression DIVIDE expression
+        """
+        #print [repr(p[i]) for i in range(0,4)]
+        if   p[2] == '+': p[0] = ('PLUS', p[1], p[3])
+        elif p[2] == '-': p[0] = ('MINUS', p[1], p[3])
+        elif p[2] == '*': p[0] = ('TIMES', p[1], p[3])
+        elif p[2] == '/': p[0] = ('DIVIDE', p[1], p[3])
 
-    def p_expression_term(self, p):
-        'expression : term'
-        p[0] = p[1]
+    def p_expression_uminus(self,p):
+        'expression : MINUS expression %prec UMINUS'
+        p[0] = -p[2]
 
-    def p_term_times(self, p):
-        'term : term TIMES factor'
-        p[0] = ('*', p[1], p[3])
-
-    def p_term_div(self, p):
-        'term : term DIVIDE factor'
-        p[0] = ('/', p[1], p[3])
-
-    def p_term_factor(self, p):
-        'term : factor'
-        p[0] = p[1]
-
-    def p_factor_int(self, p):
-        'factor : INT'
-        p[0] = ('INT', p[1])
-
-    def p_factor_expr(self, p):
-        'factor : LPAREN expression RPAREN'
+    def p_expression_group(self, p):
+        'expression : LPAREN expression RPAREN'
         p[0] = p[2]
+
+    def p_expression_int(self, p):
+        'expression : INT'
+        p[0] = p[1]
+
+    def p_expression_id(self, p):
+        'expression : ID'
+        p[0] = ('ID', p[1])
 
     # Error rule for syntax errors.
     def p_error(self, p):
@@ -284,10 +302,18 @@ class BasicVykingParser(Parser):
 # Usage
 if __name__ == "__main__":
 
+    # logger object
+    # logging.basicConfig(
+    #     level=logging.DEBUG,
+    #     #filename="parselog.txt",
+    #     #filemode="w",
+    #     format="%(message)s"
+    # )
+    # log = logging.getLogger()
+
     parser = BasicVykingParser()
-    print
-    result = parser.parse("3+2", tracking=0, debug=1)
-    print
-    print result
+    print inputs[0]
+    print parser.parse(inputs[0], debug=True)
+
 
 

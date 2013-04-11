@@ -19,7 +19,7 @@ class BasicVykingLexer(Lexer):
     """
 
     # basic regex
-    number = r'([\+-]?[1-9][0-9]*|0)'
+    number = r'([1-9][0-9]*|0)'
     exponent = r'((e|E)' + number + r')'
 
     # Reserved keywords
@@ -95,8 +95,11 @@ class BasicVykingLexer(Lexer):
     )
 
 
-    def __init__(self):
-        self.lexer = lex.lex(module=self)
+    def __init__(self, **kw):
+        self.debug = kw.get('debug', 0)
+        self.optimize = kw.get('optimize', 0)
+        self.lexer = lex.lex(module=self, debug=self.debug,
+                             optimize=self.optimize)
 
     def __iter__(self):
         return self.lexer

@@ -64,6 +64,7 @@ class IndentFilter():
         self.state = 0  # NO_INDENT level
         # token lookahead
         self.lookahead = None
+        self.printer_state = 1
 
     def __iter__(self):
         """Implemented as a generator object.
@@ -86,6 +87,7 @@ class IndentFilter():
     def input(self, data):
         self.lexer.lexer.lineno = 1
         self.lexer.input(data)
+        self.indent_level.push(0)  # init stack
 
     def token(self):
         """Returns next token from filtered lexer"""
@@ -232,9 +234,7 @@ class IndentFilter():
         if test_index == -1:
             for data in inputs:
                 self.input(data)
-                self.indent_level.push(0)  # init stack
                 self._print_input(data)
-
                 self.printer_state = 1
                 for token in self:
                     self._pretty_print_token(token)
@@ -251,7 +251,10 @@ class IndentFilter():
 
 
 if __name__ == "__main__":
-    lexer = BasicVykingLexer()
+    lexer = BasicVykingLexer(debug=1)
     indent_filter = IndentFilter(lexer)
-    indent_filter.filter_test()
+    indent_filter.filter_test(0)
+    indent_filter.input("3-2")
+    for t in indent_filter:
+        print t
     #indent_filter.filter_test()
