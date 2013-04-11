@@ -61,6 +61,8 @@ class IndentFilter():
         self.indent_level = Stack()
         self.indent_level.push(0)  # Initial level
         self.state = 0  # NO_INDENT level
+        # token lookahead
+        self.lookahead = None
 
     def __iter__(self):
         """Implemented as a generator object.
@@ -69,7 +71,16 @@ class IndentFilter():
         supplying the __iter__() and next() methods.
 
         """
-        return self.token()
+        return self
+
+    def next(self):
+        while True:
+            token = self.token()
+            if token is None:
+                break
+            else:
+                return token
+        raise StopIteration
 
     def input(self, data):
         self.lexer.input(data)
@@ -84,56 +95,78 @@ class IndentFilter():
         NO_INDENT = 0
         MAY_INDENT = 1  # COLON was read
         MUST_INDENT = 2  # COLON and NEWLINE were read
+        NEED_DEDENT = 3  # WS level is lower than top of stack level
+        END_OF_INPUT = 4  # close blocks with DEDENTS
 
-        self.state = NO_INDENT
-        for token in self.lexer:
-            if self.state == NO_INDENT:
-                if token.type == "COLON":
-                    self.state = MAY_INDENT
-                    yield token
-                elif token.type == "WS":
-                    while self._need_DEDENT(token):
-                        yield self._DEDENT(token.lineno - 1)
-                else:
-                    yield token
-            elif self.state == MAY_INDENT:
-                if token.type == "NEWLINE":
-                    self.state = MUST_INDENT
-                else:
+        print "hoy"
+
+        if self.lookahead is None:
+            token = self.lexer.token()
+            if not token:  # end of input
+                self.state = END_OF_INPUT
+        else:
+            token = self.lookahead
+
+        if self.state == NO_INDENT:
+            if token.type == "COLON":
+                self.state = MAY_INDENT
+                return token
+            elif token.type == "WS":
+                il = self.indent_level.read()
+                if token.value > il:
+                    raise VykingIndentationError(token.lineno,
+                                                 self.indent_level.read() + 1,
+                                                 self.indent_level.read())
+                elif token.value < il:
+                    self.state = NEED_DEDENT
+                    self.lookahead = token
+                    return self.token()
+                else:  # same indentation level
+                    return token
+        elif self.state == MAY_INDENT:
+            if token.type == "NEWLINE":
+                self.state = MUST_INDENT
+            else:
+                self.state = NO_INDENT
+            return token
+        elif self.state == MUST_INDENT:
+            if token.type == "WS":
+                il = self.indent_level.read()
+                if token.value > il:
+                    # store new indentation level
+                    self.indent_level.push(token.value)
                     self.state = NO_INDENT
-                yield token
-            else:  # MUST_INDENT
-                if token.type == "WS":
-                    if token.value > self.indent_level.read():
-                        # Store new indentation level
-                        self.indent_level.push(token.value)
-                        self.state = NO_INDENT
-                        yield self._INDENT(token.lineno)
-                    else:
-                        raise VykingIndentationError(token.lineno,
-                                                     self.indent_level.read() + 1,
-                                                     self.indent_level.read())
+                    return self._INDENT(token.lineno)
                 else:
-                    raise VykingSyntaxError(token.lineno,
-                                            self.indent_level.read() + 1,
-                                            self.indent_level.read())
-
-        # Yield DEDENTs at end of file
-        while self.indent_level.pop() != 0:
-            yield self._DEDENT(self.lexer.lexer.lineno)
-        raise StopIteration
-
-    def _need_DEDENT(self, token):
-        """Returns True if DEDENT is needed"""
-        if token.value > self.indent_level.read():
-            raise VykingIndentationError(token.lineno,
+                    raise VykingIndentationError(token.lineno,
+                                                 self.indent_level.read() + 1,
+                                                 self.indent_level.read())
+            else:
+                raise VykingSyntaxError(token.lineno,
+                                        self.indent_level.read() + 1,
+                                        self.indent_level.read())
+        elif self.state == NEED_DEDENT :
+            if token.type != "WS":
+                print "progamming error"
+                raise Exception
+            il = self.indent_level.read()
+            if token.value == il:
+                self.state = NO_INDENT
+                self.lookahead = None
+                return token
+            elif token.value < il:
+                self.indent_level.pop()
+                return self._DEDENT(token.lineno)
+            else:  # level is not matching stack level
+                raise VykingIndentationError(token.lineno,
                                          self.indent_level.read(),
                                          token.value)
-        elif token.value == self.indent_level.read():
-            return False
-        else:
-            self.indent_level.pop()
-            return True
+
+        else:  # self.state == END_OF_INPUT
+            if self.indent_level.pop() != 0:
+                return self._DEDENT(token.lineno)
+            else:
+                return None
 
     def _new_token(self, token_type, lineno):
         """Returns new token
@@ -155,13 +188,13 @@ class IndentFilter():
     def _INDENT(self, lineno):
         """Returns INDENT token"""
         return self._new_token("INDENT", lineno)
-    
+
     def _pretty_print_token(self, token):
         """Pretty prints token on stdout
-        
+
         Args:
             token -- LexToken to print
-            
+
         """
         extended_print = ('ID', 'INT', 'FLOAT', 'STRING')
         next_line_tokens = ['NEWLINE', 'INDENT', 'DEDENT']
@@ -180,7 +213,7 @@ class IndentFilter():
             print lineno, line
             lineno += 1
         print '\n'
-    
+
     def filter_test(self, test_index=-1):
         """Test the filter on inputs defined in test_units.py
 
@@ -191,7 +224,7 @@ class IndentFilter():
         """
         if test_index == -1:
             for data in inputs:
-                self.lexer.input(data)
+                self.input(data)
                 self.lexer.lexer.lineno = 1  # init line numbering
                 self.indent_level.push(0)  # init stack
                 self._print_input(data)
@@ -201,21 +234,22 @@ class IndentFilter():
                 print '\n'
         else:
             data = inputs[test_index]
-            self.lexer.input(data)
+            self.input(data)
             self.lexer.lexer.lineno = 1
             self._print_input(data)
 
-            for token in self:
+            while True:
+                token = self.token()
+                if token is None:
+                    break
                 self._pretty_print_token(token)
+            #for token in self:
+            #    self._pretty_print_token(token)
             print '\n'
 
 
 if __name__ == "__main__":
     lexer = BasicVykingLexer()
-    #lexer.input(inputs[2])
     indent_filter = IndentFilter(lexer)
-    print indent_filter.token()
-    print indent_filter.token()
-    print indent_filter.token()
-    indent_filter.filter_test(0)
+    indent_filter.filter_test(2)
     #indent_filter.filter_test()

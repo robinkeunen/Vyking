@@ -187,7 +187,7 @@ class BasicVykingLexer(Lexer):
         pass
         # token discarded
 
-    # Only active in bol state, tracks beginning of line indents.
+    # Only active in bol state, tracks beginning of line whitespaces.
     def t_bol_WS(self, t):
         r'\s+'
         t.value = len(t.value)
@@ -199,6 +199,7 @@ class BasicVykingLexer(Lexer):
         r'.'
         self.lexer.lexpos -= 1  # rewind one character
         self.t_bol_end(t)
+        # no whitespace indent
         t.type = 'WS'
         t.value = 0
         return t
@@ -229,4 +230,15 @@ class BasicVykingLexer(Lexer):
 # Usage
 if __name__ == "__main__":
     lexer = BasicVykingLexer()
-    lex_test(lexer, 1)
+    lex_test(lexer, 2)
+    ifStmt = """
+if a == b:
+    a = a + 1
+    return a
+
+"""
+    lexer.input(ifStmt)
+    while True:
+        tok = lexer.token()
+        if not tok: break      # No more input
+        print tok
