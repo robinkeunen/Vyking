@@ -29,7 +29,11 @@ class BinopExpression(Expression):
         self.op = op
 
 
-class atom(ASTNode):
+class Atom(ASTNode):
+    pass
+
+
+class INT(Atom):
     def __init__(self, value):
-        self.type = "number"
+        self.type = "INT"
         self.value = value
