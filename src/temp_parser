@@ -1,0 +1,276 @@
+# -----------------------------------------------------------------------------
+# temporary parser out of class to get parser.out table
+# b_vyking_parser.py
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
+import logging
+import sys
+from b_vyking_lexer import BasicVykingLexer
+from src.indent_filter import IndentFilter
+import ply.lex as lex
+import ply.yacc as yacc
+import os
+from src.test_units import inputs
+
+sys.path.insert(0, "../..")
+
+if sys.version_info[0] >= 3:
+    raw_input = input
+
+mylexer = IndentFilter(BasicVykingLexer())
+tokens = mylexer.tokens
+
+precedence = (
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'TIMES', 'DIVIDE'),
+    ('right', 'UMINUS')  # unary minus operator
+)
+
+
+def p_assignment(p):
+    """
+    assignment : ID ASSIGN expression
+    """
+    p[0] = ('ASSIGN', ('ID', p[1]), p[3])
+
+
+def p_expression_binop(p):
+    """
+    expression : expression PLUS expression
+               | expression MINUS expression
+               | expression TIMES expression
+               | expression DIVIDE expression
+    """
+    #print [repr(p[i]) for i in range(0,4)]
+    if p[2] == '+':
+        p[0] = ('PLUS', p[1], p[3])
+    elif p[2] == '-':
+        p[0] = ('MINUS', p[1], p[3])
+    elif p[2] == '*':
+        p[0] = ('TIMES', p[1], p[3])
+    elif p[2] == '/':
+        p[0] = ('DIVIDE', p[1], p[3])
+
+
+def p_expression_uminus(p):
+    'expression : MINUS expression %prec UMINUS'
+    p[0] = -p[2]
+
+
+def p_expression_group(p):
+    'expression : LPAREN expression RPAREN'
+    p[0] = p[2]
+
+
+def p_expression_int(p):
+    'expression : INT'
+    p[0] = p[1]
+
+
+def p_expression_id(p):
+    'expression : ID'
+    p[0] = ('ID', p[1])
+
+# Error rule for syntax errors.
+def p_error(p):
+    print 'Syntax error in input! ' + str(p)
+
+
+# Usage
+if __name__ == "__main__":
+    # logger object
+    logging.basicConfig(
+        level=logging.INFO,
+        #filename="parselog.txt",
+        #filemode="w",
+        #format="%(message)s"
+    )
+    log = logging.getLogger()
+
+    parser = yacc.yacc(debug=log)
+    result = parser.parse(inputs[0],lexer=mylexer, debug=log)
+    sys.stderr.flush()
+    sys.stdout.flush()
+    print inputs[0]
+    print result
+
+
+
+# Grammar rules
+
+#def p_empty(, p):
+#     'empty :'
+#     pass
+
+# def p_file_input(, p):
+#     """file_input : NEWLINE ENDMARKER
+#                   | statement ENDMARKER"""
+
+# def p_statement_list(, p):
+#     'statement_list : statement NEWLINE statement_list'
+#     p[0] = (p[1],) + p[3]
+
+# def p_statement(, p):
+#     'statement : assign_statement NEWLINE'
+#     p[0] = p[1]
+
+# def p_statement(, p):
+#     """statement : funcall NEWLINE
+#                  | if_statement NEWLINE
+#                  | while_statement NEWLINE
+#                  | for_statement NEWLINE
+#                  | assign_statement NEWLINE
+#                  | return_statement NEWLINE
+#                  | funcdef_statement NEWLINE
+#                  | import_statement NEWLINE"""
+#
+# def p_funcall(, p):
+#     """funcall : id LPARENT args RPARENT
+#                | id LPARENT RPARENT
+#                | list_fun"""
+#     #if p[2] == '(':
+#     #else:
+#
+# def p_fundef(, p):
+#     'fundef : DEFUN id parameters COLON block'
+#
+# def p_if_statement(, p):
+#     """if_statement : IF test COLON block elif_statement
+#                | IF test COLON block elif_statement ELSE COLON block"""
+#
+# def p_elif_statement(, p):
+#     """elif_statement : ELIF test COLON block
+#                  | empty"""
+#
+# def p_while_statement(, p):
+#     'while_statement : WHILE test COLON block'
+#
+# # def p_for_statement(, p):
+# #     'for_statement : FOR id IN list COLON block'
+#
+#"""assign_statement : id ASSIGN object
+#                   | id ASSIGN exp"""
+
+# def p_assign_statement(, p):
+#     """assign_statement : ID ASSIGN expression"""
+#     p[0] = ("ASSIGN", ("ID", p[1]), p[3])
+
+# def p_return_statement(, p):
+#     """return_statement : RETURN exp
+#                    | RETURN list"""
+#
+
+#
+# def p_exp(, p):
+#     'exp : add_exp'
+#     p[0] = p[1]
+#
+# def p_add_exp(, p):
+#     'add_exp : mul_exp add_exp_aux'
+#
+# def p_add_exp_aux(, p):
+#     """add_exp_aux : PLUS mul_exp
+#                    | MINUS mul_exp
+#                    | empty"""
+#
+# def p_mul_exp(, p):
+#     'mul_exp : atom mul_exp_aux'
+#
+# def p_mul_exp_aux(, p):
+#     """mul_exp_aux : TIMES atom
+#                    | DIVIDE atom
+#                    | '%' atom
+#                    | empty"""
+#
+# def p_atom(, p):
+#     """atom : id
+#             | int
+#             | float
+#             | 'None'
+#             | bool
+#             | funcall"""
+#
+# def p_block(, p):
+#     """block : statement
+#              | NEWLINE INDENT stat_aux DEDENT"""
+#
+# def p_stat_aux(, p):
+#     """stat_aux : statement stat_aux
+#                 | empty"""
+#
+# def p_test(, p):
+#     'test : xor_test'
+#
+# def p_xor_test(, p):
+#     'xor_test : or_test xor_aux'
+#
+# def p_xor_aux(, p):
+#     """xor_aux : '|' or_test xor_aux
+#                | empty"""
+#
+# def p_or_test(, p):
+#     'or_test : and_test or_aux'
+#
+# def p_or_aux(, p):
+#     """or_aux : OR and_test or_aux
+#               | empty"""
+#
+# def p_and_test(, p):
+#     'and_test : not_test and_aux'
+#
+# def p_and_aux(, p):
+#     """and_aux : AND not_test and_aux
+#                | empty"""
+#
+# def p_not_test(, p):
+#     """not_test : NOT not_test
+#                 | identity
+#                 | atom"""
+#
+# def p_identity(, p):
+#     """identity : comparison
+#                 | comparison EQ atom"""
+#
+# def p_comparison(, p):
+#     """comparison : exp
+#                   | exp comp_op exp"""
+#
+# def p_parameters(, p):
+#     """parameters : LPAREN RPAREN
+#                   | LPAREN ids RPAREN"""
+#
+# def p_ids(, p):
+#     """ids : id COMMA ids
+#            | id"""
+#
+# def p_args(, p):
+#     """args : arg COMMA args
+#             | arg"""
+#
+# def p_arg(, p):
+#     """arg : id
+#            | funcall
+#            | exp"""
+#
+# def p_list(, p):
+#     """list : '[' list_aux object ']'
+#             | '[' ']'
+#             | list_fun"""
+#
+# def p_list_aux(, p):
+#     """list_aux : object COMMA list_aux
+#                 | empty"""
+#
+# def p_object(, p):
+#     """object : INT
+#               | FLOAT
+#               | char
+#               | BOOLEAN
+#               | STRING
+#               | list
+#               | id"""
+#
+# def p_char(, p):
+#     """char : letter
+#             | digit
+#             | ' '"""

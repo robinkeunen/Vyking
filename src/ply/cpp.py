@@ -13,7 +13,6 @@ from __future__ import generators
 # Default preprocessor lexer definitions.   These tokens are enough to get
 # a basic preprocessor working.   Other modules may import these if they want
 # -----------------------------------------------------------------------------
-from src import ply as lex
 
 tokens = (
    'CPP_ID','CPP_INTEGER', 'CPP_FLOAT', 'CPP_STRING', 'CPP_CHAR', 'CPP_WS', 'CPP_COMMENT', 'CPP_POUND','CPP_DPOUND'
@@ -872,6 +871,7 @@ class Preprocessor(object):
             return None
 
 if __name__ == '__main__':
+    import ply.lex as lex
     lexer = lex.lex()
 
     # Run a preprocessor

@@ -43,16 +43,16 @@ class Parser(object):
             self.lexer = lexer
             self.tokens = self.lexer.tokens
 
-
         self.parser = yacc.yacc(module=self,
                                 debug=self.debug,
                                 debugfile=self.debugfile,
-                                tabmodule=self.tabmodule)
+                                tabmodule=self.tabmodule,
+                                )
 
     def run(self):
         while 1:
             try:
-                s = raw_input('calc > ')
+                s = raw_input('input > ')
             except EOFError:
                 break
             if not s: continue
@@ -303,17 +303,17 @@ class BasicVykingParser(Parser):
 if __name__ == "__main__":
 
     # logger object
-    # logging.basicConfig(
-    #     level=logging.DEBUG,
-    #     #filename="parselog.txt",
-    #     #filemode="w",
-    #     format="%(message)s"
-    # )
-    # log = logging.getLogger()
+    logging.basicConfig(
+        level=logging.INFO,
+        #filename="parselog.txt",
+        #filemode="w",
+        #format="%(message)s"
+    )
+    log = logging.getLogger()
 
     parser = BasicVykingParser()
     print inputs[0]
-    print parser.parse(inputs[0], debug=True)
+    print parser.parse(inputs[0], debug=log)
 
 
 

@@ -94,7 +94,6 @@ class BasicVykingLexer(Lexer):
         ('bol', 'exclusive'),  # bol -> beginning if line
     )
 
-
     def __init__(self, **kw):
         self.debug = kw.get('debug', 0)
         self.optimize = kw.get('optimize', 0)
@@ -227,7 +226,6 @@ class BasicVykingLexer(Lexer):
     def t_bol_error(self, t):
         print "Illegal character '%s'" % t.value[0]
         t.lexer.skip(1)
-
 
 
 # Usage

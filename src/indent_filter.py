@@ -5,7 +5,6 @@
 
 from src.b_vyking_lexer import BasicVykingLexer
 from src.ply import lex
-from src.ply.debug_tools import trace
 from src.stack import Stack
 from src.test_units import inputs
 

@@ -58,7 +58,6 @@
 # consider to be good Python "coding style."   Modify the code at your
 # own risk!
 # ----------------------------------------------------------------------------
-from src import ply as lex
 
 __version__    = "3.4"
 __tabversion__ = "3.2"       # Table version
@@ -85,10 +84,7 @@ resultlimit = 40               # Size limit of results when running in debug mod
 
 pickle_protocol = 0            # Protocol to use when writing pickle files
 
-import re
-import types
-import sys
-import os.path
+import re, types, sys, os.path
 
 # Compatibility function for python 2.6/3.0
 if sys.version_info[0] < 3:
@@ -1123,6 +1119,8 @@ class LRParser:
 # The following functions, classes, and variables are used to represent and
 # manipulate the rules that make up a grammar. 
 # -----------------------------------------------------------------------------
+
+import re
 
 # regex matching identifiers
 _is_identifier = re.compile(r'^[a-zA-Z0-9_-]+$')

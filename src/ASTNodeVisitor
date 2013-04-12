@@ -1,0 +1,31 @@
+# -----------------------------------------------------------------------------
+# ASTVisitor.py
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
+from src import ASTNode
+from src.ASTNode import BinopExpression
+
+import visit
+
+class ASTNodeVisitor(object):
+    @visit.on('ASTNode')
+    def visit(self, ASTNode):
+        """
+        Genereic method that initiliazes
+        the dynamic dispatcher.
+        """
+        pass
+
+    @visit.when(ASTNode)
+    def visit(self, ASTNode):
+        """
+        Will run for nodes that do not specifically
+        match the provided type.
+        """
+        pass
+
+    @visit.when(BinopExpression)
+    def visit(self, BinopExpression):
+        """Matches nodes of type BinopExpression"""
+        # some code
+        pass
