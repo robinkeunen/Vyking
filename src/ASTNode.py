@@ -17,6 +17,17 @@ class ASTNode(object):
         raise NotImplementedError("Should have implemented this")
 
 
+class Statement(ASTNode):
+    pass
+
+
+class Assignment(Statement):
+    def __init__(self, variable, right):
+        self.type = "assignment"
+        self.variable = variable
+        self.right = right
+
+
 class Expression(ASTNode):
     pass
 
@@ -33,7 +44,14 @@ class Atom(ASTNode):
     pass
 
 
-class INT(Atom):
+class Vinteger(Atom):
     def __init__(self, value):
         self.type = "INT"
+        self.value = value
+
+
+class ID(Atom):
+    def __init__(self, name, value):
+        self.type = "ID"
+        self.name = name
         self.value = value

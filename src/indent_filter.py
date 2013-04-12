@@ -29,7 +29,7 @@ class VykingIndentationError(VykingSyntaxError):
         self.lineno = lineno
         self.exp_indent = exp_indent
         self.read_indent = read_indent
-        self.printer_state = BOL
+        self.printer_state = 1  # BOL
 
     def __str__(self):
         if self.read_indent > self.exp_indent:
