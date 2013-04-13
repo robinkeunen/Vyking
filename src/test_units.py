@@ -5,14 +5,29 @@ exp1 = "x = 3 + 42 * (s - t)"
 exp2 = """
 s = 2
 t = 3
-x = 3 + 42 * (s - t)
-"""
+x = 3 + 42 * (s - t)"""
 
 ifStmt = """
 if a == b:
     a = a + 1
     return a
+"""
 
+find_bounds = """
+defun find_bounds(f, y):
+    x = 1.
+    while f(x) < y:
+        x = x*2.
+    if x == 1:
+        lo = 0
+    else:
+        lo = x/2.
+    return lo, x
+"""
+
+stringtest = """
+st = r'string with \' and " into it'
+st2 = r"same here, try ' and this \" "
 """
 
 slow_inverse = """
@@ -26,36 +41,17 @@ defun slow_inverse(f, delta=1/128.):
             return x
         else:
             return x-delta
-    return f_1 """
-
-find_bounds = """
-defun find_bounds(f, y):
-    x = 1.
-    while f(x) < y:
-        x = x*2.
-    if x == 1:
-        lo = 0
-    else:
-        lo = x/2.
-    return lo, x
-
-
-a
-
-"""
-
-stringtest = """
-st = r'string with \' and " into it'
-st2 = r"same here, try ' and this \" "
-"""
+    return f_1
+    """
 
 inputs = list()
 inputs.append(exp1)
 inputs.append(exp2)
 inputs.append(ifStmt)
-inputs.append(slow_inverse)
 inputs.append(find_bounds)
 inputs.append(stringtest)
+inputs.append(slow_inverse)
+
 
 def lex_test(lexer, test_index = -1):
 

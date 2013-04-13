@@ -21,7 +21,7 @@ class Stack:
 
     def next(self):
         next_node = self.head
-        while node is not None:
+        while next_node is not None:
             yield next_node
             next_node = next_node.next
         raise StopIteration

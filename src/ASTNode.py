@@ -22,10 +22,13 @@ class Statement(ASTNode):
 
 
 class Assignment(Statement):
-    def __init__(self, variable, right):
+    def __init__(self, name, right):
         self.type = "assignment"
-        self.variable = variable
+        self.name = name
         self.right = right
+
+    def __str__(self):
+        return "(ASSIGN, %s, " % self.name + str(self.right) + ")"
 
 
 class Expression(ASTNode):
@@ -39,6 +42,9 @@ class BinopExpression(Expression):
         self.right = right
         self.op = op
 
+    def __str__(self):
+        return "(" + self.op + ', ' + str(self.left) + ', ' + str(self.right) + ')'
+
 
 class Atom(ASTNode):
     pass
@@ -49,9 +55,19 @@ class Vinteger(Atom):
         self.type = "INT"
         self.value = value
 
+    def __str__(self):
+        return "(INT, %d)" % self.value
+
 
 class ID(Atom):
-    def __init__(self, name, value):
+    """
+    Represents an ID in the AST, if value is not set,
+    semantic analysis must check it has been assigned
+    """
+    def __init__(self, name, value=None):
         self.type = "ID"
         self.name = name
         self.value = value
+
+    def __str__(self):
+        return "(%s, " % self.name +  str(self.value) + ")"

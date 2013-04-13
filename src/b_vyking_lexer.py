@@ -227,6 +227,11 @@ class BasicVykingLexer(Lexer):
         print "Illegal character '%s'" % t.value[0]
         t.lexer.skip(1)
 
+    def get_lexpos(self):
+        return self.lexer.lexpos
+
+    def get_lineno(self):
+        return self.lexer.lineno
 
 # Usage
 if __name__ == "__main__":

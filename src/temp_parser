@@ -9,12 +9,31 @@ from b_vyking_lexer import BasicVykingLexer
 from src.ASTNode import Assignment, BinopExpression, Vinteger, ID
 from src.indent_filter import IndentFilter
 import ply.yacc as yacc
+from src.ply import lex
 from src.test_units import inputs
 
 sys.path.insert(0, "../..")
 
+
+
 mylexer = IndentFilter(BasicVykingLexer())
 tokens = mylexer.tokens
+
+# helper function
+def new_token(token_type, lineno):
+    """Returns new token
+
+    Args:
+        type -- token type
+        lineno -- line number of token
+    """
+    tok = lex.LexToken()
+    tok.type = token_type
+    tok.value = None
+    tok.lineno = lineno
+    tok.lexpos = mylexer.get_lexpos()
+    return tok
+
 
 precedence = (
     ('left', 'PLUS', 'MINUS'),
@@ -23,14 +42,36 @@ precedence = (
 )
 
 
-def p_input_newline(p):
-    """input : NEWLINE END_MARKER"""
-    p[0] = tuple()
+# def p_empty(p):
+#     'empty :'
+#     pass
 
 
-def p_input_statements(p):
-    """input : statement_sequence END_MARKER"""
+def p_vyking_input(p):
+    'vyking_input : statement_sequence ENDMARKER'
     p[0] = p[1]
+
+
+def p_statement_sequence_chain(p):
+    'statement_sequence : statement statement_sequence'
+    # tuple of the statements
+    p[0] = (p[1],) + p[2]
+
+
+def p_statement_sequence_final(p):
+    'statement_sequence : statement'
+    p[0] = (p[1],)
+
+
+def p_statement(p):
+    """
+    statement : assignment NEWLINE
+    """
+    p[0] = p[1]
+
+def p_statement_newline(p):
+    'statement : NEWLINE'
+    p[0] = tuple()
 
 
 def p_assignment(p):
@@ -79,34 +120,52 @@ def p_expression_id(p):
 
 # Error rule for syntax errors.
 def p_error(p):
-    print 'Syntax error in input! ' + str(p)
+    if p is None:
+        print "fix for missing line"
+        parser.errok()
+        return new_token("ENDMARKER", mylexer.get_lineno())
+
+    elif p.type == "ENDMARKER":
+        print "line %d: Missing new line at end of file." % p.lineno
+        p.lexer.lookahead = p
+        parser.errok()
+        return new_token("NEWLINE", p.lineno)
+    else:
+        print 'line %d: Syntax error when reading %s ' %(p.lineno, str(p))
 
 
 # Usage
 if __name__ == "__main__":
     # logger object
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         #filename="parselog.txt",
         #filemode="w",
         #format="%(message)s"
     )
     log = logging.getLogger()
 
-    parser = yacc.yacc(debug=log)
-    result = parser.parse(inputs[0], lexer=mylexer, debug=log)
+    parser = yacc.yacc(debug=log, start="vyking_input")
+    data = inputs[1]
+    result = parser.parse(data, lexer=mylexer, debug=log)
     sys.stderr.flush()
     sys.stdout.flush()
-    print inputs[0]
-    print result
+    lineno = 1
+    for line in data.split('\n'):
+        print "%d: %s" % (lineno, line)
+        lineno += 1
+    print
 
+    if result is None:
+        print result
+    else:
+        for stat in list(result):
+            print stat
 
 
     # Grammar rules
 
-    #def p_empty(, p):
-    #     'empty :'
-    #     pass
+
 
     # def p_file_input(, p):
     #     """file_input : NEWLINE ENDMARKER

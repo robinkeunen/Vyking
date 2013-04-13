@@ -10,7 +10,6 @@ Unused terminals:
     DEC
     NEQ
     GEQ
-    NEWLINE
     DEFUN
     COLON
     STRING
@@ -29,383 +28,465 @@ Unused terminals:
 
 Grammar
 
-Rule 0     S' -> assignment
-Rule 1     assignment -> ID ASSIGN expression
-Rule 2     expression -> expression PLUS expression
-Rule 3     expression -> expression MINUS expression
-Rule 4     expression -> expression TIMES expression
-Rule 5     expression -> expression DIVIDE expression
-Rule 6     expression -> MINUS expression
-Rule 7     expression -> LPAREN expression RPAREN
-Rule 8     expression -> INT
-Rule 9     expression -> ID
+Rule 0     S' -> vyking_input
+Rule 1     vyking_input -> statement_sequence ENDMARKER
+Rule 2     statement_sequence -> statement statement_sequence
+Rule 3     statement_sequence -> statement
+Rule 4     statement -> assignment NEWLINE
+Rule 5     statement -> NEWLINE
+Rule 6     assignment -> ID ASSIGN expression
+Rule 7     expression -> expression PLUS expression
+Rule 8     expression -> expression MINUS expression
+Rule 9     expression -> expression TIMES expression
+Rule 10    expression -> expression DIVIDE expression
+Rule 11    expression -> MINUS expression
+Rule 12    expression -> LPAREN expression RPAREN
+Rule 13    expression -> INT
+Rule 14    expression -> ID
 
 Terminals, with rules where they appear
 
 AND                  : 
-ASSIGN               : 1
+ASSIGN               : 6
 COLON                : 
 COMMA                : 
 DEC                  : 
 DEDENT               : 
 DEFUN                : 
-DIVIDE               : 5
+DIVIDE               : 10
 ELIF                 : 
 ELSE                 : 
+ENDMARKER            : 1
 EQ                   : 
 FLOAT                : 
 GEQ                  : 
 GREATER              : 
-ID                   : 1 9
+ID                   : 6 14
 IF                   : 
 INC                  : 
 INDENT               : 
-INT                  : 8
+INT                  : 13
 LEQ                  : 
 LOWER                : 
-LPAREN               : 7
-MINUS                : 3 6
+LPAREN               : 12
+MINUS                : 8 11
 NEQ                  : 
-NEWLINE              : 
+NEWLINE              : 4 5
 NOT                  : 
 OR                   : 
-PLUS                 : 2
+PLUS                 : 7
 RETURN               : 
-RPAREN               : 7
+RPAREN               : 12
 STRING               : 
-TIMES                : 4
+TIMES                : 9
 WHILE                : 
 error                : 
 
 Nonterminals, with rules where they appear
 
-assignment           : 0
-expression           : 1 2 2 3 3 4 4 5 5 6 7
+assignment           : 4
+expression           : 6 7 7 8 8 9 9 10 10 11 12
+statement            : 2 3
+statement_sequence   : 1 2
+vyking_input         : 0
 
 Parsing method: LALR
 
 state 0
 
-    (0) S' -> . assignment
-    (1) assignment -> . ID ASSIGN expression
+    (0) S' -> . vyking_input
+    (1) vyking_input -> . statement_sequence ENDMARKER
+    (2) statement_sequence -> . statement statement_sequence
+    (3) statement_sequence -> . statement
+    (4) statement -> . assignment NEWLINE
+    (5) statement -> . NEWLINE
+    (6) assignment -> . ID ASSIGN expression
 
-    ID              shift and go to state 2
+    NEWLINE         shift and go to state 3
+    ID              shift and go to state 6
 
-    assignment                     shift and go to state 1
+    assignment                     shift and go to state 2
+    vyking_input                   shift and go to state 1
+    statement                      shift and go to state 5
+    statement_sequence             shift and go to state 4
 
 state 1
 
-    (0) S' -> assignment .
+    (0) S' -> vyking_input .
 
 
 
 state 2
 
-    (1) assignment -> ID . ASSIGN expression
+    (4) statement -> assignment . NEWLINE
 
-    ASSIGN          shift and go to state 3
+    NEWLINE         shift and go to state 7
 
 
 state 3
 
-    (1) assignment -> ID ASSIGN . expression
-    (2) expression -> . expression PLUS expression
-    (3) expression -> . expression MINUS expression
-    (4) expression -> . expression TIMES expression
-    (5) expression -> . expression DIVIDE expression
-    (6) expression -> . MINUS expression
-    (7) expression -> . LPAREN expression RPAREN
-    (8) expression -> . INT
-    (9) expression -> . ID
+    (5) statement -> NEWLINE .
 
-    MINUS           shift and go to state 5
-    LPAREN          shift and go to state 6
-    INT             shift and go to state 4
-    ID              shift and go to state 8
+    NEWLINE         reduce using rule 5 (statement -> NEWLINE .)
+    ID              reduce using rule 5 (statement -> NEWLINE .)
+    ENDMARKER       reduce using rule 5 (statement -> NEWLINE .)
 
-    expression                     shift and go to state 7
 
 state 4
 
-    (8) expression -> INT .
+    (1) vyking_input -> statement_sequence . ENDMARKER
 
-    PLUS            reduce using rule 8 (expression -> INT .)
-    MINUS           reduce using rule 8 (expression -> INT .)
-    TIMES           reduce using rule 8 (expression -> INT .)
-    DIVIDE          reduce using rule 8 (expression -> INT .)
-    $end            reduce using rule 8 (expression -> INT .)
-    RPAREN          reduce using rule 8 (expression -> INT .)
+    ENDMARKER       shift and go to state 8
 
 
 state 5
 
-    (6) expression -> MINUS . expression
-    (2) expression -> . expression PLUS expression
-    (3) expression -> . expression MINUS expression
-    (4) expression -> . expression TIMES expression
-    (5) expression -> . expression DIVIDE expression
-    (6) expression -> . MINUS expression
-    (7) expression -> . LPAREN expression RPAREN
-    (8) expression -> . INT
-    (9) expression -> . ID
+    (2) statement_sequence -> statement . statement_sequence
+    (3) statement_sequence -> statement .
+    (2) statement_sequence -> . statement statement_sequence
+    (3) statement_sequence -> . statement
+    (4) statement -> . assignment NEWLINE
+    (5) statement -> . NEWLINE
+    (6) assignment -> . ID ASSIGN expression
 
-    MINUS           shift and go to state 5
-    LPAREN          shift and go to state 6
-    INT             shift and go to state 4
-    ID              shift and go to state 8
+    ENDMARKER       reduce using rule 3 (statement_sequence -> statement .)
+    NEWLINE         shift and go to state 3
+    ID              shift and go to state 6
 
-    expression                     shift and go to state 9
+    assignment                     shift and go to state 2
+    statement                      shift and go to state 5
+    statement_sequence             shift and go to state 9
 
 state 6
 
-    (7) expression -> LPAREN . expression RPAREN
-    (2) expression -> . expression PLUS expression
-    (3) expression -> . expression MINUS expression
-    (4) expression -> . expression TIMES expression
-    (5) expression -> . expression DIVIDE expression
-    (6) expression -> . MINUS expression
-    (7) expression -> . LPAREN expression RPAREN
-    (8) expression -> . INT
-    (9) expression -> . ID
+    (6) assignment -> ID . ASSIGN expression
 
-    MINUS           shift and go to state 5
-    LPAREN          shift and go to state 6
-    INT             shift and go to state 4
-    ID              shift and go to state 8
+    ASSIGN          shift and go to state 10
 
-    expression                     shift and go to state 10
 
 state 7
 
-    (1) assignment -> ID ASSIGN expression .
-    (2) expression -> expression . PLUS expression
-    (3) expression -> expression . MINUS expression
-    (4) expression -> expression . TIMES expression
-    (5) expression -> expression . DIVIDE expression
+    (4) statement -> assignment NEWLINE .
 
-    $end            reduce using rule 1 (assignment -> ID ASSIGN expression .)
-    PLUS            shift and go to state 13
-    MINUS           shift and go to state 14
-    TIMES           shift and go to state 12
-    DIVIDE          shift and go to state 11
+    NEWLINE         reduce using rule 4 (statement -> assignment NEWLINE .)
+    ID              reduce using rule 4 (statement -> assignment NEWLINE .)
+    ENDMARKER       reduce using rule 4 (statement -> assignment NEWLINE .)
 
 
 state 8
 
-    (9) expression -> ID .
+    (1) vyking_input -> statement_sequence ENDMARKER .
 
-    PLUS            reduce using rule 9 (expression -> ID .)
-    MINUS           reduce using rule 9 (expression -> ID .)
-    TIMES           reduce using rule 9 (expression -> ID .)
-    DIVIDE          reduce using rule 9 (expression -> ID .)
-    $end            reduce using rule 9 (expression -> ID .)
-    RPAREN          reduce using rule 9 (expression -> ID .)
+    $end            reduce using rule 1 (vyking_input -> statement_sequence ENDMARKER .)
 
 
 state 9
 
-    (6) expression -> MINUS expression .
-    (2) expression -> expression . PLUS expression
-    (3) expression -> expression . MINUS expression
-    (4) expression -> expression . TIMES expression
-    (5) expression -> expression . DIVIDE expression
+    (2) statement_sequence -> statement statement_sequence .
 
-    PLUS            reduce using rule 6 (expression -> MINUS expression .)
-    MINUS           reduce using rule 6 (expression -> MINUS expression .)
-    TIMES           reduce using rule 6 (expression -> MINUS expression .)
-    DIVIDE          reduce using rule 6 (expression -> MINUS expression .)
-    $end            reduce using rule 6 (expression -> MINUS expression .)
-    RPAREN          reduce using rule 6 (expression -> MINUS expression .)
-
-  ! PLUS            [ shift and go to state 13 ]
-  ! MINUS           [ shift and go to state 14 ]
-  ! TIMES           [ shift and go to state 12 ]
-  ! DIVIDE          [ shift and go to state 11 ]
+    ENDMARKER       reduce using rule 2 (statement_sequence -> statement statement_sequence .)
 
 
 state 10
 
-    (7) expression -> LPAREN expression . RPAREN
-    (2) expression -> expression . PLUS expression
-    (3) expression -> expression . MINUS expression
-    (4) expression -> expression . TIMES expression
-    (5) expression -> expression . DIVIDE expression
+    (6) assignment -> ID ASSIGN . expression
+    (7) expression -> . expression PLUS expression
+    (8) expression -> . expression MINUS expression
+    (9) expression -> . expression TIMES expression
+    (10) expression -> . expression DIVIDE expression
+    (11) expression -> . MINUS expression
+    (12) expression -> . LPAREN expression RPAREN
+    (13) expression -> . INT
+    (14) expression -> . ID
 
-    RPAREN          shift and go to state 15
-    PLUS            shift and go to state 13
-    MINUS           shift and go to state 14
-    TIMES           shift and go to state 12
-    DIVIDE          shift and go to state 11
+    MINUS           shift and go to state 12
+    LPAREN          shift and go to state 13
+    INT             shift and go to state 11
+    ID              shift and go to state 15
 
+    expression                     shift and go to state 14
 
 state 11
 
-    (5) expression -> expression DIVIDE . expression
-    (2) expression -> . expression PLUS expression
-    (3) expression -> . expression MINUS expression
-    (4) expression -> . expression TIMES expression
-    (5) expression -> . expression DIVIDE expression
-    (6) expression -> . MINUS expression
-    (7) expression -> . LPAREN expression RPAREN
-    (8) expression -> . INT
-    (9) expression -> . ID
+    (13) expression -> INT .
 
-    MINUS           shift and go to state 5
-    LPAREN          shift and go to state 6
-    INT             shift and go to state 4
-    ID              shift and go to state 8
+    PLUS            reduce using rule 13 (expression -> INT .)
+    MINUS           reduce using rule 13 (expression -> INT .)
+    TIMES           reduce using rule 13 (expression -> INT .)
+    DIVIDE          reduce using rule 13 (expression -> INT .)
+    NEWLINE         reduce using rule 13 (expression -> INT .)
+    RPAREN          reduce using rule 13 (expression -> INT .)
 
-    expression                     shift and go to state 16
 
 state 12
 
-    (4) expression -> expression TIMES . expression
-    (2) expression -> . expression PLUS expression
-    (3) expression -> . expression MINUS expression
-    (4) expression -> . expression TIMES expression
-    (5) expression -> . expression DIVIDE expression
-    (6) expression -> . MINUS expression
-    (7) expression -> . LPAREN expression RPAREN
-    (8) expression -> . INT
-    (9) expression -> . ID
+    (11) expression -> MINUS . expression
+    (7) expression -> . expression PLUS expression
+    (8) expression -> . expression MINUS expression
+    (9) expression -> . expression TIMES expression
+    (10) expression -> . expression DIVIDE expression
+    (11) expression -> . MINUS expression
+    (12) expression -> . LPAREN expression RPAREN
+    (13) expression -> . INT
+    (14) expression -> . ID
 
-    MINUS           shift and go to state 5
-    LPAREN          shift and go to state 6
-    INT             shift and go to state 4
-    ID              shift and go to state 8
+    MINUS           shift and go to state 12
+    LPAREN          shift and go to state 13
+    INT             shift and go to state 11
+    ID              shift and go to state 15
 
-    expression                     shift and go to state 17
+    expression                     shift and go to state 16
 
 state 13
 
-    (2) expression -> expression PLUS . expression
-    (2) expression -> . expression PLUS expression
-    (3) expression -> . expression MINUS expression
-    (4) expression -> . expression TIMES expression
-    (5) expression -> . expression DIVIDE expression
-    (6) expression -> . MINUS expression
-    (7) expression -> . LPAREN expression RPAREN
-    (8) expression -> . INT
-    (9) expression -> . ID
+    (12) expression -> LPAREN . expression RPAREN
+    (7) expression -> . expression PLUS expression
+    (8) expression -> . expression MINUS expression
+    (9) expression -> . expression TIMES expression
+    (10) expression -> . expression DIVIDE expression
+    (11) expression -> . MINUS expression
+    (12) expression -> . LPAREN expression RPAREN
+    (13) expression -> . INT
+    (14) expression -> . ID
 
-    MINUS           shift and go to state 5
-    LPAREN          shift and go to state 6
-    INT             shift and go to state 4
-    ID              shift and go to state 8
+    MINUS           shift and go to state 12
+    LPAREN          shift and go to state 13
+    INT             shift and go to state 11
+    ID              shift and go to state 15
 
-    expression                     shift and go to state 18
+    expression                     shift and go to state 17
 
 state 14
 
-    (3) expression -> expression MINUS . expression
-    (2) expression -> . expression PLUS expression
-    (3) expression -> . expression MINUS expression
-    (4) expression -> . expression TIMES expression
-    (5) expression -> . expression DIVIDE expression
-    (6) expression -> . MINUS expression
-    (7) expression -> . LPAREN expression RPAREN
-    (8) expression -> . INT
-    (9) expression -> . ID
+    (6) assignment -> ID ASSIGN expression .
+    (7) expression -> expression . PLUS expression
+    (8) expression -> expression . MINUS expression
+    (9) expression -> expression . TIMES expression
+    (10) expression -> expression . DIVIDE expression
 
-    MINUS           shift and go to state 5
-    LPAREN          shift and go to state 6
-    INT             shift and go to state 4
-    ID              shift and go to state 8
+    NEWLINE         reduce using rule 6 (assignment -> ID ASSIGN expression .)
+    PLUS            shift and go to state 20
+    MINUS           shift and go to state 21
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 18
 
-    expression                     shift and go to state 19
 
 state 15
 
-    (7) expression -> LPAREN expression RPAREN .
+    (14) expression -> ID .
 
-    PLUS            reduce using rule 7 (expression -> LPAREN expression RPAREN .)
-    MINUS           reduce using rule 7 (expression -> LPAREN expression RPAREN .)
-    TIMES           reduce using rule 7 (expression -> LPAREN expression RPAREN .)
-    DIVIDE          reduce using rule 7 (expression -> LPAREN expression RPAREN .)
-    $end            reduce using rule 7 (expression -> LPAREN expression RPAREN .)
-    RPAREN          reduce using rule 7 (expression -> LPAREN expression RPAREN .)
+    PLUS            reduce using rule 14 (expression -> ID .)
+    MINUS           reduce using rule 14 (expression -> ID .)
+    TIMES           reduce using rule 14 (expression -> ID .)
+    DIVIDE          reduce using rule 14 (expression -> ID .)
+    NEWLINE         reduce using rule 14 (expression -> ID .)
+    RPAREN          reduce using rule 14 (expression -> ID .)
 
 
 state 16
 
-    (5) expression -> expression DIVIDE expression .
-    (2) expression -> expression . PLUS expression
-    (3) expression -> expression . MINUS expression
-    (4) expression -> expression . TIMES expression
-    (5) expression -> expression . DIVIDE expression
+    (11) expression -> MINUS expression .
+    (7) expression -> expression . PLUS expression
+    (8) expression -> expression . MINUS expression
+    (9) expression -> expression . TIMES expression
+    (10) expression -> expression . DIVIDE expression
 
-    PLUS            reduce using rule 5 (expression -> expression DIVIDE expression .)
-    MINUS           reduce using rule 5 (expression -> expression DIVIDE expression .)
-    TIMES           reduce using rule 5 (expression -> expression DIVIDE expression .)
-    DIVIDE          reduce using rule 5 (expression -> expression DIVIDE expression .)
-    $end            reduce using rule 5 (expression -> expression DIVIDE expression .)
-    RPAREN          reduce using rule 5 (expression -> expression DIVIDE expression .)
+    PLUS            reduce using rule 11 (expression -> MINUS expression .)
+    MINUS           reduce using rule 11 (expression -> MINUS expression .)
+    TIMES           reduce using rule 11 (expression -> MINUS expression .)
+    DIVIDE          reduce using rule 11 (expression -> MINUS expression .)
+    NEWLINE         reduce using rule 11 (expression -> MINUS expression .)
+    RPAREN          reduce using rule 11 (expression -> MINUS expression .)
 
-  ! PLUS            [ shift and go to state 13 ]
-  ! MINUS           [ shift and go to state 14 ]
-  ! TIMES           [ shift and go to state 12 ]
-  ! DIVIDE          [ shift and go to state 11 ]
+  ! PLUS            [ shift and go to state 20 ]
+  ! MINUS           [ shift and go to state 21 ]
+  ! TIMES           [ shift and go to state 19 ]
+  ! DIVIDE          [ shift and go to state 18 ]
 
 
 state 17
 
-    (4) expression -> expression TIMES expression .
-    (2) expression -> expression . PLUS expression
-    (3) expression -> expression . MINUS expression
-    (4) expression -> expression . TIMES expression
-    (5) expression -> expression . DIVIDE expression
+    (12) expression -> LPAREN expression . RPAREN
+    (7) expression -> expression . PLUS expression
+    (8) expression -> expression . MINUS expression
+    (9) expression -> expression . TIMES expression
+    (10) expression -> expression . DIVIDE expression
 
-    PLUS            reduce using rule 4 (expression -> expression TIMES expression .)
-    MINUS           reduce using rule 4 (expression -> expression TIMES expression .)
-    TIMES           reduce using rule 4 (expression -> expression TIMES expression .)
-    DIVIDE          reduce using rule 4 (expression -> expression TIMES expression .)
-    $end            reduce using rule 4 (expression -> expression TIMES expression .)
-    RPAREN          reduce using rule 4 (expression -> expression TIMES expression .)
-
-  ! PLUS            [ shift and go to state 13 ]
-  ! MINUS           [ shift and go to state 14 ]
-  ! TIMES           [ shift and go to state 12 ]
-  ! DIVIDE          [ shift and go to state 11 ]
+    RPAREN          shift and go to state 22
+    PLUS            shift and go to state 20
+    MINUS           shift and go to state 21
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 18
 
 
 state 18
 
-    (2) expression -> expression PLUS expression .
-    (2) expression -> expression . PLUS expression
-    (3) expression -> expression . MINUS expression
-    (4) expression -> expression . TIMES expression
-    (5) expression -> expression . DIVIDE expression
+    (10) expression -> expression DIVIDE . expression
+    (7) expression -> . expression PLUS expression
+    (8) expression -> . expression MINUS expression
+    (9) expression -> . expression TIMES expression
+    (10) expression -> . expression DIVIDE expression
+    (11) expression -> . MINUS expression
+    (12) expression -> . LPAREN expression RPAREN
+    (13) expression -> . INT
+    (14) expression -> . ID
 
-    PLUS            reduce using rule 2 (expression -> expression PLUS expression .)
-    MINUS           reduce using rule 2 (expression -> expression PLUS expression .)
-    $end            reduce using rule 2 (expression -> expression PLUS expression .)
-    RPAREN          reduce using rule 2 (expression -> expression PLUS expression .)
-    TIMES           shift and go to state 12
-    DIVIDE          shift and go to state 11
+    MINUS           shift and go to state 12
+    LPAREN          shift and go to state 13
+    INT             shift and go to state 11
+    ID              shift and go to state 15
 
-  ! TIMES           [ reduce using rule 2 (expression -> expression PLUS expression .) ]
-  ! DIVIDE          [ reduce using rule 2 (expression -> expression PLUS expression .) ]
-  ! PLUS            [ shift and go to state 13 ]
-  ! MINUS           [ shift and go to state 14 ]
-
+    expression                     shift and go to state 23
 
 state 19
 
-    (3) expression -> expression MINUS expression .
-    (2) expression -> expression . PLUS expression
-    (3) expression -> expression . MINUS expression
-    (4) expression -> expression . TIMES expression
-    (5) expression -> expression . DIVIDE expression
+    (9) expression -> expression TIMES . expression
+    (7) expression -> . expression PLUS expression
+    (8) expression -> . expression MINUS expression
+    (9) expression -> . expression TIMES expression
+    (10) expression -> . expression DIVIDE expression
+    (11) expression -> . MINUS expression
+    (12) expression -> . LPAREN expression RPAREN
+    (13) expression -> . INT
+    (14) expression -> . ID
 
-    PLUS            reduce using rule 3 (expression -> expression MINUS expression .)
-    MINUS           reduce using rule 3 (expression -> expression MINUS expression .)
-    $end            reduce using rule 3 (expression -> expression MINUS expression .)
-    RPAREN          reduce using rule 3 (expression -> expression MINUS expression .)
-    TIMES           shift and go to state 12
-    DIVIDE          shift and go to state 11
+    MINUS           shift and go to state 12
+    LPAREN          shift and go to state 13
+    INT             shift and go to state 11
+    ID              shift and go to state 15
 
-  ! TIMES           [ reduce using rule 3 (expression -> expression MINUS expression .) ]
-  ! DIVIDE          [ reduce using rule 3 (expression -> expression MINUS expression .) ]
-  ! PLUS            [ shift and go to state 13 ]
-  ! MINUS           [ shift and go to state 14 ]
+    expression                     shift and go to state 24
+
+state 20
+
+    (7) expression -> expression PLUS . expression
+    (7) expression -> . expression PLUS expression
+    (8) expression -> . expression MINUS expression
+    (9) expression -> . expression TIMES expression
+    (10) expression -> . expression DIVIDE expression
+    (11) expression -> . MINUS expression
+    (12) expression -> . LPAREN expression RPAREN
+    (13) expression -> . INT
+    (14) expression -> . ID
+
+    MINUS           shift and go to state 12
+    LPAREN          shift and go to state 13
+    INT             shift and go to state 11
+    ID              shift and go to state 15
+
+    expression                     shift and go to state 25
+
+state 21
+
+    (8) expression -> expression MINUS . expression
+    (7) expression -> . expression PLUS expression
+    (8) expression -> . expression MINUS expression
+    (9) expression -> . expression TIMES expression
+    (10) expression -> . expression DIVIDE expression
+    (11) expression -> . MINUS expression
+    (12) expression -> . LPAREN expression RPAREN
+    (13) expression -> . INT
+    (14) expression -> . ID
+
+    MINUS           shift and go to state 12
+    LPAREN          shift and go to state 13
+    INT             shift and go to state 11
+    ID              shift and go to state 15
+
+    expression                     shift and go to state 26
+
+state 22
+
+    (12) expression -> LPAREN expression RPAREN .
+
+    PLUS            reduce using rule 12 (expression -> LPAREN expression RPAREN .)
+    MINUS           reduce using rule 12 (expression -> LPAREN expression RPAREN .)
+    TIMES           reduce using rule 12 (expression -> LPAREN expression RPAREN .)
+    DIVIDE          reduce using rule 12 (expression -> LPAREN expression RPAREN .)
+    NEWLINE         reduce using rule 12 (expression -> LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 12 (expression -> LPAREN expression RPAREN .)
+
+
+state 23
+
+    (10) expression -> expression DIVIDE expression .
+    (7) expression -> expression . PLUS expression
+    (8) expression -> expression . MINUS expression
+    (9) expression -> expression . TIMES expression
+    (10) expression -> expression . DIVIDE expression
+
+    PLUS            reduce using rule 10 (expression -> expression DIVIDE expression .)
+    MINUS           reduce using rule 10 (expression -> expression DIVIDE expression .)
+    TIMES           reduce using rule 10 (expression -> expression DIVIDE expression .)
+    DIVIDE          reduce using rule 10 (expression -> expression DIVIDE expression .)
+    NEWLINE         reduce using rule 10 (expression -> expression DIVIDE expression .)
+    RPAREN          reduce using rule 10 (expression -> expression DIVIDE expression .)
+
+  ! PLUS            [ shift and go to state 20 ]
+  ! MINUS           [ shift and go to state 21 ]
+  ! TIMES           [ shift and go to state 19 ]
+  ! DIVIDE          [ shift and go to state 18 ]
+
+
+state 24
+
+    (9) expression -> expression TIMES expression .
+    (7) expression -> expression . PLUS expression
+    (8) expression -> expression . MINUS expression
+    (9) expression -> expression . TIMES expression
+    (10) expression -> expression . DIVIDE expression
+
+    PLUS            reduce using rule 9 (expression -> expression TIMES expression .)
+    MINUS           reduce using rule 9 (expression -> expression TIMES expression .)
+    TIMES           reduce using rule 9 (expression -> expression TIMES expression .)
+    DIVIDE          reduce using rule 9 (expression -> expression TIMES expression .)
+    NEWLINE         reduce using rule 9 (expression -> expression TIMES expression .)
+    RPAREN          reduce using rule 9 (expression -> expression TIMES expression .)
+
+  ! PLUS            [ shift and go to state 20 ]
+  ! MINUS           [ shift and go to state 21 ]
+  ! TIMES           [ shift and go to state 19 ]
+  ! DIVIDE          [ shift and go to state 18 ]
+
+
+state 25
+
+    (7) expression -> expression PLUS expression .
+    (7) expression -> expression . PLUS expression
+    (8) expression -> expression . MINUS expression
+    (9) expression -> expression . TIMES expression
+    (10) expression -> expression . DIVIDE expression
+
+    PLUS            reduce using rule 7 (expression -> expression PLUS expression .)
+    MINUS           reduce using rule 7 (expression -> expression PLUS expression .)
+    NEWLINE         reduce using rule 7 (expression -> expression PLUS expression .)
+    RPAREN          reduce using rule 7 (expression -> expression PLUS expression .)
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 18
+
+  ! TIMES           [ reduce using rule 7 (expression -> expression PLUS expression .) ]
+  ! DIVIDE          [ reduce using rule 7 (expression -> expression PLUS expression .) ]
+  ! PLUS            [ shift and go to state 20 ]
+  ! MINUS           [ shift and go to state 21 ]
+
+
+state 26
+
+    (8) expression -> expression MINUS expression .
+    (7) expression -> expression . PLUS expression
+    (8) expression -> expression . MINUS expression
+    (9) expression -> expression . TIMES expression
+    (10) expression -> expression . DIVIDE expression
+
+    PLUS            reduce using rule 8 (expression -> expression MINUS expression .)
+    MINUS           reduce using rule 8 (expression -> expression MINUS expression .)
+    NEWLINE         reduce using rule 8 (expression -> expression MINUS expression .)
+    RPAREN          reduce using rule 8 (expression -> expression MINUS expression .)
+    TIMES           shift and go to state 19
+    DIVIDE          shift and go to state 18
+
+  ! TIMES           [ reduce using rule 8 (expression -> expression MINUS expression .) ]
+  ! DIVIDE          [ reduce using rule 8 (expression -> expression MINUS expression .) ]
+  ! PLUS            [ shift and go to state 20 ]
+  ! MINUS           [ shift and go to state 21 ]
 

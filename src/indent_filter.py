@@ -5,7 +5,7 @@
 
 from src.b_vyking_lexer import BasicVykingLexer
 from src.ply import lex
-from src.stack import Stack
+from src.stack import Stack, EmptyStackException
 from src.test_units import inputs
 
 __author__ = 'Robin Keunen'
@@ -45,6 +45,8 @@ class IndentFilter():
 
     Reads token streams from lexer and generates appropriate INDENT
     and DEDENT tokens.
+
+    Adds ENDMARKER at the end of the input
     """
 
     def __init__(self, lexer):
@@ -57,9 +59,9 @@ class IndentFilter():
         self.tokens = self.lexer.tokens # __class__.tokens
         self.tokens.append('INDENT')
         self.tokens.append('DEDENT')
+        self.tokens.append('ENDMARKER')
         self.tokens.remove('WS')
         self.indent_level = Stack()
-        self.indent_level.push(0)  # Initial level
         self.state = 0  # NO_INDENT level
         # token lookahead
         self.lookahead = None
@@ -85,8 +87,9 @@ class IndentFilter():
 
     def input(self, data):
         self.lexer.lexer.lineno = 1
-        self.lexer.input(data)
+        self.state = 0  # NO_INDENT
         self.indent_level.push(0)  # init stack
+        self.lexer.input(data)
 
     def token(self):
         """Returns next token from filtered lexer"""
@@ -164,10 +167,12 @@ class IndentFilter():
                                          token.value)
 
         else:  # self.state == END_OF_INPUT
-            if self.indent_level.pop() != 0:
-                return self._DEDENT(-1)
-            else:
-                self.state = NO_INDENT
+            try:
+                if self.indent_level.pop() != 0:
+                    return self._DEDENT(lexer.lexer.lineno)
+                else:
+                    return self._new_token("ENDMARKER", self.lexer.lexer.lineno)
+            except EmptyStackException:
                 return None
 
     def _new_token(self, token_type, lineno):
@@ -181,6 +186,7 @@ class IndentFilter():
         tok.type = token_type
         tok.value = None
         tok.lineno = lineno
+        tok.lexpos = self.lexer.lexer.lexpos
         return tok
 
     def _DEDENT(self, lineno):
@@ -205,7 +211,11 @@ class IndentFilter():
 
         if self.printer_state == BOL:
             self.printer_state = INLINE
-            print str(token.lineno) + " " + self.indent_level.read() * ' ',
+
+            try: level = self.indent_level.read()
+            except EmptyStackException: level = 0
+
+            print str(token.lineno) + " " + level * ' ',
 
         if token.type in next_line_tokens:
             print token.type + '\n',
@@ -222,6 +232,12 @@ class IndentFilter():
             lineno += 1
         print '\n'
 
+    def get_lexpos(self):
+        return self.lexer.get_lexpos()
+
+    def get_lineno(self):
+        return self.lexer.get_lineno()
+
     def filter_test(self, test_index=-1):
         """Test the filter on inputs defined in test_units.py
 
@@ -233,8 +249,10 @@ class IndentFilter():
         if test_index == -1:
             for data in inputs:
                 self.input(data)
+                self.lexer.lexer.lineno = 1
                 self._print_input(data)
                 self.printer_state = 1
+
                 for token in self:
                     self._pretty_print_token(token)
                 print '\n'
@@ -243,6 +261,7 @@ class IndentFilter():
             self.input(data)
             self.lexer.lexer.lineno = 1
             self._print_input(data)
+            self.printer_state = 1
 
             for token in self:
                 self._pretty_print_token(token)
@@ -250,10 +269,6 @@ class IndentFilter():
 
 
 if __name__ == "__main__":
-    lexer = BasicVykingLexer(debug=1)
+    lexer = BasicVykingLexer(debug=0)
     indent_filter = IndentFilter(lexer)
-    indent_filter.filter_test(0)
-    indent_filter.input("3-2")
-    for t in indent_filter:
-        print t
-    #indent_filter.filter_test()
+    indent_filter.filter_test()
