@@ -117,7 +117,8 @@ def p_test(p):
     """
     test : expression EQ expression
     """
-    p[0] = ast.BinopTest(p[1], p[2], p[3])
+    if p[2] == '==':
+        p[0] = ast.BinopTest(p[1], "EQ", p[3])
 
 def p_expression_binop(p):
     """
