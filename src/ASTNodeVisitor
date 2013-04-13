@@ -2,8 +2,8 @@
 # ASTVisitor.py
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
-from src import ASTNode
-from src.ASTNode import BinopExpression
+from src import ast
+from src.ast import BinopExpression
 
 import visit
 
@@ -16,7 +16,7 @@ class ASTNodeVisitor(object):
         """
         pass
 
-    @visit.when(ASTNode)
+    @visit.when(ast)
     def visit(self, ASTNode):
         """
         Will run for nodes that do not specifically

@@ -6,7 +6,7 @@
 import logging
 import sys
 from b_vyking_lexer import BasicVykingLexer
-from src.ASTNode import Assignment, BinopExpression, Vinteger, ID
+import ast
 from src.indent_filter import IndentFilter
 import ply.yacc as yacc
 from src.ply import lex
@@ -52,34 +52,72 @@ def p_vyking_input(p):
     p[0] = p[1]
 
 
-def p_statement_sequence_chain(p):
-    'statement_sequence : statement statement_sequence'
+def p_statement_sequence(p):
+    """
+    statement_sequence : statement statement_sequence
+                       | statement
+    """
     # tuple of the statements
-    p[0] = (p[1],) + p[2]
-
-
-def p_statement_sequence_final(p):
-    'statement_sequence : statement'
-    p[0] = (p[1],)
+    if len(p) == 3:
+        p[0] = ast.Statement_sequence(p[1], p[2])
+    else:
+        p[0] = ast.Statement_sequence(p[1])
 
 
 def p_statement(p):
     """
-    statement : assignment NEWLINE
+    statement : simple_statement
+              | compound_statement
     """
     p[0] = p[1]
 
-def p_statement_newline(p):
-    'statement : NEWLINE'
-    p[0] = tuple()
+
+def p_simple_statement(p):
+    """
+    simple_statement : assignment NEWLINE
+                     | return_statement NEWLINE
+    """
+    p[0] = p[1]
+
+
+def p_compound_statement(p):
+    """
+    compound_statement : if_statement NEWLINE
+    """
+    p[0] = p[1]
 
 
 def p_assignment(p):
-    """
-    assignment : ID ASSIGN expression
-    """
-    p[0] = Assignment(p[1], p[3])
+    'assignment : ID ASSIGN expression'
+    p[0] = ast.Assignment(p[1], p[3])
 
+
+def p_return_statement(p):
+    'return_statement : RETURN expression'
+    p[0] = ast.Return(p[2])
+
+
+def p_if_statement(p):
+    'if_statement : IF test COLON suite'
+    p[0] = ast.If(p[2], p[4])
+
+
+def p_suite(p):
+    """
+    suite : simple_statement
+          | NEWLINE INDENT statement_sequence DEDENT
+    """
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = p[3]
+
+
+def p_test(p):
+    """
+    test : expression EQ expression
+    """
+    p[0] = ast.BinopTest(p[1], p[2], p[3])
 
 def p_expression_binop(p):
     """
@@ -90,18 +128,18 @@ def p_expression_binop(p):
     """
     #print [repr(p[i]) for i in range(0,4)]
     if p[2] == '+':
-        p[0] = BinopExpression(p[1], 'PLUS', p[3])
+        p[0] = ast.Expression(p[1], 'PLUS', p[3])
     elif p[2] == '-':
-        p[0] = BinopExpression(p[1], 'MINUS', p[3])
+        p[0] = ast.Expression(p[1], 'MINUS', p[3])
     elif p[2] == '*':
-        p[0] = BinopExpression(p[1], 'TIMES', p[3])
+        p[0] = ast.Expression(p[1], 'TIMES', p[3])
     elif p[2] == '/':
-        p[0] = BinopExpression(p[1], 'DIVIDE', p[3])
+        p[0] = ast.Expression(p[1], 'DIVIDE', p[3])
 
 
 def p_expression_uminus(p):
     'expression : MINUS expression %prec UMINUS'
-    p[0] = Vinteger(-p[2])
+    p[0] = ast.Vinteger(-p[2])
 
 
 def p_expression_group(p):
@@ -111,12 +149,12 @@ def p_expression_group(p):
 
 def p_expression_int(p):
     'expression : INT'
-    p[0] = Vinteger(p[1])
+    p[0] = ast.Vinteger(p[1])
 
 
 def p_expression_id(p):
     'expression : ID'
-    p[0] = ID(p[1])
+    p[0] = ast.ID(p[1])
 
 # Error rule for syntax errors.
 def p_error(p):
@@ -136,31 +174,28 @@ def p_error(p):
 
 # Usage
 if __name__ == "__main__":
+
+    data = inputs[2]
+
     # logger object
     logging.basicConfig(
         level=logging.DEBUG,
         #filename="parselog.txt",
         #filemode="w",
-        #format="%(message)s"
+        format="%(message)s"
     )
     log = logging.getLogger()
 
     parser = yacc.yacc(debug=log, start="vyking_input")
-    data = inputs[1]
     result = parser.parse(data, lexer=mylexer, debug=log)
-    sys.stderr.flush()
-    sys.stdout.flush()
+
     lineno = 1
     for line in data.split('\n'):
         print "%d: %s" % (lineno, line)
         lineno += 1
     print
 
-    if result is None:
-        print result
-    else:
-        for stat in list(result):
-            print stat
+    print result
 
 
     # Grammar rules

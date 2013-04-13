@@ -98,11 +98,12 @@ class IndentFilter():
         # - COLON was read, next rule must be a single line statement
         #   or a block statement
         # - NEWLINE was read after a colon, user must indent
-        NO_INDENT = 0
-        MAY_INDENT = 1  # COLON was read
-        MUST_INDENT = 2  # COLON and NEWLINE were read
-        NEED_DEDENT = 3  # WS level is lower than top of stack level
-        END_OF_INPUT = 4  # close blocks with DEDENTS
+        BOF = 0  # Beginning of file
+        NO_INDENT = 1
+        MAY_INDENT = 2  # COLON was read
+        MUST_INDENT = 3  # COLON and NEWLINE were read
+        NEED_DEDENT = 4  # WS level is lower than top of stack level
+        END_OF_INPUT = 5  # close blocks with DEDENTS
 
         if self.lookahead is None:
             token = self.lexer.token()
@@ -110,6 +111,12 @@ class IndentFilter():
                 self.state = END_OF_INPUT
         else:
             token = self.lookahead
+
+        if self.state == BOF:
+            if token.type == "NEWLINE":
+                return self.token()
+            else:
+                self.state = NO_INDENT
 
         if self.state == NO_INDENT:
             if token.type == "COLON":
@@ -169,9 +176,9 @@ class IndentFilter():
         else:  # self.state == END_OF_INPUT
             try:
                 if self.indent_level.pop() != 0:
-                    return self._DEDENT(lexer.lexer.lineno)
+                    return self._DEDENT(self.get_lineno())
                 else:
-                    return self._new_token("ENDMARKER", self.lexer.lexer.lineno)
+                    return self._new_token("ENDMARKER", self.get_lineno())
             except EmptyStackException:
                 return None
 
@@ -186,7 +193,7 @@ class IndentFilter():
         tok.type = token_type
         tok.value = None
         tok.lineno = lineno
-        tok.lexpos = self.lexer.lexer.lexpos
+        tok.lexpos = self.get_lexpos()
         return tok
 
     def _DEDENT(self, lineno):

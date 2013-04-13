@@ -1,11 +1,13 @@
 __author__ = 'Robin Keunen'
 
-exp1 = "x = 3 + 42 * (s - t)"
+exp1 = "x = 3 + 42 * (s - t)" \
+       ""
 
 exp2 = """
 s = 2
 t = 3
-x = 3 + 42 * (s - t)"""
+x = 3 + 42 * (s - t)
+"""
 
 ifStmt = """
 if a == b:
