@@ -134,10 +134,6 @@ class Fundef(Statement):
 
 
 class Expression(ASTNode):
-    pass
-
-
-class Expression(Expression):
     def __init__(self, left, op, right):
         self.type = "Expression"
         self.left = left
@@ -145,14 +141,13 @@ class Expression(Expression):
         self.op = op
 
     def __str__(self):
-        return "(%s %s %s)" % (self.op, self.left, self.right)
+        if self.left is None:
+            return "(%s %s)" % (self.op, self. right)
+        else:
+            return "(%s %s %s)" % (self.op, str(self.left), str(self.right))
 
 
-class Test(ASTNode):
-    pass
-
-
-class Clause(Test):
+class Clause(ASTNode):
     def __init__(self, left, op, right):
         self.type = 'clause'
         self.left = left
@@ -211,3 +206,12 @@ class Vstring(Atom):
 
     def __str__(self):
         return self.data
+
+
+class Vboolean(Atom):
+    def __init__(self, value):
+        self.type = "boolean"
+        self.value = value
+
+    def __str__(self):
+        return str(self.value)

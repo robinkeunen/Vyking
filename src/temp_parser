@@ -40,7 +40,7 @@ precedence = (
     ('left', 'AND', 'OR'),
     ('nonassoc', 'NOT'),
     ('left', 'PLUS', 'MINUS'),
-    ('left', 'TIMES', 'DIVIDE'),
+    ('left', 'TIMES', 'DIVIDE', 'MOD'),
     ('right', 'UMINUS')  # unary minus operator
 )
 
@@ -102,9 +102,9 @@ def p_assignment(p):
     if p[2] == '=':
         p[0] = ast.Assignment(p[1], p[3])
     elif p[2] == '+=':
-        p[0] = ast.Assignment(p[1], ast.Expression(p[0], "PLUS", p[3]))
+        p[0] = ast.Assignment(p[1], ast.Expression(p[1], "PLUS", p[3]))
     elif p[2] == '-=':
-        p[0] = ast.Assignment(p[1], ast.Expression(p[0], "MINUS", p[3]))
+        p[0] = ast.Assignment(p[1], ast.Expression(p[1], "MINUS", p[3]))
 
 
 def p_return_statement(p):
@@ -240,6 +240,7 @@ def p_expression_binop(p):
                | expression MINUS expression
                | expression TIMES expression
                | expression DIVIDE expression
+               | expression MOD expression
     """
     #print [repr(p[i]) for i in range(0,4)]
     if p[2] == '+':
@@ -250,11 +251,14 @@ def p_expression_binop(p):
         p[0] = ast.Expression(p[1], 'TIMES', p[3])
     elif p[2] == '/':
         p[0] = ast.Expression(p[1], 'DIVIDE', p[3])
+    elif p[2] == '%':
+        p[0] = ast.Expression(p[1], 'MOD', p[3])
+
 
 
 def p_expression_uminus(p):
     'expression : MINUS expression %prec UMINUS'
-    p[0] = ast.Vinteger(-p[2])
+    p[0] = ast.Expression(None, 'UMINUS', p[2])
 
 
 # def p_expression_group(p):
@@ -291,6 +295,9 @@ def p_expression_funcall(p):
     'expression : funcall'
     p[0] = p[1]
 
+def p_expression_boolean(p):
+    'expression : BOOLEAN'
+    p[0] = ast.Vboolean(p[1])
 
 # Error rule for syntax errors.
 def p_error(p):
@@ -311,7 +318,7 @@ def p_error(p):
 # Usage
 if __name__ == "__main__":
 
-    data = inputs["slow_inverse"]
+    data = inputs["zero"]
 
     # logger object
     logging.basicConfig(

@@ -49,18 +49,21 @@ Rule 43    expression -> expression PLUS expression
 Rule 44    expression -> expression MINUS expression
 Rule 45    expression -> expression TIMES expression
 Rule 46    expression -> expression DIVIDE expression
-Rule 47    expression -> MINUS expression
-Rule 48    expression -> numeric
-Rule 49    numeric -> INT
-Rule 50    numeric -> FLOAT
-Rule 51    expression -> ID
-Rule 52    expression -> STRING
-Rule 53    expression -> funcall
+Rule 47    expression -> expression MOD expression
+Rule 48    expression -> MINUS expression
+Rule 49    expression -> numeric
+Rule 50    numeric -> INT
+Rule 51    numeric -> FLOAT
+Rule 52    expression -> ID
+Rule 53    expression -> STRING
+Rule 54    expression -> funcall
+Rule 55    expression -> BOOLEAN
 
 Terminals, with rules where they appear
 
 AND                  : 35
 ASSIGN               : 13
+BOOLEAN              : 55
 COLON                : 21 23 25 26 27
 COMMA                : 19 28
 DEC                  : 15
@@ -71,18 +74,19 @@ ELIF                 : 25
 ELSE                 : 23
 ENDMARKER            : 2
 EQ                   : 36
-FLOAT                : 50
+FLOAT                : 51
 GEQ                  : 40
 GT                   : 39
-ID                   : 13 14 15 17 18 27 28 29 51
+ID                   : 13 14 15 17 18 27 28 29 52
 IF                   : 21
 INC                  : 14
 INDENT               : 31
-INT                  : 49
+INT                  : 50
 LEQ                  : 41
 LPAREN               : 17 18 27 33
 LT                   : 38
-MINUS                : 44 47
+MINUS                : 44 48
+MOD                  : 47
 NEQ                  : 37
 NEWLINE              : 7 8 9 31
 NOT                  : 32
@@ -90,7 +94,7 @@ OR                   : 34
 PLUS                 : 43
 RETURN               : 16
 RPAREN               : 17 18 27 33
-STRING               : 52
+STRING               : 53
 TIMES                : 45
 WHILE                : 26
 error                : 
@@ -103,12 +107,12 @@ clause               : 13 19 20 21 25 26 32 33 34 34 35 35
 compound_statement   : 6
 elif_statement       : 22
 empty                : 24
-expression           : 14 15 16 36 36 37 37 38 38 39 39 40 40 41 41 42 43 43 44 44 45 45 46 46 47
-funcall              : 9 53
+expression           : 14 15 16 36 36 37 37 38 38 39 39 40 40 41 41 42 43 43 44 44 45 45 46 46 47 47 48
+funcall              : 9 54
 fundef               : 12
 if_closure           : 21 25
 if_statement         : 10
-numeric              : 48
+numeric              : 49
 parameters           : 27 28
 return_statement     : 8
 simple_statement     : 5 30
@@ -177,8 +181,8 @@ state 2
     IF              reduce using rule 5 (statement -> simple_statement .)
     WHILE           reduce using rule 5 (statement -> simple_statement .)
     DEFUN           reduce using rule 5 (statement -> simple_statement .)
-    ENDMARKER       reduce using rule 5 (statement -> simple_statement .)
     DEDENT          reduce using rule 5 (statement -> simple_statement .)
+    ENDMARKER       reduce using rule 5 (statement -> simple_statement .)
 
 
 state 3
@@ -220,28 +224,31 @@ state 6
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     clause                         shift and go to state 20
     numeric                        shift and go to state 21
     funcall                        shift and go to state 22
-    expression                     shift and go to state 30
+    expression                     shift and go to state 31
 
 state 7
 
@@ -250,24 +257,27 @@ state 7
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    expression                     shift and go to state 31
+    expression                     shift and go to state 32
     numeric                        shift and go to state 21
 
 state 8
@@ -279,15 +289,15 @@ state 8
     IF              reduce using rule 6 (statement -> compound_statement .)
     WHILE           reduce using rule 6 (statement -> compound_statement .)
     DEFUN           reduce using rule 6 (statement -> compound_statement .)
-    ENDMARKER       reduce using rule 6 (statement -> compound_statement .)
     DEDENT          reduce using rule 6 (statement -> compound_statement .)
+    ENDMARKER       reduce using rule 6 (statement -> compound_statement .)
 
 
 state 9
 
     (8) simple_statement -> return_statement . NEWLINE
 
-    NEWLINE         shift and go to state 32
+    NEWLINE         shift and go to state 33
 
 
 state 10
@@ -340,7 +350,7 @@ state 11
     assignment                     shift and go to state 13
     simple_statement               shift and go to state 2
     fundef                         shift and go to state 16
-    statement_sequence             shift and go to state 33
+    statement_sequence             shift and go to state 34
     return_statement               shift and go to state 9
     while_statement                shift and go to state 10
     statement                      shift and go to state 11
@@ -363,7 +373,7 @@ state 13
 
     (7) simple_statement -> assignment . NEWLINE
 
-    NEWLINE         shift and go to state 34
+    NEWLINE         shift and go to state 35
 
 
 state 14
@@ -374,10 +384,10 @@ state 14
     (17) funcall -> ID . LPAREN args RPAREN
     (18) funcall -> ID . LPAREN RPAREN
 
-    ASSIGN          shift and go to state 35
-    INC             shift and go to state 38
-    DEC             shift and go to state 37
-    LPAREN          shift and go to state 36
+    ASSIGN          shift and go to state 36
+    INC             shift and go to state 39
+    DEC             shift and go to state 38
+    LPAREN          shift and go to state 37
 
 
 state 15
@@ -398,28 +408,31 @@ state 15
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
-    clause                         shift and go to state 39
+    clause                         shift and go to state 40
     numeric                        shift and go to state 21
     funcall                        shift and go to state 22
-    expression                     shift and go to state 30
+    expression                     shift and go to state 31
 
 state 16
 
@@ -438,7 +451,7 @@ state 17
 
     (27) fundef -> DEFUN ID . LPAREN parameters RPAREN COLON suite
 
-    LPAREN          shift and go to state 40
+    LPAREN          shift and go to state 41
 
 
 state 18
@@ -469,102 +482,108 @@ state 20
     (34) clause -> clause . OR clause
     (35) clause -> clause . AND clause
 
-    COLON           shift and go to state 42
-    OR              shift and go to state 43
-    AND             shift and go to state 41
+    COLON           shift and go to state 43
+    OR              shift and go to state 44
+    AND             shift and go to state 42
 
 
 state 21
 
-    (48) expression -> numeric .
+    (49) expression -> numeric .
 
-    PLUS            reduce using rule 48 (expression -> numeric .)
-    MINUS           reduce using rule 48 (expression -> numeric .)
-    TIMES           reduce using rule 48 (expression -> numeric .)
-    DIVIDE          reduce using rule 48 (expression -> numeric .)
-    COLON           reduce using rule 48 (expression -> numeric .)
-    OR              reduce using rule 48 (expression -> numeric .)
-    AND             reduce using rule 48 (expression -> numeric .)
-    RPAREN          reduce using rule 48 (expression -> numeric .)
-    NEWLINE         reduce using rule 48 (expression -> numeric .)
-    COMMA           reduce using rule 48 (expression -> numeric .)
-    EQ              reduce using rule 48 (expression -> numeric .)
-    NEQ             reduce using rule 48 (expression -> numeric .)
-    LT              reduce using rule 48 (expression -> numeric .)
-    GT              reduce using rule 48 (expression -> numeric .)
-    GEQ             reduce using rule 48 (expression -> numeric .)
-    LEQ             reduce using rule 48 (expression -> numeric .)
+    PLUS            reduce using rule 49 (expression -> numeric .)
+    MINUS           reduce using rule 49 (expression -> numeric .)
+    TIMES           reduce using rule 49 (expression -> numeric .)
+    DIVIDE          reduce using rule 49 (expression -> numeric .)
+    MOD             reduce using rule 49 (expression -> numeric .)
+    COLON           reduce using rule 49 (expression -> numeric .)
+    OR              reduce using rule 49 (expression -> numeric .)
+    AND             reduce using rule 49 (expression -> numeric .)
+    RPAREN          reduce using rule 49 (expression -> numeric .)
+    NEWLINE         reduce using rule 49 (expression -> numeric .)
+    COMMA           reduce using rule 49 (expression -> numeric .)
+    EQ              reduce using rule 49 (expression -> numeric .)
+    NEQ             reduce using rule 49 (expression -> numeric .)
+    LT              reduce using rule 49 (expression -> numeric .)
+    GT              reduce using rule 49 (expression -> numeric .)
+    GEQ             reduce using rule 49 (expression -> numeric .)
+    LEQ             reduce using rule 49 (expression -> numeric .)
 
 
 state 22
 
-    (53) expression -> funcall .
+    (54) expression -> funcall .
 
-    PLUS            reduce using rule 53 (expression -> funcall .)
-    MINUS           reduce using rule 53 (expression -> funcall .)
-    TIMES           reduce using rule 53 (expression -> funcall .)
-    DIVIDE          reduce using rule 53 (expression -> funcall .)
-    COLON           reduce using rule 53 (expression -> funcall .)
-    OR              reduce using rule 53 (expression -> funcall .)
-    AND             reduce using rule 53 (expression -> funcall .)
-    RPAREN          reduce using rule 53 (expression -> funcall .)
-    NEWLINE         reduce using rule 53 (expression -> funcall .)
-    COMMA           reduce using rule 53 (expression -> funcall .)
-    EQ              reduce using rule 53 (expression -> funcall .)
-    NEQ             reduce using rule 53 (expression -> funcall .)
-    LT              reduce using rule 53 (expression -> funcall .)
-    GT              reduce using rule 53 (expression -> funcall .)
-    GEQ             reduce using rule 53 (expression -> funcall .)
-    LEQ             reduce using rule 53 (expression -> funcall .)
+    PLUS            reduce using rule 54 (expression -> funcall .)
+    MINUS           reduce using rule 54 (expression -> funcall .)
+    TIMES           reduce using rule 54 (expression -> funcall .)
+    DIVIDE          reduce using rule 54 (expression -> funcall .)
+    MOD             reduce using rule 54 (expression -> funcall .)
+    COLON           reduce using rule 54 (expression -> funcall .)
+    OR              reduce using rule 54 (expression -> funcall .)
+    AND             reduce using rule 54 (expression -> funcall .)
+    RPAREN          reduce using rule 54 (expression -> funcall .)
+    NEWLINE         reduce using rule 54 (expression -> funcall .)
+    COMMA           reduce using rule 54 (expression -> funcall .)
+    EQ              reduce using rule 54 (expression -> funcall .)
+    NEQ             reduce using rule 54 (expression -> funcall .)
+    LT              reduce using rule 54 (expression -> funcall .)
+    GT              reduce using rule 54 (expression -> funcall .)
+    GEQ             reduce using rule 54 (expression -> funcall .)
+    LEQ             reduce using rule 54 (expression -> funcall .)
 
 
 state 23
 
-    (47) expression -> MINUS . expression
+    (48) expression -> MINUS . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    expression                     shift and go to state 44
+    expression                     shift and go to state 45
     numeric                        shift and go to state 21
 
 state 24
 
-    (52) expression -> STRING .
+    (53) expression -> STRING .
 
-    PLUS            reduce using rule 52 (expression -> STRING .)
-    MINUS           reduce using rule 52 (expression -> STRING .)
-    TIMES           reduce using rule 52 (expression -> STRING .)
-    DIVIDE          reduce using rule 52 (expression -> STRING .)
-    COLON           reduce using rule 52 (expression -> STRING .)
-    OR              reduce using rule 52 (expression -> STRING .)
-    AND             reduce using rule 52 (expression -> STRING .)
-    RPAREN          reduce using rule 52 (expression -> STRING .)
-    NEWLINE         reduce using rule 52 (expression -> STRING .)
-    COMMA           reduce using rule 52 (expression -> STRING .)
-    EQ              reduce using rule 52 (expression -> STRING .)
-    NEQ             reduce using rule 52 (expression -> STRING .)
-    LT              reduce using rule 52 (expression -> STRING .)
-    GT              reduce using rule 52 (expression -> STRING .)
-    GEQ             reduce using rule 52 (expression -> STRING .)
-    LEQ             reduce using rule 52 (expression -> STRING .)
+    PLUS            reduce using rule 53 (expression -> STRING .)
+    MINUS           reduce using rule 53 (expression -> STRING .)
+    TIMES           reduce using rule 53 (expression -> STRING .)
+    DIVIDE          reduce using rule 53 (expression -> STRING .)
+    MOD             reduce using rule 53 (expression -> STRING .)
+    COLON           reduce using rule 53 (expression -> STRING .)
+    OR              reduce using rule 53 (expression -> STRING .)
+    AND             reduce using rule 53 (expression -> STRING .)
+    RPAREN          reduce using rule 53 (expression -> STRING .)
+    NEWLINE         reduce using rule 53 (expression -> STRING .)
+    COMMA           reduce using rule 53 (expression -> STRING .)
+    EQ              reduce using rule 53 (expression -> STRING .)
+    NEQ             reduce using rule 53 (expression -> STRING .)
+    LT              reduce using rule 53 (expression -> STRING .)
+    GT              reduce using rule 53 (expression -> STRING .)
+    GEQ             reduce using rule 53 (expression -> STRING .)
+    LEQ             reduce using rule 53 (expression -> STRING .)
 
 
 state 25
@@ -585,99 +604,128 @@ state 25
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    clause                         shift and go to state 45
-    expression                     shift and go to state 30
+    clause                         shift and go to state 46
+    expression                     shift and go to state 31
     numeric                        shift and go to state 21
 
 state 26
 
-    (51) expression -> ID .
+    (52) expression -> ID .
     (17) funcall -> ID . LPAREN args RPAREN
     (18) funcall -> ID . LPAREN RPAREN
 
-    PLUS            reduce using rule 51 (expression -> ID .)
-    MINUS           reduce using rule 51 (expression -> ID .)
-    TIMES           reduce using rule 51 (expression -> ID .)
-    DIVIDE          reduce using rule 51 (expression -> ID .)
-    COLON           reduce using rule 51 (expression -> ID .)
-    OR              reduce using rule 51 (expression -> ID .)
-    AND             reduce using rule 51 (expression -> ID .)
-    RPAREN          reduce using rule 51 (expression -> ID .)
-    NEWLINE         reduce using rule 51 (expression -> ID .)
-    COMMA           reduce using rule 51 (expression -> ID .)
-    EQ              reduce using rule 51 (expression -> ID .)
-    NEQ             reduce using rule 51 (expression -> ID .)
-    LT              reduce using rule 51 (expression -> ID .)
-    GT              reduce using rule 51 (expression -> ID .)
-    GEQ             reduce using rule 51 (expression -> ID .)
-    LEQ             reduce using rule 51 (expression -> ID .)
-    LPAREN          shift and go to state 36
+    PLUS            reduce using rule 52 (expression -> ID .)
+    MINUS           reduce using rule 52 (expression -> ID .)
+    TIMES           reduce using rule 52 (expression -> ID .)
+    DIVIDE          reduce using rule 52 (expression -> ID .)
+    MOD             reduce using rule 52 (expression -> ID .)
+    COLON           reduce using rule 52 (expression -> ID .)
+    OR              reduce using rule 52 (expression -> ID .)
+    AND             reduce using rule 52 (expression -> ID .)
+    RPAREN          reduce using rule 52 (expression -> ID .)
+    NEWLINE         reduce using rule 52 (expression -> ID .)
+    COMMA           reduce using rule 52 (expression -> ID .)
+    EQ              reduce using rule 52 (expression -> ID .)
+    NEQ             reduce using rule 52 (expression -> ID .)
+    LT              reduce using rule 52 (expression -> ID .)
+    GT              reduce using rule 52 (expression -> ID .)
+    GEQ             reduce using rule 52 (expression -> ID .)
+    LEQ             reduce using rule 52 (expression -> ID .)
+    LPAREN          shift and go to state 37
 
 
 state 27
 
-    (49) numeric -> INT .
+    (50) numeric -> INT .
 
-    PLUS            reduce using rule 49 (numeric -> INT .)
-    MINUS           reduce using rule 49 (numeric -> INT .)
-    TIMES           reduce using rule 49 (numeric -> INT .)
-    DIVIDE          reduce using rule 49 (numeric -> INT .)
-    NEWLINE         reduce using rule 49 (numeric -> INT .)
-    EQ              reduce using rule 49 (numeric -> INT .)
-    NEQ             reduce using rule 49 (numeric -> INT .)
-    LT              reduce using rule 49 (numeric -> INT .)
-    GT              reduce using rule 49 (numeric -> INT .)
-    GEQ             reduce using rule 49 (numeric -> INT .)
-    LEQ             reduce using rule 49 (numeric -> INT .)
-    OR              reduce using rule 49 (numeric -> INT .)
-    AND             reduce using rule 49 (numeric -> INT .)
-    RPAREN          reduce using rule 49 (numeric -> INT .)
-    COMMA           reduce using rule 49 (numeric -> INT .)
-    COLON           reduce using rule 49 (numeric -> INT .)
+    EQ              reduce using rule 50 (numeric -> INT .)
+    NEQ             reduce using rule 50 (numeric -> INT .)
+    LT              reduce using rule 50 (numeric -> INT .)
+    GT              reduce using rule 50 (numeric -> INT .)
+    GEQ             reduce using rule 50 (numeric -> INT .)
+    LEQ             reduce using rule 50 (numeric -> INT .)
+    PLUS            reduce using rule 50 (numeric -> INT .)
+    MINUS           reduce using rule 50 (numeric -> INT .)
+    TIMES           reduce using rule 50 (numeric -> INT .)
+    DIVIDE          reduce using rule 50 (numeric -> INT .)
+    MOD             reduce using rule 50 (numeric -> INT .)
+    OR              reduce using rule 50 (numeric -> INT .)
+    AND             reduce using rule 50 (numeric -> INT .)
+    RPAREN          reduce using rule 50 (numeric -> INT .)
+    COMMA           reduce using rule 50 (numeric -> INT .)
+    COLON           reduce using rule 50 (numeric -> INT .)
+    NEWLINE         reduce using rule 50 (numeric -> INT .)
 
 
 state 28
 
-    (50) numeric -> FLOAT .
+    (51) numeric -> FLOAT .
 
-    PLUS            reduce using rule 50 (numeric -> FLOAT .)
-    MINUS           reduce using rule 50 (numeric -> FLOAT .)
-    TIMES           reduce using rule 50 (numeric -> FLOAT .)
-    DIVIDE          reduce using rule 50 (numeric -> FLOAT .)
-    NEWLINE         reduce using rule 50 (numeric -> FLOAT .)
-    EQ              reduce using rule 50 (numeric -> FLOAT .)
-    NEQ             reduce using rule 50 (numeric -> FLOAT .)
-    LT              reduce using rule 50 (numeric -> FLOAT .)
-    GT              reduce using rule 50 (numeric -> FLOAT .)
-    GEQ             reduce using rule 50 (numeric -> FLOAT .)
-    LEQ             reduce using rule 50 (numeric -> FLOAT .)
-    OR              reduce using rule 50 (numeric -> FLOAT .)
-    AND             reduce using rule 50 (numeric -> FLOAT .)
-    RPAREN          reduce using rule 50 (numeric -> FLOAT .)
-    COMMA           reduce using rule 50 (numeric -> FLOAT .)
-    COLON           reduce using rule 50 (numeric -> FLOAT .)
+    EQ              reduce using rule 51 (numeric -> FLOAT .)
+    NEQ             reduce using rule 51 (numeric -> FLOAT .)
+    LT              reduce using rule 51 (numeric -> FLOAT .)
+    GT              reduce using rule 51 (numeric -> FLOAT .)
+    GEQ             reduce using rule 51 (numeric -> FLOAT .)
+    LEQ             reduce using rule 51 (numeric -> FLOAT .)
+    PLUS            reduce using rule 51 (numeric -> FLOAT .)
+    MINUS           reduce using rule 51 (numeric -> FLOAT .)
+    TIMES           reduce using rule 51 (numeric -> FLOAT .)
+    DIVIDE          reduce using rule 51 (numeric -> FLOAT .)
+    MOD             reduce using rule 51 (numeric -> FLOAT .)
+    OR              reduce using rule 51 (numeric -> FLOAT .)
+    AND             reduce using rule 51 (numeric -> FLOAT .)
+    RPAREN          reduce using rule 51 (numeric -> FLOAT .)
+    COMMA           reduce using rule 51 (numeric -> FLOAT .)
+    COLON           reduce using rule 51 (numeric -> FLOAT .)
+    NEWLINE         reduce using rule 51 (numeric -> FLOAT .)
 
 
 state 29
+
+    (55) expression -> BOOLEAN .
+
+    PLUS            reduce using rule 55 (expression -> BOOLEAN .)
+    MINUS           reduce using rule 55 (expression -> BOOLEAN .)
+    TIMES           reduce using rule 55 (expression -> BOOLEAN .)
+    DIVIDE          reduce using rule 55 (expression -> BOOLEAN .)
+    MOD             reduce using rule 55 (expression -> BOOLEAN .)
+    COLON           reduce using rule 55 (expression -> BOOLEAN .)
+    OR              reduce using rule 55 (expression -> BOOLEAN .)
+    AND             reduce using rule 55 (expression -> BOOLEAN .)
+    RPAREN          reduce using rule 55 (expression -> BOOLEAN .)
+    NEWLINE         reduce using rule 55 (expression -> BOOLEAN .)
+    COMMA           reduce using rule 55 (expression -> BOOLEAN .)
+    EQ              reduce using rule 55 (expression -> BOOLEAN .)
+    NEQ             reduce using rule 55 (expression -> BOOLEAN .)
+    LT              reduce using rule 55 (expression -> BOOLEAN .)
+    GT              reduce using rule 55 (expression -> BOOLEAN .)
+    GEQ             reduce using rule 55 (expression -> BOOLEAN .)
+    LEQ             reduce using rule 55 (expression -> BOOLEAN .)
+
+
+state 30
 
     (32) clause -> NOT . clause
     (32) clause -> . NOT clause
@@ -695,30 +743,33 @@ state 29
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    clause                         shift and go to state 46
-    expression                     shift and go to state 30
+    clause                         shift and go to state 47
+    expression                     shift and go to state 31
     numeric                        shift and go to state 21
 
-state 30
+state 31
 
     (36) clause -> expression . EQ expression
     (37) clause -> expression . NEQ expression
@@ -731,41 +782,45 @@ state 30
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
-    EQ              shift and go to state 54
-    NEQ             shift and go to state 56
-    LT              shift and go to state 52
-    GT              shift and go to state 48
-    GEQ             shift and go to state 47
-    LEQ             shift and go to state 51
-    COLON           reduce using rule 42 (clause -> expression .)
+    EQ              shift and go to state 56
+    NEQ             shift and go to state 58
+    LT              shift and go to state 53
+    GT              shift and go to state 49
+    GEQ             shift and go to state 48
+    LEQ             shift and go to state 52
     OR              reduce using rule 42 (clause -> expression .)
     AND             reduce using rule 42 (clause -> expression .)
+    COLON           reduce using rule 42 (clause -> expression .)
     RPAREN          reduce using rule 42 (clause -> expression .)
     NEWLINE         reduce using rule 42 (clause -> expression .)
     COMMA           reduce using rule 42 (clause -> expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 31
+state 32
 
     (16) return_statement -> RETURN expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
     NEWLINE         reduce using rule 16 (return_statement -> RETURN expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 32
+state 33
 
     (8) simple_statement -> return_statement NEWLINE .
 
@@ -780,7 +835,7 @@ state 32
     ELIF            reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
 
 
-state 33
+state 34
 
     (3) statement_sequence -> statement statement_sequence .
 
@@ -788,7 +843,7 @@ state 33
     DEDENT          reduce using rule 3 (statement_sequence -> statement statement_sequence .)
 
 
-state 34
+state 35
 
     (7) simple_statement -> assignment NEWLINE .
 
@@ -803,7 +858,7 @@ state 34
     ELIF            reduce using rule 7 (simple_statement -> assignment NEWLINE .)
 
 
-state 35
+state 36
 
     (13) assignment -> ID ASSIGN . clause
     (32) clause -> . NOT clause
@@ -821,30 +876,33 @@ state 35
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    clause                         shift and go to state 57
-    expression                     shift and go to state 30
+    clause                         shift and go to state 59
+    expression                     shift and go to state 31
     numeric                        shift and go to state 21
 
-state 36
+state 37
 
     (17) funcall -> ID LPAREN . args RPAREN
     (18) funcall -> ID LPAREN . RPAREN
@@ -865,107 +923,116 @@ state 36
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    RPAREN          shift and go to state 59
-    NOT             shift and go to state 29
+    RPAREN          shift and go to state 61
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    clause                         shift and go to state 58
-    args                           shift and go to state 60
-    expression                     shift and go to state 30
+    clause                         shift and go to state 60
+    args                           shift and go to state 62
+    expression                     shift and go to state 31
     numeric                        shift and go to state 21
 
-state 37
+state 38
 
     (15) assignment -> ID DEC . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    expression                     shift and go to state 61
+    expression                     shift and go to state 63
     numeric                        shift and go to state 21
 
-state 38
+state 39
 
     (14) assignment -> ID INC . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    expression                     shift and go to state 62
+    expression                     shift and go to state 64
     numeric                        shift and go to state 21
 
-state 39
+state 40
 
     (21) if_statement -> IF clause . COLON suite if_closure
     (34) clause -> clause . OR clause
     (35) clause -> clause . AND clause
 
-    COLON           shift and go to state 63
-    OR              shift and go to state 43
-    AND             shift and go to state 41
+    COLON           shift and go to state 65
+    OR              shift and go to state 44
+    AND             shift and go to state 42
 
 
-state 40
+state 41
 
     (27) fundef -> DEFUN ID LPAREN . parameters RPAREN COLON suite
     (28) parameters -> . parameters COMMA ID
     (29) parameters -> . ID
 
-    ID              shift and go to state 65
+    ID              shift and go to state 67
 
-    parameters                     shift and go to state 64
+    parameters                     shift and go to state 66
 
-state 41
+state 42
 
     (35) clause -> clause AND . clause
     (32) clause -> . NOT clause
@@ -983,30 +1050,33 @@ state 41
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    clause                         shift and go to state 66
-    expression                     shift and go to state 30
+    clause                         shift and go to state 68
+    expression                     shift and go to state 31
     numeric                        shift and go to state 21
 
-state 42
+state 43
 
     (26) while_statement -> WHILE clause COLON . suite
     (30) suite -> . simple_statement
@@ -1021,17 +1091,17 @@ state 42
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NEWLINE         shift and go to state 67
+    NEWLINE         shift and go to state 69
     ID              shift and go to state 14
     RETURN          shift and go to state 7
 
     funcall                        shift and go to state 5
-    simple_statement               shift and go to state 68
+    simple_statement               shift and go to state 70
     return_statement               shift and go to state 9
     assignment                     shift and go to state 13
-    suite                          shift and go to state 69
+    suite                          shift and go to state 71
 
-state 43
+state 44
 
     (34) clause -> clause OR . clause
     (32) clause -> . NOT clause
@@ -1049,162 +1119,117 @@ state 43
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    clause                         shift and go to state 70
-    expression                     shift and go to state 30
+    clause                         shift and go to state 72
+    expression                     shift and go to state 31
     numeric                        shift and go to state 21
 
-state 44
+state 45
 
-    (47) expression -> MINUS expression .
+    (48) expression -> MINUS expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
-    PLUS            reduce using rule 47 (expression -> MINUS expression .)
-    MINUS           reduce using rule 47 (expression -> MINUS expression .)
-    TIMES           reduce using rule 47 (expression -> MINUS expression .)
-    DIVIDE          reduce using rule 47 (expression -> MINUS expression .)
-    COLON           reduce using rule 47 (expression -> MINUS expression .)
-    OR              reduce using rule 47 (expression -> MINUS expression .)
-    AND             reduce using rule 47 (expression -> MINUS expression .)
-    RPAREN          reduce using rule 47 (expression -> MINUS expression .)
-    NEWLINE         reduce using rule 47 (expression -> MINUS expression .)
-    COMMA           reduce using rule 47 (expression -> MINUS expression .)
-    EQ              reduce using rule 47 (expression -> MINUS expression .)
-    NEQ             reduce using rule 47 (expression -> MINUS expression .)
-    LT              reduce using rule 47 (expression -> MINUS expression .)
-    GT              reduce using rule 47 (expression -> MINUS expression .)
-    GEQ             reduce using rule 47 (expression -> MINUS expression .)
-    LEQ             reduce using rule 47 (expression -> MINUS expression .)
+    PLUS            reduce using rule 48 (expression -> MINUS expression .)
+    MINUS           reduce using rule 48 (expression -> MINUS expression .)
+    TIMES           reduce using rule 48 (expression -> MINUS expression .)
+    DIVIDE          reduce using rule 48 (expression -> MINUS expression .)
+    MOD             reduce using rule 48 (expression -> MINUS expression .)
+    COLON           reduce using rule 48 (expression -> MINUS expression .)
+    OR              reduce using rule 48 (expression -> MINUS expression .)
+    AND             reduce using rule 48 (expression -> MINUS expression .)
+    RPAREN          reduce using rule 48 (expression -> MINUS expression .)
+    NEWLINE         reduce using rule 48 (expression -> MINUS expression .)
+    COMMA           reduce using rule 48 (expression -> MINUS expression .)
+    EQ              reduce using rule 48 (expression -> MINUS expression .)
+    NEQ             reduce using rule 48 (expression -> MINUS expression .)
+    LT              reduce using rule 48 (expression -> MINUS expression .)
+    GT              reduce using rule 48 (expression -> MINUS expression .)
+    GEQ             reduce using rule 48 (expression -> MINUS expression .)
+    LEQ             reduce using rule 48 (expression -> MINUS expression .)
 
-  ! PLUS            [ shift and go to state 53 ]
-  ! MINUS           [ shift and go to state 55 ]
-  ! TIMES           [ shift and go to state 50 ]
-  ! DIVIDE          [ shift and go to state 49 ]
+  ! PLUS            [ shift and go to state 54 ]
+  ! MINUS           [ shift and go to state 57 ]
+  ! TIMES           [ shift and go to state 51 ]
+  ! DIVIDE          [ shift and go to state 50 ]
+  ! MOD             [ shift and go to state 55 ]
 
 
-state 45
+state 46
 
     (33) clause -> LPAREN clause . RPAREN
     (34) clause -> clause . OR clause
     (35) clause -> clause . AND clause
 
-    RPAREN          shift and go to state 71
-    OR              shift and go to state 43
-    AND             shift and go to state 41
+    RPAREN          shift and go to state 73
+    OR              shift and go to state 44
+    AND             shift and go to state 42
 
 
-state 46
+state 47
 
     (32) clause -> NOT clause .
     (34) clause -> clause . OR clause
     (35) clause -> clause . AND clause
 
-    COLON           reduce using rule 32 (clause -> NOT clause .)
     OR              reduce using rule 32 (clause -> NOT clause .)
     AND             reduce using rule 32 (clause -> NOT clause .)
+    COLON           reduce using rule 32 (clause -> NOT clause .)
     RPAREN          reduce using rule 32 (clause -> NOT clause .)
     NEWLINE         reduce using rule 32 (clause -> NOT clause .)
     COMMA           reduce using rule 32 (clause -> NOT clause .)
 
-  ! OR              [ shift and go to state 43 ]
-  ! AND             [ shift and go to state 41 ]
+  ! OR              [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 42 ]
 
 
-state 47
+state 48
 
     (40) clause -> expression GEQ . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
-    INT             shift and go to state 27
-    FLOAT           shift and go to state 28
-
-    funcall                        shift and go to state 22
-    expression                     shift and go to state 72
-    numeric                        shift and go to state 21
-
-state 48
-
-    (39) clause -> expression GT . expression
-    (43) expression -> . expression PLUS expression
-    (44) expression -> . expression MINUS expression
-    (45) expression -> . expression TIMES expression
-    (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
-    (17) funcall -> . ID LPAREN args RPAREN
-    (18) funcall -> . ID LPAREN RPAREN
-
-    MINUS           shift and go to state 23
-    ID              shift and go to state 26
-    STRING          shift and go to state 24
-    INT             shift and go to state 27
-    FLOAT           shift and go to state 28
-
-    funcall                        shift and go to state 22
-    expression                     shift and go to state 73
-    numeric                        shift and go to state 21
-
-state 49
-
-    (46) expression -> expression DIVIDE . expression
-    (43) expression -> . expression PLUS expression
-    (44) expression -> . expression MINUS expression
-    (45) expression -> . expression TIMES expression
-    (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
-    (17) funcall -> . ID LPAREN args RPAREN
-    (18) funcall -> . ID LPAREN RPAREN
-
-    MINUS           shift and go to state 23
-    ID              shift and go to state 26
-    STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
@@ -1212,26 +1237,29 @@ state 49
     expression                     shift and go to state 74
     numeric                        shift and go to state 21
 
-state 50
+state 49
 
-    (45) expression -> expression TIMES . expression
+    (39) clause -> expression GT . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
@@ -1239,26 +1267,29 @@ state 50
     expression                     shift and go to state 75
     numeric                        shift and go to state 21
 
-state 51
+state 50
 
-    (41) clause -> expression LEQ . expression
+    (46) expression -> expression DIVIDE . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
@@ -1266,26 +1297,29 @@ state 51
     expression                     shift and go to state 76
     numeric                        shift and go to state 21
 
-state 52
+state 51
 
-    (38) clause -> expression LT . expression
+    (45) expression -> expression TIMES . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
@@ -1293,26 +1327,29 @@ state 52
     expression                     shift and go to state 77
     numeric                        shift and go to state 21
 
-state 53
+state 52
 
-    (43) expression -> expression PLUS . expression
+    (41) clause -> expression LEQ . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
@@ -1320,26 +1357,29 @@ state 53
     expression                     shift and go to state 78
     numeric                        shift and go to state 21
 
-state 54
+state 53
 
-    (36) clause -> expression EQ . expression
+    (38) clause -> expression LT . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
@@ -1347,26 +1387,29 @@ state 54
     expression                     shift and go to state 79
     numeric                        shift and go to state 21
 
-state 55
+state 54
 
-    (44) expression -> expression MINUS . expression
+    (43) expression -> expression PLUS . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
@@ -1374,26 +1417,29 @@ state 55
     expression                     shift and go to state 80
     numeric                        shift and go to state 21
 
-state 56
+state 55
 
-    (37) clause -> expression NEQ . expression
+    (47) expression -> expression MOD . expression
     (43) expression -> . expression PLUS expression
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
@@ -1401,18 +1447,108 @@ state 56
     expression                     shift and go to state 81
     numeric                        shift and go to state 21
 
+state 56
+
+    (36) clause -> expression EQ . expression
+    (43) expression -> . expression PLUS expression
+    (44) expression -> . expression MINUS expression
+    (45) expression -> . expression TIMES expression
+    (46) expression -> . expression DIVIDE expression
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
+    (17) funcall -> . ID LPAREN args RPAREN
+    (18) funcall -> . ID LPAREN RPAREN
+
+    MINUS           shift and go to state 23
+    ID              shift and go to state 26
+    STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
+    INT             shift and go to state 27
+    FLOAT           shift and go to state 28
+
+    funcall                        shift and go to state 22
+    expression                     shift and go to state 82
+    numeric                        shift and go to state 21
+
 state 57
+
+    (44) expression -> expression MINUS . expression
+    (43) expression -> . expression PLUS expression
+    (44) expression -> . expression MINUS expression
+    (45) expression -> . expression TIMES expression
+    (46) expression -> . expression DIVIDE expression
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
+    (17) funcall -> . ID LPAREN args RPAREN
+    (18) funcall -> . ID LPAREN RPAREN
+
+    MINUS           shift and go to state 23
+    ID              shift and go to state 26
+    STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
+    INT             shift and go to state 27
+    FLOAT           shift and go to state 28
+
+    funcall                        shift and go to state 22
+    expression                     shift and go to state 83
+    numeric                        shift and go to state 21
+
+state 58
+
+    (37) clause -> expression NEQ . expression
+    (43) expression -> . expression PLUS expression
+    (44) expression -> . expression MINUS expression
+    (45) expression -> . expression TIMES expression
+    (46) expression -> . expression DIVIDE expression
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
+    (17) funcall -> . ID LPAREN args RPAREN
+    (18) funcall -> . ID LPAREN RPAREN
+
+    MINUS           shift and go to state 23
+    ID              shift and go to state 26
+    STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
+    INT             shift and go to state 27
+    FLOAT           shift and go to state 28
+
+    funcall                        shift and go to state 22
+    expression                     shift and go to state 84
+    numeric                        shift and go to state 21
+
+state 59
 
     (13) assignment -> ID ASSIGN clause .
     (34) clause -> clause . OR clause
     (35) clause -> clause . AND clause
 
     NEWLINE         reduce using rule 13 (assignment -> ID ASSIGN clause .)
-    OR              shift and go to state 43
-    AND             shift and go to state 41
+    OR              shift and go to state 44
+    AND             shift and go to state 42
 
 
-state 58
+state 60
 
     (20) args -> clause .
     (34) clause -> clause . OR clause
@@ -1420,72 +1556,77 @@ state 58
 
     RPAREN          reduce using rule 20 (args -> clause .)
     COMMA           reduce using rule 20 (args -> clause .)
-    OR              shift and go to state 43
-    AND             shift and go to state 41
+    OR              shift and go to state 44
+    AND             shift and go to state 42
 
 
-state 59
+state 61
 
     (18) funcall -> ID LPAREN RPAREN .
 
+    PLUS            reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    MINUS           reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    TIMES           reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    DIVIDE          reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    MOD             reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    COLON           reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    OR              reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    AND             reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    RPAREN          reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
     NEWLINE         reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
+    COMMA           reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
     EQ              reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
     NEQ             reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
     LT              reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
     GT              reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
     GEQ             reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
     LEQ             reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    PLUS            reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    MINUS           reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    TIMES           reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    DIVIDE          reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    COLON           reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    OR              reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    AND             reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    RPAREN          reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
-    COMMA           reduce using rule 18 (funcall -> ID LPAREN RPAREN .)
 
 
-state 60
+state 62
 
     (17) funcall -> ID LPAREN args . RPAREN
     (19) args -> args . COMMA clause
 
-    RPAREN          shift and go to state 82
-    COMMA           shift and go to state 83
+    RPAREN          shift and go to state 85
+    COMMA           shift and go to state 86
 
 
-state 61
+state 63
 
     (15) assignment -> ID DEC expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
     NEWLINE         reduce using rule 15 (assignment -> ID DEC expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 62
+state 64
 
     (14) assignment -> ID INC expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
     NEWLINE         reduce using rule 14 (assignment -> ID INC expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 63
+state 65
 
     (21) if_statement -> IF clause COLON . suite if_closure
     (30) suite -> . simple_statement
@@ -1500,26 +1641,26 @@ state 63
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NEWLINE         shift and go to state 67
+    NEWLINE         shift and go to state 69
     ID              shift and go to state 14
     RETURN          shift and go to state 7
 
     funcall                        shift and go to state 5
-    simple_statement               shift and go to state 68
+    simple_statement               shift and go to state 70
     return_statement               shift and go to state 9
     assignment                     shift and go to state 13
-    suite                          shift and go to state 84
+    suite                          shift and go to state 87
 
-state 64
+state 66
 
     (27) fundef -> DEFUN ID LPAREN parameters . RPAREN COLON suite
     (28) parameters -> parameters . COMMA ID
 
-    RPAREN          shift and go to state 85
-    COMMA           shift and go to state 86
+    RPAREN          shift and go to state 88
+    COMMA           shift and go to state 89
 
 
-state 65
+state 67
 
     (29) parameters -> ID .
 
@@ -1527,31 +1668,31 @@ state 65
     COMMA           reduce using rule 29 (parameters -> ID .)
 
 
-state 66
+state 68
 
     (35) clause -> clause AND clause .
     (34) clause -> clause . OR clause
     (35) clause -> clause . AND clause
 
-    COLON           reduce using rule 35 (clause -> clause AND clause .)
     OR              reduce using rule 35 (clause -> clause AND clause .)
     AND             reduce using rule 35 (clause -> clause AND clause .)
+    COLON           reduce using rule 35 (clause -> clause AND clause .)
     RPAREN          reduce using rule 35 (clause -> clause AND clause .)
     NEWLINE         reduce using rule 35 (clause -> clause AND clause .)
     COMMA           reduce using rule 35 (clause -> clause AND clause .)
 
-  ! OR              [ shift and go to state 43 ]
-  ! AND             [ shift and go to state 41 ]
+  ! OR              [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 42 ]
 
 
-state 67
+state 69
 
     (31) suite -> NEWLINE . INDENT statement_sequence DEDENT
 
-    INDENT          shift and go to state 87
+    INDENT          shift and go to state 90
 
 
-state 68
+state 70
 
     (30) suite -> simple_statement .
 
@@ -1566,7 +1707,7 @@ state 68
     ELIF            reduce using rule 30 (suite -> simple_statement .)
 
 
-state 69
+state 71
 
     (26) while_statement -> WHILE clause COLON suite .
 
@@ -1575,91 +1716,97 @@ state 69
     IF              reduce using rule 26 (while_statement -> WHILE clause COLON suite .)
     WHILE           reduce using rule 26 (while_statement -> WHILE clause COLON suite .)
     DEFUN           reduce using rule 26 (while_statement -> WHILE clause COLON suite .)
-    DEDENT          reduce using rule 26 (while_statement -> WHILE clause COLON suite .)
     ENDMARKER       reduce using rule 26 (while_statement -> WHILE clause COLON suite .)
+    DEDENT          reduce using rule 26 (while_statement -> WHILE clause COLON suite .)
 
 
-state 70
+state 72
 
     (34) clause -> clause OR clause .
     (34) clause -> clause . OR clause
     (35) clause -> clause . AND clause
 
-    COLON           reduce using rule 34 (clause -> clause OR clause .)
     OR              reduce using rule 34 (clause -> clause OR clause .)
     AND             reduce using rule 34 (clause -> clause OR clause .)
+    COLON           reduce using rule 34 (clause -> clause OR clause .)
     RPAREN          reduce using rule 34 (clause -> clause OR clause .)
     NEWLINE         reduce using rule 34 (clause -> clause OR clause .)
     COMMA           reduce using rule 34 (clause -> clause OR clause .)
 
-  ! OR              [ shift and go to state 43 ]
-  ! AND             [ shift and go to state 41 ]
+  ! OR              [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 42 ]
 
 
-state 71
+state 73
 
     (33) clause -> LPAREN clause RPAREN .
 
-    COLON           reduce using rule 33 (clause -> LPAREN clause RPAREN .)
     OR              reduce using rule 33 (clause -> LPAREN clause RPAREN .)
     AND             reduce using rule 33 (clause -> LPAREN clause RPAREN .)
+    COLON           reduce using rule 33 (clause -> LPAREN clause RPAREN .)
     RPAREN          reduce using rule 33 (clause -> LPAREN clause RPAREN .)
     NEWLINE         reduce using rule 33 (clause -> LPAREN clause RPAREN .)
     COMMA           reduce using rule 33 (clause -> LPAREN clause RPAREN .)
 
 
-state 72
+state 74
 
     (40) clause -> expression GEQ expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
-    COLON           reduce using rule 40 (clause -> expression GEQ expression .)
     OR              reduce using rule 40 (clause -> expression GEQ expression .)
     AND             reduce using rule 40 (clause -> expression GEQ expression .)
+    COLON           reduce using rule 40 (clause -> expression GEQ expression .)
     RPAREN          reduce using rule 40 (clause -> expression GEQ expression .)
     NEWLINE         reduce using rule 40 (clause -> expression GEQ expression .)
     COMMA           reduce using rule 40 (clause -> expression GEQ expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 73
+state 75
 
     (39) clause -> expression GT expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
-    COLON           reduce using rule 39 (clause -> expression GT expression .)
     OR              reduce using rule 39 (clause -> expression GT expression .)
     AND             reduce using rule 39 (clause -> expression GT expression .)
+    COLON           reduce using rule 39 (clause -> expression GT expression .)
     RPAREN          reduce using rule 39 (clause -> expression GT expression .)
     NEWLINE         reduce using rule 39 (clause -> expression GT expression .)
     COMMA           reduce using rule 39 (clause -> expression GT expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 74
+state 76
 
     (46) expression -> expression DIVIDE expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
     PLUS            reduce using rule 46 (expression -> expression DIVIDE expression .)
     MINUS           reduce using rule 46 (expression -> expression DIVIDE expression .)
     TIMES           reduce using rule 46 (expression -> expression DIVIDE expression .)
     DIVIDE          reduce using rule 46 (expression -> expression DIVIDE expression .)
+    MOD             reduce using rule 46 (expression -> expression DIVIDE expression .)
     COLON           reduce using rule 46 (expression -> expression DIVIDE expression .)
     OR              reduce using rule 46 (expression -> expression DIVIDE expression .)
     AND             reduce using rule 46 (expression -> expression DIVIDE expression .)
@@ -1673,24 +1820,27 @@ state 74
     GEQ             reduce using rule 46 (expression -> expression DIVIDE expression .)
     LEQ             reduce using rule 46 (expression -> expression DIVIDE expression .)
 
-  ! PLUS            [ shift and go to state 53 ]
-  ! MINUS           [ shift and go to state 55 ]
-  ! TIMES           [ shift and go to state 50 ]
-  ! DIVIDE          [ shift and go to state 49 ]
+  ! PLUS            [ shift and go to state 54 ]
+  ! MINUS           [ shift and go to state 57 ]
+  ! TIMES           [ shift and go to state 51 ]
+  ! DIVIDE          [ shift and go to state 50 ]
+  ! MOD             [ shift and go to state 55 ]
 
 
-state 75
+state 77
 
     (45) expression -> expression TIMES expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
     PLUS            reduce using rule 45 (expression -> expression TIMES expression .)
     MINUS           reduce using rule 45 (expression -> expression TIMES expression .)
     TIMES           reduce using rule 45 (expression -> expression TIMES expression .)
     DIVIDE          reduce using rule 45 (expression -> expression TIMES expression .)
+    MOD             reduce using rule 45 (expression -> expression TIMES expression .)
     COLON           reduce using rule 45 (expression -> expression TIMES expression .)
     OR              reduce using rule 45 (expression -> expression TIMES expression .)
     AND             reduce using rule 45 (expression -> expression TIMES expression .)
@@ -1704,59 +1854,65 @@ state 75
     GEQ             reduce using rule 45 (expression -> expression TIMES expression .)
     LEQ             reduce using rule 45 (expression -> expression TIMES expression .)
 
-  ! PLUS            [ shift and go to state 53 ]
-  ! MINUS           [ shift and go to state 55 ]
-  ! TIMES           [ shift and go to state 50 ]
-  ! DIVIDE          [ shift and go to state 49 ]
+  ! PLUS            [ shift and go to state 54 ]
+  ! MINUS           [ shift and go to state 57 ]
+  ! TIMES           [ shift and go to state 51 ]
+  ! DIVIDE          [ shift and go to state 50 ]
+  ! MOD             [ shift and go to state 55 ]
 
 
-state 76
+state 78
 
     (41) clause -> expression LEQ expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
-    COLON           reduce using rule 41 (clause -> expression LEQ expression .)
     OR              reduce using rule 41 (clause -> expression LEQ expression .)
     AND             reduce using rule 41 (clause -> expression LEQ expression .)
+    COLON           reduce using rule 41 (clause -> expression LEQ expression .)
     RPAREN          reduce using rule 41 (clause -> expression LEQ expression .)
     NEWLINE         reduce using rule 41 (clause -> expression LEQ expression .)
     COMMA           reduce using rule 41 (clause -> expression LEQ expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 77
+state 79
 
     (38) clause -> expression LT expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
-    COLON           reduce using rule 38 (clause -> expression LT expression .)
     OR              reduce using rule 38 (clause -> expression LT expression .)
     AND             reduce using rule 38 (clause -> expression LT expression .)
+    COLON           reduce using rule 38 (clause -> expression LT expression .)
     RPAREN          reduce using rule 38 (clause -> expression LT expression .)
     NEWLINE         reduce using rule 38 (clause -> expression LT expression .)
     COMMA           reduce using rule 38 (clause -> expression LT expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 78
+state 80
 
     (43) expression -> expression PLUS expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
     PLUS            reduce using rule 43 (expression -> expression PLUS expression .)
     MINUS           reduce using rule 43 (expression -> expression PLUS expression .)
@@ -1772,42 +1928,81 @@ state 78
     GT              reduce using rule 43 (expression -> expression PLUS expression .)
     GEQ             reduce using rule 43 (expression -> expression PLUS expression .)
     LEQ             reduce using rule 43 (expression -> expression PLUS expression .)
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
   ! TIMES           [ reduce using rule 43 (expression -> expression PLUS expression .) ]
   ! DIVIDE          [ reduce using rule 43 (expression -> expression PLUS expression .) ]
-  ! PLUS            [ shift and go to state 53 ]
-  ! MINUS           [ shift and go to state 55 ]
+  ! MOD             [ reduce using rule 43 (expression -> expression PLUS expression .) ]
+  ! PLUS            [ shift and go to state 54 ]
+  ! MINUS           [ shift and go to state 57 ]
 
 
-state 79
+state 81
+
+    (47) expression -> expression MOD expression .
+    (43) expression -> expression . PLUS expression
+    (44) expression -> expression . MINUS expression
+    (45) expression -> expression . TIMES expression
+    (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
+
+    PLUS            reduce using rule 47 (expression -> expression MOD expression .)
+    MINUS           reduce using rule 47 (expression -> expression MOD expression .)
+    TIMES           reduce using rule 47 (expression -> expression MOD expression .)
+    DIVIDE          reduce using rule 47 (expression -> expression MOD expression .)
+    MOD             reduce using rule 47 (expression -> expression MOD expression .)
+    COLON           reduce using rule 47 (expression -> expression MOD expression .)
+    OR              reduce using rule 47 (expression -> expression MOD expression .)
+    AND             reduce using rule 47 (expression -> expression MOD expression .)
+    RPAREN          reduce using rule 47 (expression -> expression MOD expression .)
+    NEWLINE         reduce using rule 47 (expression -> expression MOD expression .)
+    COMMA           reduce using rule 47 (expression -> expression MOD expression .)
+    EQ              reduce using rule 47 (expression -> expression MOD expression .)
+    NEQ             reduce using rule 47 (expression -> expression MOD expression .)
+    LT              reduce using rule 47 (expression -> expression MOD expression .)
+    GT              reduce using rule 47 (expression -> expression MOD expression .)
+    GEQ             reduce using rule 47 (expression -> expression MOD expression .)
+    LEQ             reduce using rule 47 (expression -> expression MOD expression .)
+
+  ! PLUS            [ shift and go to state 54 ]
+  ! MINUS           [ shift and go to state 57 ]
+  ! TIMES           [ shift and go to state 51 ]
+  ! DIVIDE          [ shift and go to state 50 ]
+  ! MOD             [ shift and go to state 55 ]
+
+
+state 82
 
     (36) clause -> expression EQ expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
-    COLON           reduce using rule 36 (clause -> expression EQ expression .)
     OR              reduce using rule 36 (clause -> expression EQ expression .)
     AND             reduce using rule 36 (clause -> expression EQ expression .)
+    COLON           reduce using rule 36 (clause -> expression EQ expression .)
     RPAREN          reduce using rule 36 (clause -> expression EQ expression .)
     NEWLINE         reduce using rule 36 (clause -> expression EQ expression .)
     COMMA           reduce using rule 36 (clause -> expression EQ expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 80
+state 83
 
     (44) expression -> expression MINUS expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
     PLUS            reduce using rule 44 (expression -> expression MINUS expression .)
     MINUS           reduce using rule 44 (expression -> expression MINUS expression .)
@@ -1823,58 +2018,63 @@ state 80
     GT              reduce using rule 44 (expression -> expression MINUS expression .)
     GEQ             reduce using rule 44 (expression -> expression MINUS expression .)
     LEQ             reduce using rule 44 (expression -> expression MINUS expression .)
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
   ! TIMES           [ reduce using rule 44 (expression -> expression MINUS expression .) ]
   ! DIVIDE          [ reduce using rule 44 (expression -> expression MINUS expression .) ]
-  ! PLUS            [ shift and go to state 53 ]
-  ! MINUS           [ shift and go to state 55 ]
+  ! MOD             [ reduce using rule 44 (expression -> expression MINUS expression .) ]
+  ! PLUS            [ shift and go to state 54 ]
+  ! MINUS           [ shift and go to state 57 ]
 
 
-state 81
+state 84
 
     (37) clause -> expression NEQ expression .
     (43) expression -> expression . PLUS expression
     (44) expression -> expression . MINUS expression
     (45) expression -> expression . TIMES expression
     (46) expression -> expression . DIVIDE expression
+    (47) expression -> expression . MOD expression
 
-    COLON           reduce using rule 37 (clause -> expression NEQ expression .)
     OR              reduce using rule 37 (clause -> expression NEQ expression .)
     AND             reduce using rule 37 (clause -> expression NEQ expression .)
+    COLON           reduce using rule 37 (clause -> expression NEQ expression .)
     RPAREN          reduce using rule 37 (clause -> expression NEQ expression .)
     NEWLINE         reduce using rule 37 (clause -> expression NEQ expression .)
     COMMA           reduce using rule 37 (clause -> expression NEQ expression .)
-    PLUS            shift and go to state 53
-    MINUS           shift and go to state 55
-    TIMES           shift and go to state 50
-    DIVIDE          shift and go to state 49
+    PLUS            shift and go to state 54
+    MINUS           shift and go to state 57
+    TIMES           shift and go to state 51
+    DIVIDE          shift and go to state 50
+    MOD             shift and go to state 55
 
 
-state 82
+state 85
 
     (17) funcall -> ID LPAREN args RPAREN .
 
+    PLUS            reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    MINUS           reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    TIMES           reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    DIVIDE          reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    MOD             reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    COLON           reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    OR              reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    AND             reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    RPAREN          reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
     NEWLINE         reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
+    COMMA           reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
     EQ              reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
     NEQ             reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
     LT              reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
     GT              reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
     GEQ             reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
     LEQ             reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    PLUS            reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    MINUS           reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    TIMES           reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    DIVIDE          reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    COLON           reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    OR              reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    AND             reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    RPAREN          reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
-    COMMA           reduce using rule 17 (funcall -> ID LPAREN args RPAREN .)
 
 
-state 83
+state 86
 
     (19) args -> args COMMA . clause
     (32) clause -> . NOT clause
@@ -1892,30 +2092,33 @@ state 83
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
     funcall                        shift and go to state 22
-    clause                         shift and go to state 88
-    expression                     shift and go to state 30
+    clause                         shift and go to state 91
+    expression                     shift and go to state 31
     numeric                        shift and go to state 21
 
-state 84
+state 87
 
     (21) if_statement -> IF clause COLON suite . if_closure
     (22) if_closure -> . elif_statement
@@ -1924,8 +2127,8 @@ state 84
     (25) elif_statement -> . ELIF clause COLON suite if_closure
     (1) empty -> .
 
-    ELSE            shift and go to state 91
-    ELIF            shift and go to state 89
+    ELSE            shift and go to state 94
+    ELIF            shift and go to state 92
     ID              reduce using rule 1 (empty -> .)
     RETURN          reduce using rule 1 (empty -> .)
     IF              reduce using rule 1 (empty -> .)
@@ -1934,25 +2137,25 @@ state 84
     ENDMARKER       reduce using rule 1 (empty -> .)
     DEDENT          reduce using rule 1 (empty -> .)
 
-    elif_statement                 shift and go to state 90
-    if_closure                     shift and go to state 92
-    empty                          shift and go to state 93
+    elif_statement                 shift and go to state 93
+    if_closure                     shift and go to state 95
+    empty                          shift and go to state 96
 
-state 85
+state 88
 
     (27) fundef -> DEFUN ID LPAREN parameters RPAREN . COLON suite
 
-    COLON           shift and go to state 94
+    COLON           shift and go to state 97
 
 
-state 86
+state 89
 
     (28) parameters -> parameters COMMA . ID
 
-    ID              shift and go to state 95
+    ID              shift and go to state 98
 
 
-state 87
+state 90
 
     (31) suite -> NEWLINE INDENT . statement_sequence DEDENT
     (3) statement_sequence -> . statement statement_sequence
@@ -1986,13 +2189,13 @@ state 87
     assignment                     shift and go to state 13
     simple_statement               shift and go to state 2
     fundef                         shift and go to state 16
-    statement_sequence             shift and go to state 96
+    statement_sequence             shift and go to state 99
     return_statement               shift and go to state 9
     while_statement                shift and go to state 10
     statement                      shift and go to state 11
     if_statement                   shift and go to state 12
 
-state 88
+state 91
 
     (19) args -> args COMMA clause .
     (34) clause -> clause . OR clause
@@ -2000,11 +2203,11 @@ state 88
 
     RPAREN          reduce using rule 19 (args -> args COMMA clause .)
     COMMA           reduce using rule 19 (args -> args COMMA clause .)
-    OR              shift and go to state 43
-    AND             shift and go to state 41
+    OR              shift and go to state 44
+    AND             shift and go to state 42
 
 
-state 89
+state 92
 
     (25) elif_statement -> ELIF . clause COLON suite if_closure
     (32) clause -> . NOT clause
@@ -2022,30 +2225,33 @@ state 89
     (44) expression -> . expression MINUS expression
     (45) expression -> . expression TIMES expression
     (46) expression -> . expression DIVIDE expression
-    (47) expression -> . MINUS expression
-    (48) expression -> . numeric
-    (51) expression -> . ID
-    (52) expression -> . STRING
-    (53) expression -> . funcall
-    (49) numeric -> . INT
-    (50) numeric -> . FLOAT
+    (47) expression -> . expression MOD expression
+    (48) expression -> . MINUS expression
+    (49) expression -> . numeric
+    (52) expression -> . ID
+    (53) expression -> . STRING
+    (54) expression -> . funcall
+    (55) expression -> . BOOLEAN
+    (50) numeric -> . INT
+    (51) numeric -> . FLOAT
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NOT             shift and go to state 29
+    NOT             shift and go to state 30
     LPAREN          shift and go to state 25
     MINUS           shift and go to state 23
     ID              shift and go to state 26
     STRING          shift and go to state 24
+    BOOLEAN         shift and go to state 29
     INT             shift and go to state 27
     FLOAT           shift and go to state 28
 
-    clause                         shift and go to state 97
+    clause                         shift and go to state 100
     numeric                        shift and go to state 21
     funcall                        shift and go to state 22
-    expression                     shift and go to state 30
+    expression                     shift and go to state 31
 
-state 90
+state 93
 
     (22) if_closure -> elif_statement .
 
@@ -2058,14 +2264,14 @@ state 90
     DEDENT          reduce using rule 22 (if_closure -> elif_statement .)
 
 
-state 91
+state 94
 
     (23) if_closure -> ELSE . COLON suite
 
-    COLON           shift and go to state 98
+    COLON           shift and go to state 101
 
 
-state 92
+state 95
 
     (21) if_statement -> IF clause COLON suite if_closure .
 
@@ -2074,11 +2280,11 @@ state 92
     IF              reduce using rule 21 (if_statement -> IF clause COLON suite if_closure .)
     WHILE           reduce using rule 21 (if_statement -> IF clause COLON suite if_closure .)
     DEFUN           reduce using rule 21 (if_statement -> IF clause COLON suite if_closure .)
-    ENDMARKER       reduce using rule 21 (if_statement -> IF clause COLON suite if_closure .)
     DEDENT          reduce using rule 21 (if_statement -> IF clause COLON suite if_closure .)
+    ENDMARKER       reduce using rule 21 (if_statement -> IF clause COLON suite if_closure .)
 
 
-state 93
+state 96
 
     (24) if_closure -> empty .
 
@@ -2091,7 +2297,7 @@ state 93
     DEDENT          reduce using rule 24 (if_closure -> empty .)
 
 
-state 94
+state 97
 
     (27) fundef -> DEFUN ID LPAREN parameters RPAREN COLON . suite
     (30) suite -> . simple_statement
@@ -2106,17 +2312,17 @@ state 94
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NEWLINE         shift and go to state 67
+    NEWLINE         shift and go to state 69
     ID              shift and go to state 14
     RETURN          shift and go to state 7
 
     funcall                        shift and go to state 5
     assignment                     shift and go to state 13
-    simple_statement               shift and go to state 68
+    simple_statement               shift and go to state 70
     return_statement               shift and go to state 9
-    suite                          shift and go to state 99
+    suite                          shift and go to state 102
 
-state 95
+state 98
 
     (28) parameters -> parameters COMMA ID .
 
@@ -2124,25 +2330,25 @@ state 95
     COMMA           reduce using rule 28 (parameters -> parameters COMMA ID .)
 
 
-state 96
+state 99
 
     (31) suite -> NEWLINE INDENT statement_sequence . DEDENT
 
-    DEDENT          shift and go to state 100
+    DEDENT          shift and go to state 103
 
 
-state 97
+state 100
 
     (25) elif_statement -> ELIF clause . COLON suite if_closure
     (34) clause -> clause . OR clause
     (35) clause -> clause . AND clause
 
-    COLON           shift and go to state 101
-    OR              shift and go to state 43
-    AND             shift and go to state 41
+    COLON           shift and go to state 104
+    OR              shift and go to state 44
+    AND             shift and go to state 42
 
 
-state 98
+state 101
 
     (23) if_closure -> ELSE COLON . suite
     (30) suite -> . simple_statement
@@ -2157,17 +2363,17 @@ state 98
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NEWLINE         shift and go to state 67
+    NEWLINE         shift and go to state 69
     ID              shift and go to state 14
     RETURN          shift and go to state 7
 
     funcall                        shift and go to state 5
     assignment                     shift and go to state 13
-    simple_statement               shift and go to state 68
+    simple_statement               shift and go to state 70
     return_statement               shift and go to state 9
-    suite                          shift and go to state 102
+    suite                          shift and go to state 105
 
-state 99
+state 102
 
     (27) fundef -> DEFUN ID LPAREN parameters RPAREN COLON suite .
 
@@ -2180,7 +2386,7 @@ state 99
     DEDENT          reduce using rule 27 (fundef -> DEFUN ID LPAREN parameters RPAREN COLON suite .)
 
 
-state 100
+state 103
 
     (31) suite -> NEWLINE INDENT statement_sequence DEDENT .
 
@@ -2195,7 +2401,7 @@ state 100
     ELIF            reduce using rule 31 (suite -> NEWLINE INDENT statement_sequence DEDENT .)
 
 
-state 101
+state 104
 
     (25) elif_statement -> ELIF clause COLON . suite if_closure
     (30) suite -> . simple_statement
@@ -2210,17 +2416,17 @@ state 101
     (17) funcall -> . ID LPAREN args RPAREN
     (18) funcall -> . ID LPAREN RPAREN
 
-    NEWLINE         shift and go to state 67
+    NEWLINE         shift and go to state 69
     ID              shift and go to state 14
     RETURN          shift and go to state 7
 
     funcall                        shift and go to state 5
-    simple_statement               shift and go to state 68
+    simple_statement               shift and go to state 70
     return_statement               shift and go to state 9
     assignment                     shift and go to state 13
-    suite                          shift and go to state 103
+    suite                          shift and go to state 106
 
-state 102
+state 105
 
     (23) if_closure -> ELSE COLON suite .
 
@@ -2233,7 +2439,7 @@ state 102
     DEDENT          reduce using rule 23 (if_closure -> ELSE COLON suite .)
 
 
-state 103
+state 106
 
     (25) elif_statement -> ELIF clause COLON suite . if_closure
     (22) if_closure -> . elif_statement
@@ -2242,8 +2448,8 @@ state 103
     (25) elif_statement -> . ELIF clause COLON suite if_closure
     (1) empty -> .
 
-    ELSE            shift and go to state 91
-    ELIF            shift and go to state 89
+    ELSE            shift and go to state 94
+    ELIF            shift and go to state 92
     ID              reduce using rule 1 (empty -> .)
     RETURN          reduce using rule 1 (empty -> .)
     IF              reduce using rule 1 (empty -> .)
@@ -2252,11 +2458,11 @@ state 103
     ENDMARKER       reduce using rule 1 (empty -> .)
     DEDENT          reduce using rule 1 (empty -> .)
 
-    elif_statement                 shift and go to state 90
-    if_closure                     shift and go to state 104
-    empty                          shift and go to state 93
+    elif_statement                 shift and go to state 93
+    if_closure                     shift and go to state 107
+    empty                          shift and go to state 96
 
-state 104
+state 107
 
     (25) elif_statement -> ELIF clause COLON suite if_closure .
 

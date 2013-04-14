@@ -40,12 +40,14 @@ class BasicVykingLexer(Lexer):
               'INT',
               'FLOAT',
               'STRING',
+              'BOOLEAN',
               'PLUS',
               'INC',
               'MINUS',
               'DEC',
               'TIMES',
               'DIVIDE',
+              'MOD',
               'ASSIGN',
               'LPAREN',
               'RPAREN',
@@ -71,6 +73,7 @@ class BasicVykingLexer(Lexer):
     t_DEC = r'-='
     t_TIMES = r'\*'
     t_DIVIDE = r'/'
+    t_MOD = r'%'
     t_ASSIGN = r'='
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
@@ -151,7 +154,7 @@ class BasicVykingLexer(Lexer):
 
     def t_BOOLEAN(self, t):
         r'(True | False)'
-        t.value = bool(t.value)
+        t.value = t.value == "True"
         return t
 
     def t_ID(self, t):
