@@ -2,15 +2,17 @@
 # b_vyking_parser.py
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
+
 import logging
 import sys
-from src.indent_filter import IndentFilter
+import ast
+import os
 import ply.lex as lex
 import ply.yacc as yacc
-import os
+from src.indent_filter import IndentFilter
 from src.test_units import inputs
 
-sys.path.insert(0,"../..")
+sys.path.insert(0, "../..")
 
 if sys.version_info[0] >= 3:
     raw_input = input
@@ -24,13 +26,14 @@ class Parser(object):
     precedence = ()
 
 
-    def __init__(self, lexer=None, **kw):
+    def __init__(self, lexer=None, start=None, **kw):
         self.debug = kw.get('debug', 0)
         self.names = {}
+        self.start = start
         try:
             modname = os.path.split(os.path.splitext(__file__)[0])[1] + "_" + self.__class__.__name__
         except:
-            modname = "parser"+"_"+self.__class__.__name__
+            modname = "parser" + "_" + self.__class__.__name__
         self.debugfile = modname + ".dbg"
         self.tabmodule = modname + "_" + "parsetab"
         #print self.debugfile, self.tabmodule
@@ -47,7 +50,8 @@ class Parser(object):
                                 debug=self.debug,
                                 debugfile=self.debugfile,
                                 tabmodule=self.tabmodule,
-                                )
+                                start=self.start
+        )
 
     def run(self):
         while 1:
@@ -61,259 +65,332 @@ class Parser(object):
     def parse(self, input=None, lexer=None, debug=0, tracking=0, tokenfunc=None):
         if lexer is None:
             return self.parser.parse(input=input, lexer=self.lexer,
-                              debug=debug, tracking=tracking, tokenfunc=tokenfunc)
+                                     debug=debug, tracking=tracking, tokenfunc=tokenfunc)
         else:
             return self.parser.parse(input=input, debug=debug,
-                              tracking=tracking, tokenfunc=tokenfunc)
+                                     tracking=tracking, tokenfunc=tokenfunc)
 
 
 class BasicVykingParser(Parser):
-
-    def __init__(self, **kw):
-        mylexer = IndentFilter(BasicVykingLexer())
-        super(BasicVykingParser, self).__init__(lexer=mylexer, **kw)
-        self.tokens = self.lexer.tokens
-
-# Grammar rules
-
-    #def p_empty(self, p):
-    #     'empty :'
-    #     pass
-
-    # def p_file_input(self, p):
-    #     """file_input : NEWLINE ENDMARKER
-    #                   | statement ENDMARKER"""
-
-    # def p_statement_list(self, p):
-    #     'statement_list : statement NEWLINE statement_list'
-    #     p[0] = (p[1],) + p[3]
-
-    # def p_statement(self, p):
-    #     'statement : assign_statement NEWLINE'
-    #     p[0] = p[1]
-
-    # def p_statement(self, p):
-    #     """statement : funcall NEWLINE
-    #                  | if_statement NEWLINE
-    #                  | while_statement NEWLINE
-    #                  | for_statement NEWLINE
-    #                  | assign_statement NEWLINE
-    #                  | return_statement NEWLINE
-    #                  | funcdef_statement NEWLINE
-    #                  | import_statement NEWLINE"""
-    #
-    # def p_funcall(self, p):
-    #     """funcall : id LPARENT args RPARENT
-    #                | id LPARENT RPARENT
-    #                | list_fun"""
-    #     #if p[2] == '(':
-    #     #else:
-    #
-    # def p_fundef(self, p):
-    #     'fundef : DEFUN id parameters COLON block'
-    #
-    # def p_if_statement(self, p):
-    #     """if_statement : IF test COLON block elif_statement
-    #                | IF test COLON block elif_statement ELSE COLON block"""
-    #
-    # def p_elif_statement(self, p):
-    #     """elif_statement : ELIF test COLON block
-    #                  | empty"""
-    #
-    # def p_while_statement(self, p):
-    #     'while_statement : WHILE test COLON block'
-    #
-    # # def p_for_statement(self, p):
-    # #     'for_statement : FOR id IN list COLON block'
-    #
-    #"""assign_statement : id ASSIGN object
-    #                   | id ASSIGN exp"""
-
-    # def p_assign_statement(self, p):
-    #     """assign_statement : ID ASSIGN expression"""
-    #     p[0] = ("ASSIGN", ("ID", p[1]), p[3])
-
-    # def p_return_statement(self, p):
-    #     """return_statement : RETURN exp
-    #                    | RETURN list"""
-    #
-
-    #
-    # def p_exp(self, p):
-    #     'exp : add_exp'
-    #     p[0] = p[1]
-    #
-    # def p_add_exp(self, p):
-    #     'add_exp : mul_exp add_exp_aux'
-    #
-    # def p_add_exp_aux(self, p):
-    #     """add_exp_aux : PLUS mul_exp
-    #                    | MINUS mul_exp
-    #                    | empty"""
-    #
-    # def p_mul_exp(self, p):
-    #     'mul_exp : atom mul_exp_aux'
-    #
-    # def p_mul_exp_aux(self, p):
-    #     """mul_exp_aux : TIMES atom
-    #                    | DIVIDE atom
-    #                    | '%' atom
-    #                    | empty"""
-    #
-    # def p_atom(self, p):
-    #     """atom : id
-    #             | int
-    #             | float
-    #             | 'None'
-    #             | bool
-    #             | funcall"""
-    #
-    # def p_block(self, p):
-    #     """block : statement
-    #              | NEWLINE INDENT stat_aux DEDENT"""
-    #
-    # def p_stat_aux(self, p):
-    #     """stat_aux : statement stat_aux
-    #                 | empty"""
-    #
-    # def p_test(self, p):
-    #     'test : xor_test'
-    #
-    # def p_xor_test(self, p):
-    #     'xor_test : or_test xor_aux'
-    #
-    # def p_xor_aux(self, p):
-    #     """xor_aux : '|' or_test xor_aux
-    #                | empty"""
-    #
-    # def p_or_test(self, p):
-    #     'or_test : and_test or_aux'
-    #
-    # def p_or_aux(self, p):
-    #     """or_aux : OR and_test or_aux
-    #               | empty"""
-    #
-    # def p_and_test(self, p):
-    #     'and_test : not_test and_aux'
-    #
-    # def p_and_aux(self, p):
-    #     """and_aux : AND not_test and_aux
-    #                | empty"""
-    #
-    # def p_not_test(self, p):
-    #     """not_test : NOT not_test
-    #                 | identity
-    #                 | atom"""
-    #
-    # def p_identity(self, p):
-    #     """identity : comparison
-    #                 | comparison EQ atom"""
-    #
-    # def p_comparison(self, p):
-    #     """comparison : exp
-    #                   | exp comp_op exp"""
-    #
-    # def p_parameters(self, p):
-    #     """parameters : LPAREN RPAREN
-    #                   | LPAREN ids RPAREN"""
-    #
-    # def p_ids(self, p):
-    #     """ids : id COMMA ids
-    #            | id"""
-    #
-    # def p_args(self, p):
-    #     """args : arg COMMA args
-    #             | arg"""
-    #
-    # def p_arg(self, p):
-    #     """arg : id
-    #            | funcall
-    #            | exp"""
-    #
-    # def p_list(self, p):
-    #     """list : '[' list_aux object ']'
-    #             | '[' ']'
-    #             | list_fun"""
-    #
-    # def p_list_aux(self, p):
-    #     """list_aux : object COMMA list_aux
-    #                 | empty"""
-    #
-    # def p_object(self, p):
-    #     """object : INT
-    #               | FLOAT
-    #               | char
-    #               | BOOLEAN
-    #               | STRING
-    #               | list
-    #               | id"""
-    #
-    # def p_char(self, p):
-    #     """char : letter
-    #             | digit
-    #             | ' '"""
-
     precedence = (
+        ('nonassoc', 'unmatched_if'),
+        ('nonassoc', 'ELSE'),
+        ('nonassoc', 'ELIF'),
+        ('left', 'AND', 'OR'),
+        ('nonassoc', 'NOT'),
         ('left', 'PLUS', 'MINUS'),
-        ('left', 'TIMES', 'DIVIDE'),
+        ('left', 'TIMES', 'DIVIDE', 'MOD'),
         ('right', 'UMINUS')  # unary minus operator
     )
 
+    def __init__(self, **kw):
+        mylexer = IndentFilter(BasicVykingLexer())
+        super(BasicVykingParser, self).__init__(lexer=mylexer,
+                                                start="vyking_input",
+                                                **kw)
+        self.tokens = self.lexer.tokens
+
+
+    def p_empty(self, p):
+        'empty :'
+        pass
+
+
+    def p_vyking_input(self, p):
+        'vyking_input : statement_sequence ENDMARKER'
+        p[0] = p[1]
+
+
+    def p_statement_sequence(self, p):
+        """
+        statement_sequence : statement statement_sequence
+                           | statement
+        """
+        # tuple of the statements
+        if len(p) == 3:
+            p[0] = ast.Statement_sequence(p[1], p[2])
+        else:
+            p[0] = ast.Statement_sequence(p[1])
+
+
+    def p_statement(self, p):
+        """
+        statement : simple_statement
+                  | compound_statement
+        """
+        p[0] = p[1]
+
+
+    def p_simple_statement(self, p):
+        """
+        simple_statement : assignment NEWLINE
+                         | return_statement NEWLINE
+                         | funcall NEWLINE
+        """
+        p[0] = p[1]
+
+
+    def p_compound_statement(self, p):
+        """
+        compound_statement : if_statement
+                           | while_statement
+                           | fundef
+        """
+        p[0] = p[1]
+
+
     def p_assignment(self, p):
         """
-        assignment : ID ASSIGN expression
+        assignment : ID ASSIGN clause
+                   | ID INC expression
+                   | ID DEC expression
         """
-        p[0] = ('ASSIGN', ('ID', p[1]), p[3])
+        if p[2] == '=':
+            p[0] = ast.Assignment(p[1], p[3])
+        elif p[2] == '+=':
+            p[0] = ast.Assignment(p[1], ast.Expression(p[1], "PLUS", p[3]))
+        elif p[2] == '-=':
+            p[0] = ast.Assignment(p[1], ast.Expression(p[1], "MINUS", p[3]))
+
+
+    def p_return_statement(self, p):
+        'return_statement : RETURN expression'
+        p[0] = ast.Return(p[2])
+
+
+    def p_funcall(self, p):
+        """
+        funcall : ID LPAREN args RPAREN
+                | ID LPAREN RPAREN
+        """
+        if len(p) == 5:
+            p[0] = ast.Funcall(ast.ID(p[1]), p[3])
+        else:
+            p[0] = ast.Funcall(ast.ID(p[1]))
+
+
+    def p_args(self, p):
+        """
+        args : args COMMA clause
+             | clause
+        """
+        if len(p) == 4:
+            p[0] = p[1] + [p[3]]
+        else:
+            p[0] = [p[1]]
+
+
+    def p_if_statement(self, p):
+        """
+        if_statement : IF clause COLON suite if_closure
+        """
+        p[0] = ast.If(p[2], p[4], p[5])
+
+
+    def p_if_closure(self, p):
+        """
+        if_closure : elif_statement %prec ELIF
+                   | ELSE COLON suite
+        """
+        if len(p) == 2:
+            p[0] = p[1]
+        else:
+            p[0] = ast.Else(p[3])
+
+
+    def p_if_closure_empty(self, p):
+        'if_closure : empty %prec unmatched_if'
+        p[0] = p[1]
+
+
+    def p_elif_statement(self, p):
+        'elif_statement : ELIF clause COLON suite if_closure'
+        p[0] = ast.Elif(p[2], p[4], p[5])
+
+
+    def p_while_statement(self, p):
+        'while_statement : WHILE clause COLON suite'
+        p[0] = ast.While(p[2], p[4])
+
+
+    def p_fundef(self, p):
+        'fundef : DEFUN ID LPAREN parameters RPAREN COLON suite'
+        p[0] = ast.Fundef(ast.ID(p[2]), p[7], p[4])
+
+
+    def p_parameters(self, p):
+        """
+        parameters : parameters COMMA ID
+                   | ID
+        """
+        if len(p) == 4:
+            p[0] = p[1] + [ast.ID(p[3])]
+        else:
+            p[0] = [ast.ID(p[1])]
+
+
+    def p_suite(self, p):
+        """
+        suite : simple_statement
+              | NEWLINE INDENT statement_sequence DEDENT
+        """
+        if len(p) == 2:
+            p[0] = p[1]
+        else:
+            p[0] = p[3]
+
+
+    def p_clause(self, p):
+        """
+        clause : NOT clause
+             | LPAREN clause RPAREN
+             | clause OR clause
+             | clause AND clause
+             | expression EQ expression
+             | expression NEQ expression
+             | expression LT expression
+             | expression GT expression
+             | expression GEQ expression
+             | expression LEQ expression
+        """
+        if len(p) == 3:
+            p[0] = ast.Clause(None, "NOT", p[2])
+        elif p[1] == '(':
+            p[0] = p[2]
+        elif p[2] == 'or':
+            p[0] = ast.Clause(p[1], "OR", p[3])
+        elif p[2] == 'and':
+            p[0] = ast.Clause(p[1], "AND", p[3])
+        elif p[2] == '==':
+            p[0] = ast.Clause(p[1], "EQ", p[3])
+        elif p[2] == '!=':
+            p[0] = ast.Clause(p[1], "NEQ", p[3])
+        elif p[2] == '<':
+            p[0] = ast.Clause(p[1], "LT", p[3])
+        elif p[2] == '>':
+            p[0] = ast.Clause(p[1], "GT", p[3])
+        elif p[2] == '<=':
+            p[0] = ast.Clause(p[1], "LEQ", p[3])
+        elif p[2] == '>=':
+            p[0] = ast.Clause(p[1], "GEQ", p[3])
+
+
+    def p_clause_exp(self, p):
+        'clause : expression'
+        p[0] = p[1]
+
 
     def p_expression_binop(self, p):
         """
         expression : expression PLUS expression
-                  | expression MINUS expression
-                  | expression TIMES expression
-                  | expression DIVIDE expression
+                   | expression MINUS expression
+                   | expression TIMES expression
+                   | expression DIVIDE expression
+                   | expression MOD expression
         """
         #print [repr(p[i]) for i in range(0,4)]
-        if   p[2] == '+': p[0] = ('PLUS', p[1], p[3])
-        elif p[2] == '-': p[0] = ('MINUS', p[1], p[3])
-        elif p[2] == '*': p[0] = ('TIMES', p[1], p[3])
-        elif p[2] == '/': p[0] = ('DIVIDE', p[1], p[3])
+        if p[2] == '+':
+            p[0] = ast.Expression(p[1], 'PLUS', p[3])
+        elif p[2] == '-':
+            p[0] = ast.Expression(p[1], 'MINUS', p[3])
+        elif p[2] == '*':
+            p[0] = ast.Expression(p[1], 'TIMES', p[3])
+        elif p[2] == '/':
+            p[0] = ast.Expression(p[1], 'DIVIDE', p[3])
+        elif p[2] == '%':
+            p[0] = ast.Expression(p[1], 'MOD', p[3])
 
-    def p_expression_uminus(self,p):
+
+    def p_expression_uminus(self, p):
         'expression : MINUS expression %prec UMINUS'
-        p[0] = -p[2]
+        p[0] = ast.Expression(None, 'UMINUS', p[2])
 
-    def p_expression_group(self, p):
-        'expression : LPAREN expression RPAREN'
-        p[0] = p[2]
 
-    def p_expression_int(self, p):
-        'expression : INT'
+    # def p_expression_group(self, p):
+    #     'expression : LPAREN expression RPAREN'
+    #     p[0] = p[2]
+
+
+    def p_expression_numeric(self, p):
+        'expression : numeric'
         p[0] = p[1]
+
+
+    def p_numeric_int(self, p):
+        'numeric : INT'
+        p[0] = ast.Vinteger(p[1])
+
+
+    def p_numeric_float(self, p):
+        'numeric : FLOAT'
+        p[0] = ast.Vfloat(p[1])
+
 
     def p_expression_id(self, p):
         'expression : ID'
-        p[0] = ('ID', p[1])
+        p[0] = ast.ID(p[1])
+
+
+    def p_expression_string(self, p):
+        'expression : STRING'
+        p[0] = ast.Vstring(p[1])
+
+
+    def p_expression_funcall(self, p):
+        'expression : funcall'
+        p[0] = p[1]
+
+    def p_expression_boolean(self, p):
+        'expression : BOOLEAN'
+        p[0] = ast.Vboolean(p[1])
 
     # Error rule for syntax errors.
     def p_error(self, p):
-        print 'Syntax error in input! ' + str(p)
+        if p is None:
+            print "fix for missing line"
+            parser.errok()
+            return self.new_token("ENDMARKER", self.lexer.get_lineno())
+
+        elif p.type == "ENDMARKER":
+            print "line %d: Missing new line at end of file." % p.lineno
+            p.lexer.lookahead = p
+            parser.errok()
+            return self.new_token("NEWLINE", p.lineno)
+        else:
+            print 'line %d: Syntax error when reading %s ' % (p.lineno, str(self, p))
+
+    # helper function
+    def new_token(self, token_type, lineno):
+        """Returns new token
+
+        Args:
+            type -- token type
+            lineno -- line number of token
+        """
+        tok = lex.LexToken()
+        tok.type = token_type
+        tok.value = None
+        tok.lineno = lineno
+        tok.lexpos = self.lexer.get_lexpos()
+        return tok
 
 
 # Usage
 if __name__ == "__main__":
+    data = inputs["zero"]
 
     # logger object
     logging.basicConfig(
         level=logging.INFO,
-        #filename="parselog.txt",
-        #filemode="w",
-        #format="%(message)s"
+        filename="parselog.txt",
+        filemode="w",
+        format="%(message)s"
     )
     log = logging.getLogger()
 
-    parser = BasicVykingParser()
-    print inputs[0]
-    print parser.parse(inputs[0], debug=log)
+    parser = BasicVykingParser(debug=log)
+    result = parser.parse(data, debug=log)
+    print result
 
 
 

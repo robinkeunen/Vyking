@@ -3,19 +3,17 @@
 # b_vyking_parser.py
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
+
 import logging
 import sys
-from b_vyking_lexer import BasicVykingLexer
 import ast
-from src.indent_filter import IndentFilter
 import ply.yacc as yacc
+from src.indent_filter import IndentFilter
 from src.ply import lex
 from src.test_units import inputs
+from b_vyking_lexer import BasicVykingLexer
 
 sys.path.insert(0, "../..")
-
-mylexer = IndentFilter(BasicVykingLexer())
-tokens = mylexer.tokens
 
 # helper function
 def new_token(token_type, lineno):
@@ -32,6 +30,8 @@ def new_token(token_type, lineno):
     tok.lexpos = mylexer.get_lexpos()
     return tok
 
+mylexer = IndentFilter(BasicVykingLexer())
+tokens = mylexer.tokens
 
 precedence = (
     ('nonassoc', 'unmatched_if'),
