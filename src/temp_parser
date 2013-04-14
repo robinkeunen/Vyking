@@ -14,8 +14,6 @@ from src.test_units import inputs
 
 sys.path.insert(0, "../..")
 
-
-
 mylexer = IndentFilter(BasicVykingLexer())
 tokens = mylexer.tokens
 
@@ -40,6 +38,7 @@ precedence = (
     ('nonassoc', 'ELSE'),
     ('nonassoc', 'ELIF'),
     ('left', 'AND', 'OR'),
+    ('nonassoc', 'NOT'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
     ('right', 'UMINUS')  # unary minus operator
@@ -88,18 +87,51 @@ def p_simple_statement(p):
 def p_compound_statement(p):
     """
     compound_statement : if_statement
+                       | while_statement
+                       | fundef
     """
     p[0] = p[1]
 
 
 def p_assignment(p):
-    'assignment : ID ASSIGN expression'
-    p[0] = ast.Assignment(p[1], p[3])
+    """
+    assignment : ID ASSIGN clause
+               | ID INC expression
+               | ID DEC expression
+    """
+    if p[2] == '=':
+        p[0] = ast.Assignment(p[1], p[3])
+    elif p[2] == '+=':
+        p[0] = ast.Assignment(p[1], ast.Expression(p[0], "PLUS", p[3]))
+    elif p[2] == '-=':
+        p[0] = ast.Assignment(p[1], ast.Expression(p[0], "MINUS", p[3]))
 
 
 def p_return_statement(p):
     'return_statement : RETURN expression'
     p[0] = ast.Return(p[2])
+
+
+def p_funcall(p):
+    """
+    funcall : ID LPAREN args RPAREN
+            | ID LPAREN RPAREN
+    """
+    if len(p) == 5:
+        p[0] = ast.Funcall(ast.ID(p[1]), p[3])
+    else:
+        p[0] = ast.Funcall(ast.ID(p[1]))
+
+
+def p_args(p):
+    """
+    args : args COMMA clause
+         | clause
+    """
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
 
 
 def p_if_statement(p):
@@ -130,6 +162,27 @@ def p_elif_statement(p):
     p[0] = ast.Elif(p[2], p[4], p[5])
 
 
+def p_while_statement(p):
+    'while_statement : WHILE clause COLON suite'
+    p[0] = ast.While(p[2], p[4])
+
+
+def p_fundef(p):
+    'fundef : DEFUN ID LPAREN parameters RPAREN COLON suite'
+    p[0] = ast.Fundef(ast.ID(p[2]), p[7], p[4])
+
+
+def p_parameters(p):
+    """
+    parameters : parameters COMMA ID
+               | ID
+    """
+    if len(p) == 4:
+        p[0] = p[1] + [ast.ID(p[3])]
+    else:
+        p[0] = [ast.ID(p[1])]
+
+
 def p_suite(p):
     """
     suite : simple_statement
@@ -144,6 +197,7 @@ def p_suite(p):
 def p_clause(p):
     """
     clause : NOT clause
+         | LPAREN clause RPAREN
          | clause OR clause
          | clause AND clause
          | expression EQ expression
@@ -155,6 +209,8 @@ def p_clause(p):
     """
     if len(p) == 3:
         p[0] = ast.Clause(None, "NOT", p[2])
+    elif p[1] == '(':
+        p[0] = p[2]
     elif p[2] == 'or':
         p[0] = ast.Clause(p[1], "OR", p[3])
     elif p[2] == 'and':
@@ -201,14 +257,24 @@ def p_expression_uminus(p):
     p[0] = ast.Vinteger(-p[2])
 
 
-def p_expression_group(p):
-    'expression : LPAREN expression RPAREN'
-    p[0] = p[2]
+# def p_expression_group(p):
+#     'expression : LPAREN expression RPAREN'
+#     p[0] = p[2]
 
 
-def p_expression_int(p):
-    'expression : INT'
+def p_expression_numeric(p):
+    'expression : numeric'
+    p[0] = p[1]
+
+
+def p_numeric_int(p):
+    'numeric : INT'
     p[0] = ast.Vinteger(p[1])
+
+
+def p_numeric_float(p):
+    'numeric : FLOAT'
+    p[0] = ast.Vfloat(p[1])
 
 
 def p_expression_id(p):
@@ -216,31 +282,14 @@ def p_expression_id(p):
     p[0] = ast.ID(p[1])
 
 
+def p_expression_string(p):
+    'expression : STRING'
+    p[0] = ast.Vstring(p[1])
+
+
 def p_expression_funcall(p):
     'expression : funcall'
     p[0] = p[1]
-
-
-def p_funcall(p):
-    """
-    funcall : ID LPAREN args RPAREN
-            | ID LPAREN RPAREN
-    """
-    if len(p) == 5:
-        p[0] = ast.Funcall(p[1], p[3])
-    else:
-        p[0] = ast.Funcall(p[1])
-
-
-def p_args(p):
-    """
-    args : args COMMA clause
-         | clause
-    """
-    if len(p) == 4:
-        p[0] = p[1] + [p[3]]
-    else:
-        p[0] = [p[1]]
 
 
 # Error rule for syntax errors.
@@ -256,13 +305,13 @@ def p_error(p):
         parser.errok()
         return new_token("NEWLINE", p.lineno)
     else:
-        print 'line %d: Syntax error when reading %s ' %(p.lineno, str(p))
+        print 'line %d: Syntax error when reading %s ' % (p.lineno, str(p))
 
 
 # Usage
 if __name__ == "__main__":
 
-    data = inputs[3]
+    data = inputs["slow_inverse"]
 
     # logger object
     logging.basicConfig(
@@ -283,178 +332,3 @@ if __name__ == "__main__":
     print
 
     print result
-
-
-    # Grammar rules
-
-
-
-    # def p_file_input(, p):
-    #     """file_input : NEWLINE ENDMARKER
-    #                   | statement ENDMARKER"""
-
-    # def p_statement_list(, p):
-    #     'statement_list : statement NEWLINE statement_list'
-    #     p[0] = (p[1],) + p[3]
-
-    # def p_statement(, p):
-    #     'statement : assign_statement NEWLINE'
-    #     p[0] = p[1]
-
-    # def p_statement(, p):
-    #     """statement : funcall NEWLINE
-    #                  | if_statement NEWLINE
-    #                  | while_statement NEWLINE
-    #                  | for_statement NEWLINE
-    #                  | assign_statement NEWLINE
-    #                  | return_statement NEWLINE
-    #                  | funcdef_statement NEWLINE
-    #                  | import_statement NEWLINE"""
-    #
-
-    #     #if p[2] == '(':
-    #     #else:
-    #
-    # def p_fundef(, p):
-    #     'fundef : DEFUN id parameters COLON block'
-    #
-    # def p_if_statement(, p):
-    #     """if_statement : IF clause COLON block elif_statement
-    #                | IF clause COLON block elif_statement ELSE COLON block"""
-    #
-    # def p_elif_statement(, p):
-    #     """elif_statement : ELIF clause COLON block
-    #                  | empty"""
-    #
-    # def p_while_statement(, p):
-    #     'while_statement : WHILE clause COLON block'
-    #
-    # # def p_for_statement(, p):
-    # #     'for_statement : FOR id IN list COLON block'
-    #
-    #"""assign_statement : id ASSIGN object
-    #                   | id ASSIGN exp"""
-
-    # def p_assign_statement(, p):
-    #     """assign_statement : ID ASSIGN expression"""
-    #     p[0] = ("ASSIGN", ("ID", p[1]), p[3])
-
-    # def p_return_statement(, p):
-    #     """return_statement : RETURN exp
-    #                    | RETURN list"""
-    #
-
-    #
-    # def p_exp(, p):
-    #     'exp : add_exp'
-    #     p[0] = p[1]
-    #
-    # def p_add_exp(, p):
-    #     'add_exp : mul_exp add_exp_aux'
-    #
-    # def p_add_exp_aux(, p):
-    #     """add_exp_aux : PLUS mul_exp
-    #                    | MINUS mul_exp
-    #                    | empty"""
-    #
-    # def p_mul_exp(, p):
-    #     'mul_exp : atom mul_exp_aux'
-    #
-    # def p_mul_exp_aux(, p):
-    #     """mul_exp_aux : TIMES atom
-    #                    | DIVIDE atom
-    #                    | '%' atom
-    #                    | empty"""
-    #
-    # def p_atom(, p):
-    #     """atom : id
-    #             | int
-    #             | float
-    #             | 'None'
-    #             | bool
-    #             | funcall"""
-    #
-    # def p_block(, p):
-    #     """block : statement
-    #              | NEWLINE INDENT stat_aux DEDENT"""
-    #
-    # def p_stat_aux(, p):
-    #     """stat_aux : statement stat_aux
-    #                 | empty"""
-    #
-    # def p_clause(, p):
-    #     'clause : xor_clause'
-    #
-    # def p_xor_clause(, p):
-    #     'xor_clause : or_clause xor_aux'
-    #
-    # def p_xor_aux(, p):
-    #     """xor_aux : '|' or_clause xor_aux
-    #                | empty"""
-    #
-    # def p_or_clause(, p):
-    #     'or_clause : and_clause or_aux'
-    #
-    # def p_or_aux(, p):
-    #     """or_aux : OR and_clause or_aux
-    #               | empty"""
-    #
-    # def p_and_clause(, p):
-    #     'and_clause : not_clause and_aux'
-    #
-    # def p_and_aux(, p):
-    #     """and_aux : AND not_clause and_aux
-    #                | empty"""
-    #
-    # def p_not_clause(, p):
-    #     """not_clause : NOT not_clause
-    #                 | identity
-    #                 | atom"""
-    #
-    # def p_identity(, p):
-    #     """identity : comparison
-    #                 | comparison EQ atom"""
-    #
-    # def p_comparison(, p):
-    #     """comparison : exp
-    #                   | exp comp_op exp"""
-    #
-    # def p_parameters(, p):
-    #     """parameters : LPAREN RPAREN
-    #                   | LPAREN ids RPAREN"""
-    #
-    # def p_ids(, p):
-    #     """ids : id COMMA ids
-    #            | id"""
-    #
-    # def p_args(, p):
-    #     """args : arg COMMA args
-    #             | arg"""
-    #
-    # def p_arg(, p):
-    #     """arg : id
-    #            | funcall
-    #            | exp"""
-    #
-    # def p_list(, p):
-    #     """list : '[' list_aux object ']'
-    #             | '[' ']'
-    #             | list_fun"""
-    #
-    # def p_list_aux(, p):
-    #     """list_aux : object COMMA list_aux
-    #                 | empty"""
-    #
-    # def p_object(, p):
-    #     """object : INT
-    #               | FLOAT
-    #               | char
-    #               | BOOLEAN
-    #               | STRING
-    #               | list
-    #               | id"""
-    #
-    # def p_char(, p):
-    #     """char : letter
-    #             | digit
-    #             | ' '"""

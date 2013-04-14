@@ -69,27 +69,35 @@ class Funcall(Statement):
 
 
 class If(Statement):
-    def __init__(self, test, suite, if_closure=None):
+    def __init__(self, clause, suite, if_closure=None):
         self.type = "if_statement"
-        self.test = test
+        self.clause = clause
         self.suite = suite
         self.if_closure = if_closure
 
     def __str__(self):
-        return "(IF %s \n\t %s %s)" \
-               % (str(self.test), str(self.suite), str(self.if_closure))
+        if self.if_closure is None:
+            return "(IF %s \n\t %s)" \
+               % (str(self.clause), str(self.suite))
+        else:
+            return "(IF %s \n\t %s %s)" \
+                   % (str(self.clause), str(self.suite), str(self.if_closure))
 
 
 class Elif(Statement):
-    def __init__(self, test, suite, if_closure=None):
+    def __init__(self, clause, suite, if_closure=None):
         self.type = "elif_statement"
-        self.test = test
+        self.clause = clause
         self.suite = suite
         self.if_closure = if_closure
 
     def __str__(self):
-        return "(ELIF %s \n\t %s %s)" \
-               % (str(self.test), str(self.suite), str(self.if_closure))
+        if self.if_closure is None:
+            return "(ELIF %s \n\t %s)" \
+               % (str(self.clause), str(self.suite))
+        else:
+            return "(ELIF %s \n\t %s %s)" \
+                   % (str(self.clause), str(self.suite), str(self.if_closure))
 
 
 class Else(Statement):
@@ -99,6 +107,31 @@ class Else(Statement):
 
     def __str__(self):
         return "(ELSE %s)" % str(self.suite)
+
+
+class While(Statement):
+    def __init__(self, clause, suite):
+        self.type = "while"
+        self.clause = clause
+        self.suite = suite
+
+    def __str__(self):
+        return "(WHILE %s \n %s)" % (str(self.clause), str(self.suite))
+
+
+class Fundef(Statement):
+    def __init__(self, id, suite, parameters=[]):
+        self.id = id
+        self.parameters = parameters
+        self.suite = suite
+
+    def __str__(self):
+        parameters ="["
+        for p in self.parameters:
+            parameters += str(p) + ' '
+        parameters += "]"
+        return "(DEFUN %s %s \n %s)" % (str(self.id), parameters, str(self.suite))
+
 
 class Expression(ASTNode):
     pass
@@ -121,7 +154,7 @@ class Test(ASTNode):
 
 class Clause(Test):
     def __init__(self, left, op, right):
-        self.type = 'test'
+        self.type = 'clause'
         self.left = left
         self.op = op
         self.right = right
@@ -146,16 +179,35 @@ class Vinteger(Atom):
         return "(INT %d)" % self.value
 
 
+class Vfloat(Atom):
+    def __init__(self, value):
+        self.type = "FLOAT"
+        self.value = value
+
+    def __str__(self):
+        return "(FLOAT %d)" % self.value
+
+
 class ID(Atom):
     """
     Represents an ID in the AST, if value is not set,
     semantic analysis must check it has been assigned
     """
-
     def __init__(self, name, value=None):
         self.type = "ID"
         self.name = name
         self.value = value
 
     def __str__(self):
-        return "(%s " % self.name + str(self.value) + ")"
+        if self.value is None:
+            return self.name
+        else:
+            return "(%s " % self.name + str(self.value) + ")"
+
+class Vstring(Atom):
+    def __init__(self, data):
+        self.type = "string"
+        self.data = data
+
+    def __str__(self):
+        return self.data
