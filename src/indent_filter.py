@@ -83,7 +83,10 @@ class IndentFilter():
         self.level = 0
 
     def token(self):
-        return self.filtered_stream.next()
+        try:
+            return self.filtered_stream.next()
+        except StopIteration:
+            return None
 
     def filter_tokens(self):
         # Vyking has 3 indentation states.
@@ -111,15 +114,14 @@ class IndentFilter():
                 return token.value < levels.read()
 
         for token in self.lexer:
-            #print "%d %s" % (state, token.type)
             # ignore NEWLINEs at beginning of input
             if state == BOF:
-                if token.type == "NEWLINE" :
+                if token.type == "NEWLINE":
                     continue
-                else :
+                else:
                     state = NO_INDENT
 
-            elif state == NO_INDENT:
+            if state == NO_INDENT:
                 if token.type == "COLON":
                     state = MAY_INDENT
                     yield token
@@ -127,6 +129,9 @@ class IndentFilter():
                     while need_DEDENT(token):
                         levels.pop()
                         yield self._DEDENT(token.lineno - 1)
+                        # need NEWLINE between two successive DEDENTS
+                        #if need_DEDENT(token):
+                        #    yield self._new_token("NEWLINE", token.lineno -1)
                 else:
                     yield token
 
@@ -151,11 +156,11 @@ class IndentFilter():
         # Yield DEDENTs at end of input
         while levels.pop() != 0:
             yield self._DEDENT(self.get_lineno())
-            yield self._new_token("NEWLINE", self.get_lineno())
+            #yield self._new_token("NEWLINE", self.get_lineno())
 
         yield self._new_token("ENDMARKER", self.get_lineno())
         yield  None
-        raise StopIteration
+
 
     def _new_token(self, token_type, lineno):
         """Returns new token

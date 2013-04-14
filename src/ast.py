@@ -32,7 +32,7 @@ class Statement_sequence():
     def __str__(self):
         result = ""
         for st in self.stat_list:
-            result += str(st) + "\n\t"
+            result += str(st) + "\n"
         return result
 
 
@@ -55,15 +55,50 @@ class Return(Statement):
         return "(RETURN %s)" % self.value
 
 
+class Funcall(Statement):
+    def __init__(self, id, args=[]):
+        self.type = "funcall"
+        self.id = id
+        self.args = args
+    def __str__(self):
+        args_repr = "["
+        for arg in self.args:
+            args_repr += str(arg)
+        args_repr += "]"
+        return "(f:%s %s)" % (self.id, args_repr)
+
+
 class If(Statement):
-    def __init__(self, test, else_):
+    def __init__(self, test, suite, if_closure=None):
         self.type = "if_statement"
         self.test = test
-        self.else_ = else_
+        self.suite = suite
+        self.if_closure = if_closure
 
     def __str__(self):
-        return "(IF %s \n %s" % (str(self.test), str(self.else_))
+        return "(IF %s \n\t %s %s)" \
+               % (str(self.test), str(self.suite), str(self.if_closure))
 
+
+class Elif(Statement):
+    def __init__(self, test, suite, if_closure=None):
+        self.type = "elif_statement"
+        self.test = test
+        self.suite = suite
+        self.if_closure = if_closure
+
+    def __str__(self):
+        return "(ELIF %s \n\t %s %s)" \
+               % (str(self.test), str(self.suite), str(self.if_closure))
+
+
+class Else(Statement):
+    def __init__(self, suite):
+        self.type = "else"
+        self.suite = suite
+
+    def __str__(self):
+        return "(ELSE %s)" % str(self.suite)
 
 class Expression(ASTNode):
     pass

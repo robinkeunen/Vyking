@@ -36,15 +36,19 @@ def new_token(token_type, lineno):
 
 
 precedence = (
+    ('nonassoc', 'unmatched_if'),
+    ('nonassoc', 'ELSE'),
+    ('nonassoc', 'ELIF'),
+    ('nonassoc', 'EQ', 'LT', 'GT'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
     ('right', 'UMINUS')  # unary minus operator
 )
 
 
-# def p_empty(p):
-#     'empty :'
-#     pass
+def p_empty(p):
+    'empty :'
+    pass
 
 
 def p_vyking_input(p):
@@ -76,13 +80,14 @@ def p_simple_statement(p):
     """
     simple_statement : assignment NEWLINE
                      | return_statement NEWLINE
+                     | funcall NEWLINE
     """
     p[0] = p[1]
 
 
 def p_compound_statement(p):
     """
-    compound_statement : if_statement NEWLINE
+    compound_statement : if_statement
     """
     p[0] = p[1]
 
@@ -98,8 +103,31 @@ def p_return_statement(p):
 
 
 def p_if_statement(p):
-    'if_statement : IF test COLON suite'
-    p[0] = ast.If(p[2], p[4])
+    """
+    if_statement : IF test COLON suite if_closure
+    """
+    p[0] = ast.If(p[2], p[4], p[5])
+
+
+def p_if_closure(p):
+    """
+    if_closure : elif_statement %prec ELIF
+               | ELSE COLON suite
+    """
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = ast.Else(p[3])
+
+
+def p_if_closure_empty(p):
+    'if_closure : empty %prec unmatched_if'
+    p[0] = p[1]
+
+
+def p_elif_statement(p):
+    'elif_statement : ELIF test COLON suite if_closure'
+    p[0] = ast.Elif(p[2], p[4], p[5])
 
 
 def p_suite(p):
@@ -116,9 +144,21 @@ def p_suite(p):
 def p_test(p):
     """
     test : expression EQ expression
+         | expression LT expression
+         | expression GT expression
     """
     if p[2] == '==':
         p[0] = ast.BinopTest(p[1], "EQ", p[3])
+    elif p[2] == '<':
+        p[0] = ast.BinopTest(p[1], "LT", p[3])
+    elif p[2] == '>':
+        p[0] = ast.BinopTest(p[1], "GT", p[3])
+
+
+def p_test_exp(p):
+    'test : expression'
+    p[0] = p[1]
+
 
 def p_expression_binop(p):
     """
@@ -157,6 +197,34 @@ def p_expression_id(p):
     'expression : ID'
     p[0] = ast.ID(p[1])
 
+
+def p_expression_funcall(p):
+    'expression : funcall'
+    p[0] = p[1]
+
+
+def p_funcall(p):
+    """
+    funcall : ID LPAREN args RPAREN
+            | ID LPAREN RPAREN
+    """
+    if len(p) == 5:
+        p[0] = ast.Funcall(p[1], p[3])
+    else:
+        p[0] = ast.Funcall(p[1])
+
+
+def p_args(p):
+    """
+    args : args COMMA test
+         | test
+    """
+    if len(p) == 4:
+        p[0] = p[1] + [p[3]]
+    else:
+        p[0] = [p[1]]
+
+
 # Error rule for syntax errors.
 def p_error(p):
     if p is None:
@@ -181,8 +249,8 @@ if __name__ == "__main__":
     # logger object
     logging.basicConfig(
         level=logging.DEBUG,
-        #filename="parselog.txt",
-        #filemode="w",
+        filename="parselog.txt",
+        filemode="w",
         format="%(message)s"
     )
     log = logging.getLogger()
@@ -225,10 +293,7 @@ if __name__ == "__main__":
     #                  | funcdef_statement NEWLINE
     #                  | import_statement NEWLINE"""
     #
-    # def p_funcall(, p):
-    #     """funcall : id LPARENT args RPARENT
-    #                | id LPARENT RPARENT
-    #                | list_fun"""
+
     #     #if p[2] == '(':
     #     #else:
     #

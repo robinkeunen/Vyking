@@ -52,8 +52,8 @@ class BasicVykingLexer(Lexer):
               'COLON',
               'NEWLINE',
               'EQ',
-              'LOWER',
-              'GREATER',
+              'LT',
+              'GT',
               'LEQ',
               'GEQ',
               'NEQ',
@@ -76,8 +76,8 @@ class BasicVykingLexer(Lexer):
     t_RPAREN = r'\)'
     t_COLON = r'\:'
     t_EQ = r'=='
-    t_LOWER = r'<'
-    t_GREATER = r'>'
+    t_LT = r'<'
+    t_GT = r'>'
     t_LEQ = r'<='
     t_GEQ = r'>='
     t_NEQ = r'!='

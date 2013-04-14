@@ -9,10 +9,30 @@ t = 3
 x = 3 + 42 * (s - t)
 """
 
-ifStmt = """
+dangling_else = """
+if a == b:
+    a = a + 1
+    if a == 2:
+        print(x)
+    else:
+        a = b + 6
+        dothis(b+6)
+else:
+    return func(x, y)
+"""
+
+elifStmt = """
 if a == b:
     a = a + 1
     return a
+elif a > 2:
+    if robin < genie:
+         return yay
+    lo = b/2
+elif a == 3:
+    return b
+else:
+    return end
 """
 
 find_bounds = """
@@ -49,7 +69,8 @@ defun slow_inverse(f, delta=1/128.):
 inputs = list()
 inputs.append(exp1)
 inputs.append(exp2)
-inputs.append(ifStmt)
+inputs.append(dangling_else)
+inputs.append(elifStmt)
 inputs.append(find_bounds)
 inputs.append(stringtest)
 inputs.append(slow_inverse)
