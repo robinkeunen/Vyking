@@ -119,7 +119,7 @@ class Test(ASTNode):
     pass
 
 
-class BinopTest(Test):
+class Clause(Test):
     def __init__(self, left, op, right):
         self.type = 'test'
         self.left = left
@@ -127,7 +127,10 @@ class BinopTest(Test):
         self.right = right
 
     def __str__(self):
-        return "(%s %s %s)" % (self.op, self.left, self.right)
+        if self.left is None:
+            return "(%s %s)" % (self.op, self.right)
+        else:
+            return "(%s %s %s)" % (self.op, self.left, self.right)
 
 
 class Atom(ASTNode):

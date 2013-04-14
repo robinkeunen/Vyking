@@ -5,14 +5,8 @@ Unused terminals:
     DEFUN
     WHILE
     DEC
-    NEQ
-    GEQ
     STRING
-    AND
     FLOAT
-    LEQ
-    NOT
-    OR
     INC
 
 Grammar
@@ -30,78 +24,85 @@ Rule 9     simple_statement -> funcall NEWLINE
 Rule 10    compound_statement -> if_statement
 Rule 11    assignment -> ID ASSIGN expression
 Rule 12    return_statement -> RETURN expression
-Rule 13    if_statement -> IF test COLON suite if_closure
+Rule 13    if_statement -> IF clause COLON suite if_closure
 Rule 14    if_closure -> elif_statement
 Rule 15    if_closure -> ELSE COLON suite
 Rule 16    if_closure -> empty
-Rule 17    elif_statement -> ELIF test COLON suite if_closure
+Rule 17    elif_statement -> ELIF clause COLON suite if_closure
 Rule 18    suite -> simple_statement
 Rule 19    suite -> NEWLINE INDENT statement_sequence DEDENT
-Rule 20    test -> expression EQ expression
-Rule 21    test -> expression LT expression
-Rule 22    test -> expression GT expression
-Rule 23    test -> expression
-Rule 24    expression -> expression PLUS expression
-Rule 25    expression -> expression MINUS expression
-Rule 26    expression -> expression TIMES expression
-Rule 27    expression -> expression DIVIDE expression
-Rule 28    expression -> MINUS expression
-Rule 29    expression -> LPAREN expression RPAREN
-Rule 30    expression -> INT
-Rule 31    expression -> ID
-Rule 32    expression -> funcall
-Rule 33    funcall -> ID LPAREN args RPAREN
-Rule 34    funcall -> ID LPAREN RPAREN
-Rule 35    args -> args COMMA test
-Rule 36    args -> test
+Rule 20    clause -> NOT clause
+Rule 21    clause -> clause OR clause
+Rule 22    clause -> clause AND clause
+Rule 23    clause -> expression EQ expression
+Rule 24    clause -> expression NEQ expression
+Rule 25    clause -> expression LT expression
+Rule 26    clause -> expression GT expression
+Rule 27    clause -> expression GEQ expression
+Rule 28    clause -> expression LEQ expression
+Rule 29    clause -> expression
+Rule 30    expression -> expression PLUS expression
+Rule 31    expression -> expression MINUS expression
+Rule 32    expression -> expression TIMES expression
+Rule 33    expression -> expression DIVIDE expression
+Rule 34    expression -> MINUS expression
+Rule 35    expression -> LPAREN expression RPAREN
+Rule 36    expression -> INT
+Rule 37    expression -> ID
+Rule 38    expression -> funcall
+Rule 39    funcall -> ID LPAREN args RPAREN
+Rule 40    funcall -> ID LPAREN RPAREN
+Rule 41    args -> args COMMA clause
+Rule 42    args -> clause
 
 Terminals, with rules where they appear
 
-AND                  : 
+AND                  : 22
 ASSIGN               : 11
 COLON                : 13 15 17
-COMMA                : 35
+COMMA                : 41
 DEC                  : 
 DEDENT               : 19
 DEFUN                : 
-DIVIDE               : 27
+DIVIDE               : 33
 ELIF                 : 17
 ELSE                 : 15
 ENDMARKER            : 2
-EQ                   : 20
+EQ                   : 23
 FLOAT                : 
-GEQ                  : 
-GT                   : 22
-ID                   : 11 31 33 34
+GEQ                  : 27
+GT                   : 26
+ID                   : 11 37 39 40
 IF                   : 13
 INC                  : 
 INDENT               : 19
-INT                  : 30
-LEQ                  : 
-LPAREN               : 29 33 34
-LT                   : 21
-MINUS                : 25 28
-NEQ                  : 
+INT                  : 36
+LEQ                  : 28
+LPAREN               : 35 39 40
+LT                   : 25
+MINUS                : 31 34
+NEQ                  : 24
 NEWLINE              : 7 8 9 19
-NOT                  : 
-OR                   : 
-PLUS                 : 24
+NOT                  : 20
+OR                   : 21
+PLUS                 : 30
 RETURN               : 12
-RPAREN               : 29 33 34
+RPAREN               : 35 39 40
 STRING               : 
-TIMES                : 26
+TIMES                : 32
 WHILE                : 
 error                : 
 
 Nonterminals, with rules where they appear
 
-args                 : 33 35
+args                 : 39 41
 assignment           : 7
+clause               : 13 17 20 21 21 22 22 41 42
 compound_statement   : 6
 elif_statement       : 14
 empty                : 16
-expression           : 11 12 20 20 21 21 22 22 23 24 24 25 25 26 26 27 27 28 29
-funcall              : 9 32
+expression           : 11 12 23 23 24 24 25 25 26 26 27 27 28 28 29 30 30 31 31 32 32 33 33 34 35
+funcall              : 9 38
 if_closure           : 13 17
 if_statement         : 10
 return_statement     : 8
@@ -109,7 +110,6 @@ simple_statement     : 5 18
 statement            : 3 4
 statement_sequence   : 2 3 19
 suite                : 13 15 17
-test                 : 13 17 35 36
 vyking_input         : 0
 
 Parsing method: LALR
@@ -128,9 +128,9 @@ state 0
     (10) compound_statement -> . if_statement
     (11) assignment -> . ID ASSIGN expression
     (12) return_statement -> . RETURN expression
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
-    (13) if_statement -> . IF test COLON suite if_closure
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+    (13) if_statement -> . IF clause COLON suite if_closure
 
     ID              shift and go to state 11
     RETURN          shift and go to state 5
@@ -180,17 +180,17 @@ state 4
 state 5
 
     (12) return_statement -> RETURN . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
@@ -232,12 +232,12 @@ state 8
     (10) compound_statement -> . if_statement
     (11) assignment -> . ID ASSIGN expression
     (12) return_statement -> . RETURN expression
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
-    (13) if_statement -> . IF test COLON suite if_closure
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+    (13) if_statement -> . IF clause COLON suite if_closure
 
-    ENDMARKER       reduce using rule 4 (statement_sequence -> statement .)
     DEDENT          reduce using rule 4 (statement_sequence -> statement .)
+    ENDMARKER       reduce using rule 4 (statement_sequence -> statement .)
     ID              shift and go to state 11
     RETURN          shift and go to state 5
     IF              shift and go to state 12
@@ -258,8 +258,8 @@ state 9
     ID              reduce using rule 10 (compound_statement -> if_statement .)
     RETURN          reduce using rule 10 (compound_statement -> if_statement .)
     IF              reduce using rule 10 (compound_statement -> if_statement .)
-    DEDENT          reduce using rule 10 (compound_statement -> if_statement .)
     ENDMARKER       reduce using rule 10 (compound_statement -> if_statement .)
+    DEDENT          reduce using rule 10 (compound_statement -> if_statement .)
 
 
 state 10
@@ -272,8 +272,8 @@ state 10
 state 11
 
     (11) assignment -> ID . ASSIGN expression
-    (33) funcall -> ID . LPAREN args RPAREN
-    (34) funcall -> ID . LPAREN RPAREN
+    (39) funcall -> ID . LPAREN args RPAREN
+    (40) funcall -> ID . LPAREN RPAREN
 
     ASSIGN          shift and go to state 24
     LPAREN          shift and go to state 25
@@ -281,31 +281,38 @@ state 11
 
 state 12
 
-    (13) if_statement -> IF . test COLON suite if_closure
-    (20) test -> . expression EQ expression
-    (21) test -> . expression LT expression
-    (22) test -> . expression GT expression
-    (23) test -> . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (13) if_statement -> IF . clause COLON suite if_closure
+    (20) clause -> . NOT clause
+    (21) clause -> . clause OR clause
+    (22) clause -> . clause AND clause
+    (23) clause -> . expression EQ expression
+    (24) clause -> . expression NEQ expression
+    (25) clause -> . expression LT expression
+    (26) clause -> . expression GT expression
+    (27) clause -> . expression GEQ expression
+    (28) clause -> . expression LEQ expression
+    (29) clause -> . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
+    NOT             shift and go to state 27
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
     INT             shift and go to state 15
     ID              shift and go to state 18
 
+    clause                         shift and go to state 26
     funcall                        shift and go to state 16
-    test                           shift and go to state 26
-    expression                     shift and go to state 27
+    expression                     shift and go to state 28
 
 state 13
 
@@ -318,63 +325,73 @@ state 14
 
     (9) simple_statement -> funcall NEWLINE .
 
+    ELSE            reduce using rule 9 (simple_statement -> funcall NEWLINE .)
+    ELIF            reduce using rule 9 (simple_statement -> funcall NEWLINE .)
     ID              reduce using rule 9 (simple_statement -> funcall NEWLINE .)
     RETURN          reduce using rule 9 (simple_statement -> funcall NEWLINE .)
     IF              reduce using rule 9 (simple_statement -> funcall NEWLINE .)
-    DEDENT          reduce using rule 9 (simple_statement -> funcall NEWLINE .)
-    ELSE            reduce using rule 9 (simple_statement -> funcall NEWLINE .)
-    ELIF            reduce using rule 9 (simple_statement -> funcall NEWLINE .)
     ENDMARKER       reduce using rule 9 (simple_statement -> funcall NEWLINE .)
+    DEDENT          reduce using rule 9 (simple_statement -> funcall NEWLINE .)
 
 
 state 15
 
-    (30) expression -> INT .
+    (36) expression -> INT .
 
-    PLUS            reduce using rule 30 (expression -> INT .)
-    MINUS           reduce using rule 30 (expression -> INT .)
-    TIMES           reduce using rule 30 (expression -> INT .)
-    DIVIDE          reduce using rule 30 (expression -> INT .)
-    NEWLINE         reduce using rule 30 (expression -> INT .)
-    EQ              reduce using rule 30 (expression -> INT .)
-    LT              reduce using rule 30 (expression -> INT .)
-    GT              reduce using rule 30 (expression -> INT .)
-    COLON           reduce using rule 30 (expression -> INT .)
-    RPAREN          reduce using rule 30 (expression -> INT .)
-    COMMA           reduce using rule 30 (expression -> INT .)
+    PLUS            reduce using rule 36 (expression -> INT .)
+    MINUS           reduce using rule 36 (expression -> INT .)
+    TIMES           reduce using rule 36 (expression -> INT .)
+    DIVIDE          reduce using rule 36 (expression -> INT .)
+    NEWLINE         reduce using rule 36 (expression -> INT .)
+    EQ              reduce using rule 36 (expression -> INT .)
+    NEQ             reduce using rule 36 (expression -> INT .)
+    LT              reduce using rule 36 (expression -> INT .)
+    GT              reduce using rule 36 (expression -> INT .)
+    GEQ             reduce using rule 36 (expression -> INT .)
+    LEQ             reduce using rule 36 (expression -> INT .)
+    COLON           reduce using rule 36 (expression -> INT .)
+    OR              reduce using rule 36 (expression -> INT .)
+    AND             reduce using rule 36 (expression -> INT .)
+    RPAREN          reduce using rule 36 (expression -> INT .)
+    COMMA           reduce using rule 36 (expression -> INT .)
 
 
 state 16
 
-    (32) expression -> funcall .
+    (38) expression -> funcall .
 
-    PLUS            reduce using rule 32 (expression -> funcall .)
-    MINUS           reduce using rule 32 (expression -> funcall .)
-    TIMES           reduce using rule 32 (expression -> funcall .)
-    DIVIDE          reduce using rule 32 (expression -> funcall .)
-    NEWLINE         reduce using rule 32 (expression -> funcall .)
-    EQ              reduce using rule 32 (expression -> funcall .)
-    LT              reduce using rule 32 (expression -> funcall .)
-    GT              reduce using rule 32 (expression -> funcall .)
-    COLON           reduce using rule 32 (expression -> funcall .)
-    RPAREN          reduce using rule 32 (expression -> funcall .)
-    COMMA           reduce using rule 32 (expression -> funcall .)
+    PLUS            reduce using rule 38 (expression -> funcall .)
+    MINUS           reduce using rule 38 (expression -> funcall .)
+    TIMES           reduce using rule 38 (expression -> funcall .)
+    DIVIDE          reduce using rule 38 (expression -> funcall .)
+    NEWLINE         reduce using rule 38 (expression -> funcall .)
+    EQ              reduce using rule 38 (expression -> funcall .)
+    NEQ             reduce using rule 38 (expression -> funcall .)
+    LT              reduce using rule 38 (expression -> funcall .)
+    GT              reduce using rule 38 (expression -> funcall .)
+    GEQ             reduce using rule 38 (expression -> funcall .)
+    LEQ             reduce using rule 38 (expression -> funcall .)
+    COLON           reduce using rule 38 (expression -> funcall .)
+    OR              reduce using rule 38 (expression -> funcall .)
+    AND             reduce using rule 38 (expression -> funcall .)
+    RPAREN          reduce using rule 38 (expression -> funcall .)
+    COMMA           reduce using rule 38 (expression -> funcall .)
 
 
 state 17
 
-    (29) expression -> LPAREN . expression RPAREN
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (35) expression -> LPAREN . expression RPAREN
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
@@ -382,114 +399,62 @@ state 17
     ID              shift and go to state 18
 
     funcall                        shift and go to state 16
-    expression                     shift and go to state 28
+    expression                     shift and go to state 29
 
 state 18
 
-    (31) expression -> ID .
-    (33) funcall -> ID . LPAREN args RPAREN
-    (34) funcall -> ID . LPAREN RPAREN
+    (37) expression -> ID .
+    (39) funcall -> ID . LPAREN args RPAREN
+    (40) funcall -> ID . LPAREN RPAREN
 
-    PLUS            reduce using rule 31 (expression -> ID .)
-    MINUS           reduce using rule 31 (expression -> ID .)
-    TIMES           reduce using rule 31 (expression -> ID .)
-    DIVIDE          reduce using rule 31 (expression -> ID .)
-    NEWLINE         reduce using rule 31 (expression -> ID .)
-    EQ              reduce using rule 31 (expression -> ID .)
-    LT              reduce using rule 31 (expression -> ID .)
-    GT              reduce using rule 31 (expression -> ID .)
-    COLON           reduce using rule 31 (expression -> ID .)
-    RPAREN          reduce using rule 31 (expression -> ID .)
-    COMMA           reduce using rule 31 (expression -> ID .)
+    PLUS            reduce using rule 37 (expression -> ID .)
+    MINUS           reduce using rule 37 (expression -> ID .)
+    TIMES           reduce using rule 37 (expression -> ID .)
+    DIVIDE          reduce using rule 37 (expression -> ID .)
+    NEWLINE         reduce using rule 37 (expression -> ID .)
+    EQ              reduce using rule 37 (expression -> ID .)
+    NEQ             reduce using rule 37 (expression -> ID .)
+    LT              reduce using rule 37 (expression -> ID .)
+    GT              reduce using rule 37 (expression -> ID .)
+    GEQ             reduce using rule 37 (expression -> ID .)
+    LEQ             reduce using rule 37 (expression -> ID .)
+    COLON           reduce using rule 37 (expression -> ID .)
+    OR              reduce using rule 37 (expression -> ID .)
+    AND             reduce using rule 37 (expression -> ID .)
+    RPAREN          reduce using rule 37 (expression -> ID .)
+    COMMA           reduce using rule 37 (expression -> ID .)
     LPAREN          shift and go to state 25
 
 
 state 19
 
     (12) return_statement -> RETURN expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
 
     NEWLINE         reduce using rule 12 (return_statement -> RETURN expression .)
-    PLUS            shift and go to state 31
-    MINUS           shift and go to state 32
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
 
 
 state 20
 
-    (28) expression -> MINUS . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
-
-    MINUS           shift and go to state 20
-    LPAREN          shift and go to state 17
-    INT             shift and go to state 15
-    ID              shift and go to state 18
-
-    funcall                        shift and go to state 16
-    expression                     shift and go to state 33
-
-state 21
-
-    (8) simple_statement -> return_statement NEWLINE .
-
-    ID              reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
-    RETURN          reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
-    IF              reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
-    DEDENT          reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
-    ELSE            reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
-    ELIF            reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
-    ENDMARKER       reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
-
-
-state 22
-
-    (3) statement_sequence -> statement statement_sequence .
-
-    ENDMARKER       reduce using rule 3 (statement_sequence -> statement statement_sequence .)
-    DEDENT          reduce using rule 3 (statement_sequence -> statement statement_sequence .)
-
-
-state 23
-
-    (7) simple_statement -> assignment NEWLINE .
-
-    ID              reduce using rule 7 (simple_statement -> assignment NEWLINE .)
-    RETURN          reduce using rule 7 (simple_statement -> assignment NEWLINE .)
-    IF              reduce using rule 7 (simple_statement -> assignment NEWLINE .)
-    DEDENT          reduce using rule 7 (simple_statement -> assignment NEWLINE .)
-    ELSE            reduce using rule 7 (simple_statement -> assignment NEWLINE .)
-    ELIF            reduce using rule 7 (simple_statement -> assignment NEWLINE .)
-    ENDMARKER       reduce using rule 7 (simple_statement -> assignment NEWLINE .)
-
-
-state 24
-
-    (11) assignment -> ID ASSIGN . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (34) expression -> MINUS . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
@@ -499,121 +464,209 @@ state 24
     funcall                        shift and go to state 16
     expression                     shift and go to state 34
 
-state 25
+state 21
 
-    (33) funcall -> ID LPAREN . args RPAREN
-    (34) funcall -> ID LPAREN . RPAREN
-    (35) args -> . args COMMA test
-    (36) args -> . test
-    (20) test -> . expression EQ expression
-    (21) test -> . expression LT expression
-    (22) test -> . expression GT expression
-    (23) test -> . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (8) simple_statement -> return_statement NEWLINE .
 
-    RPAREN          shift and go to state 35
+    ELSE            reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
+    ELIF            reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
+    ID              reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
+    RETURN          reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
+    IF              reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
+    ENDMARKER       reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
+    DEDENT          reduce using rule 8 (simple_statement -> return_statement NEWLINE .)
+
+
+state 22
+
+    (3) statement_sequence -> statement statement_sequence .
+
+    DEDENT          reduce using rule 3 (statement_sequence -> statement statement_sequence .)
+    ENDMARKER       reduce using rule 3 (statement_sequence -> statement statement_sequence .)
+
+
+state 23
+
+    (7) simple_statement -> assignment NEWLINE .
+
+    ELSE            reduce using rule 7 (simple_statement -> assignment NEWLINE .)
+    ELIF            reduce using rule 7 (simple_statement -> assignment NEWLINE .)
+    ID              reduce using rule 7 (simple_statement -> assignment NEWLINE .)
+    RETURN          reduce using rule 7 (simple_statement -> assignment NEWLINE .)
+    IF              reduce using rule 7 (simple_statement -> assignment NEWLINE .)
+    ENDMARKER       reduce using rule 7 (simple_statement -> assignment NEWLINE .)
+    DEDENT          reduce using rule 7 (simple_statement -> assignment NEWLINE .)
+
+
+state 24
+
+    (11) assignment -> ID ASSIGN . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
     INT             shift and go to state 15
     ID              shift and go to state 18
 
-    test                           shift and go to state 37
     funcall                        shift and go to state 16
-    args                           shift and go to state 36
-    expression                     shift and go to state 27
+    expression                     shift and go to state 35
+
+state 25
+
+    (39) funcall -> ID LPAREN . args RPAREN
+    (40) funcall -> ID LPAREN . RPAREN
+    (41) args -> . args COMMA clause
+    (42) args -> . clause
+    (20) clause -> . NOT clause
+    (21) clause -> . clause OR clause
+    (22) clause -> . clause AND clause
+    (23) clause -> . expression EQ expression
+    (24) clause -> . expression NEQ expression
+    (25) clause -> . expression LT expression
+    (26) clause -> . expression GT expression
+    (27) clause -> . expression GEQ expression
+    (28) clause -> . expression LEQ expression
+    (29) clause -> . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    RPAREN          shift and go to state 37
+    NOT             shift and go to state 27
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
+
+    funcall                        shift and go to state 16
+    clause                         shift and go to state 36
+    args                           shift and go to state 38
+    expression                     shift and go to state 28
 
 state 26
 
-    (13) if_statement -> IF test . COLON suite if_closure
+    (13) if_statement -> IF clause . COLON suite if_closure
+    (21) clause -> clause . OR clause
+    (22) clause -> clause . AND clause
 
-    COLON           shift and go to state 38
+    COLON           shift and go to state 40
+    OR              shift and go to state 41
+    AND             shift and go to state 39
 
 
 state 27
 
-    (20) test -> expression . EQ expression
-    (21) test -> expression . LT expression
-    (22) test -> expression . GT expression
-    (23) test -> expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
+    (20) clause -> NOT . clause
+    (20) clause -> . NOT clause
+    (21) clause -> . clause OR clause
+    (22) clause -> . clause AND clause
+    (23) clause -> . expression EQ expression
+    (24) clause -> . expression NEQ expression
+    (25) clause -> . expression LT expression
+    (26) clause -> . expression GT expression
+    (27) clause -> . expression GEQ expression
+    (28) clause -> . expression LEQ expression
+    (29) clause -> . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
-    EQ              shift and go to state 41
-    LT              shift and go to state 40
-    GT              shift and go to state 39
-    COLON           reduce using rule 23 (test -> expression .)
-    RPAREN          reduce using rule 23 (test -> expression .)
-    COMMA           reduce using rule 23 (test -> expression .)
-    PLUS            shift and go to state 31
-    MINUS           shift and go to state 32
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
+    NOT             shift and go to state 27
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
 
+    funcall                        shift and go to state 16
+    clause                         shift and go to state 42
+    expression                     shift and go to state 28
 
 state 28
 
-    (29) expression -> LPAREN expression . RPAREN
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
+    (23) clause -> expression . EQ expression
+    (24) clause -> expression . NEQ expression
+    (25) clause -> expression . LT expression
+    (26) clause -> expression . GT expression
+    (27) clause -> expression . GEQ expression
+    (28) clause -> expression . LEQ expression
+    (29) clause -> expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
 
-    RPAREN          shift and go to state 42
-    PLUS            shift and go to state 31
-    MINUS           shift and go to state 32
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
+    EQ              shift and go to state 47
+    NEQ             shift and go to state 48
+    LT              shift and go to state 46
+    GT              shift and go to state 44
+    GEQ             shift and go to state 43
+    LEQ             shift and go to state 45
+    COLON           reduce using rule 29 (clause -> expression .)
+    OR              reduce using rule 29 (clause -> expression .)
+    AND             reduce using rule 29 (clause -> expression .)
+    RPAREN          reduce using rule 29 (clause -> expression .)
+    COMMA           reduce using rule 29 (clause -> expression .)
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
 
 
 state 29
 
-    (27) expression -> expression DIVIDE . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (35) expression -> LPAREN expression . RPAREN
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
 
-    MINUS           shift and go to state 20
-    LPAREN          shift and go to state 17
-    INT             shift and go to state 15
-    ID              shift and go to state 18
+    RPAREN          shift and go to state 49
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
 
-    funcall                        shift and go to state 16
-    expression                     shift and go to state 43
 
 state 30
 
-    (26) expression -> expression TIMES . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (33) expression -> expression DIVIDE . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
@@ -621,22 +674,22 @@ state 30
     ID              shift and go to state 18
 
     funcall                        shift and go to state 16
-    expression                     shift and go to state 44
+    expression                     shift and go to state 50
 
 state 31
 
-    (24) expression -> expression PLUS . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (32) expression -> expression TIMES . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
@@ -644,143 +697,22 @@ state 31
     ID              shift and go to state 18
 
     funcall                        shift and go to state 16
-    expression                     shift and go to state 45
+    expression                     shift and go to state 51
 
 state 32
 
-    (25) expression -> expression MINUS . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
-
-    MINUS           shift and go to state 20
-    LPAREN          shift and go to state 17
-    INT             shift and go to state 15
-    ID              shift and go to state 18
-
-    funcall                        shift and go to state 16
-    expression                     shift and go to state 46
-
-state 33
-
-    (28) expression -> MINUS expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
-
-    PLUS            reduce using rule 28 (expression -> MINUS expression .)
-    MINUS           reduce using rule 28 (expression -> MINUS expression .)
-    TIMES           reduce using rule 28 (expression -> MINUS expression .)
-    DIVIDE          reduce using rule 28 (expression -> MINUS expression .)
-    NEWLINE         reduce using rule 28 (expression -> MINUS expression .)
-    EQ              reduce using rule 28 (expression -> MINUS expression .)
-    LT              reduce using rule 28 (expression -> MINUS expression .)
-    GT              reduce using rule 28 (expression -> MINUS expression .)
-    COLON           reduce using rule 28 (expression -> MINUS expression .)
-    RPAREN          reduce using rule 28 (expression -> MINUS expression .)
-    COMMA           reduce using rule 28 (expression -> MINUS expression .)
-
-  ! PLUS            [ shift and go to state 31 ]
-  ! MINUS           [ shift and go to state 32 ]
-  ! TIMES           [ shift and go to state 30 ]
-  ! DIVIDE          [ shift and go to state 29 ]
-
-
-state 34
-
-    (11) assignment -> ID ASSIGN expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
-
-    NEWLINE         reduce using rule 11 (assignment -> ID ASSIGN expression .)
-    PLUS            shift and go to state 31
-    MINUS           shift and go to state 32
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
-
-
-state 35
-
-    (34) funcall -> ID LPAREN RPAREN .
-
-    EQ              reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    LT              reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    GT              reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    PLUS            reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    MINUS           reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    TIMES           reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    DIVIDE          reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    RPAREN          reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    COMMA           reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    NEWLINE         reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-    COLON           reduce using rule 34 (funcall -> ID LPAREN RPAREN .)
-
-
-state 36
-
-    (33) funcall -> ID LPAREN args . RPAREN
-    (35) args -> args . COMMA test
-
-    RPAREN          shift and go to state 47
-    COMMA           shift and go to state 48
-
-
-state 37
-
-    (36) args -> test .
-
-    RPAREN          reduce using rule 36 (args -> test .)
-    COMMA           reduce using rule 36 (args -> test .)
-
-
-state 38
-
-    (13) if_statement -> IF test COLON . suite if_closure
-    (18) suite -> . simple_statement
-    (19) suite -> . NEWLINE INDENT statement_sequence DEDENT
-    (7) simple_statement -> . assignment NEWLINE
-    (8) simple_statement -> . return_statement NEWLINE
-    (9) simple_statement -> . funcall NEWLINE
-    (11) assignment -> . ID ASSIGN expression
-    (12) return_statement -> . RETURN expression
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
-
-    NEWLINE         shift and go to state 49
-    ID              shift and go to state 11
-    RETURN          shift and go to state 5
-
-    funcall                        shift and go to state 4
-    assignment                     shift and go to state 10
-    simple_statement               shift and go to state 50
-    return_statement               shift and go to state 7
-    suite                          shift and go to state 51
-
-state 39
-
-    (22) test -> expression GT . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (30) expression -> expression PLUS . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
@@ -790,20 +722,20 @@ state 39
     funcall                        shift and go to state 16
     expression                     shift and go to state 52
 
-state 40
+state 33
 
-    (21) test -> expression LT . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (31) expression -> expression MINUS . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
@@ -813,203 +745,571 @@ state 40
     funcall                        shift and go to state 16
     expression                     shift and go to state 53
 
-state 41
+state 34
 
-    (20) test -> expression EQ . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (34) expression -> MINUS expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
 
+    PLUS            reduce using rule 34 (expression -> MINUS expression .)
+    MINUS           reduce using rule 34 (expression -> MINUS expression .)
+    TIMES           reduce using rule 34 (expression -> MINUS expression .)
+    DIVIDE          reduce using rule 34 (expression -> MINUS expression .)
+    NEWLINE         reduce using rule 34 (expression -> MINUS expression .)
+    EQ              reduce using rule 34 (expression -> MINUS expression .)
+    NEQ             reduce using rule 34 (expression -> MINUS expression .)
+    LT              reduce using rule 34 (expression -> MINUS expression .)
+    GT              reduce using rule 34 (expression -> MINUS expression .)
+    GEQ             reduce using rule 34 (expression -> MINUS expression .)
+    LEQ             reduce using rule 34 (expression -> MINUS expression .)
+    COLON           reduce using rule 34 (expression -> MINUS expression .)
+    OR              reduce using rule 34 (expression -> MINUS expression .)
+    AND             reduce using rule 34 (expression -> MINUS expression .)
+    RPAREN          reduce using rule 34 (expression -> MINUS expression .)
+    COMMA           reduce using rule 34 (expression -> MINUS expression .)
+
+  ! PLUS            [ shift and go to state 32 ]
+  ! MINUS           [ shift and go to state 33 ]
+  ! TIMES           [ shift and go to state 31 ]
+  ! DIVIDE          [ shift and go to state 30 ]
+
+
+state 35
+
+    (11) assignment -> ID ASSIGN expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    NEWLINE         reduce using rule 11 (assignment -> ID ASSIGN expression .)
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
+
+
+state 36
+
+    (42) args -> clause .
+    (21) clause -> clause . OR clause
+    (22) clause -> clause . AND clause
+
+    RPAREN          reduce using rule 42 (args -> clause .)
+    COMMA           reduce using rule 42 (args -> clause .)
+    OR              shift and go to state 41
+    AND             shift and go to state 39
+
+
+state 37
+
+    (40) funcall -> ID LPAREN RPAREN .
+
+    NEWLINE         reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    PLUS            reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    MINUS           reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    TIMES           reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    DIVIDE          reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    EQ              reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    NEQ             reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    LT              reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    GT              reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    GEQ             reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    LEQ             reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    COLON           reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    OR              reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    AND             reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    RPAREN          reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+    COMMA           reduce using rule 40 (funcall -> ID LPAREN RPAREN .)
+
+
+state 38
+
+    (39) funcall -> ID LPAREN args . RPAREN
+    (41) args -> args . COMMA clause
+
+    RPAREN          shift and go to state 54
+    COMMA           shift and go to state 55
+
+
+state 39
+
+    (22) clause -> clause AND . clause
+    (20) clause -> . NOT clause
+    (21) clause -> . clause OR clause
+    (22) clause -> . clause AND clause
+    (23) clause -> . expression EQ expression
+    (24) clause -> . expression NEQ expression
+    (25) clause -> . expression LT expression
+    (26) clause -> . expression GT expression
+    (27) clause -> . expression GEQ expression
+    (28) clause -> . expression LEQ expression
+    (29) clause -> . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    NOT             shift and go to state 27
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
     INT             shift and go to state 15
     ID              shift and go to state 18
 
     funcall                        shift and go to state 16
-    expression                     shift and go to state 54
+    clause                         shift and go to state 56
+    expression                     shift and go to state 28
+
+state 40
+
+    (13) if_statement -> IF clause COLON . suite if_closure
+    (18) suite -> . simple_statement
+    (19) suite -> . NEWLINE INDENT statement_sequence DEDENT
+    (7) simple_statement -> . assignment NEWLINE
+    (8) simple_statement -> . return_statement NEWLINE
+    (9) simple_statement -> . funcall NEWLINE
+    (11) assignment -> . ID ASSIGN expression
+    (12) return_statement -> . RETURN expression
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    NEWLINE         shift and go to state 57
+    ID              shift and go to state 11
+    RETURN          shift and go to state 5
+
+    funcall                        shift and go to state 4
+    simple_statement               shift and go to state 58
+    return_statement               shift and go to state 7
+    assignment                     shift and go to state 10
+    suite                          shift and go to state 59
+
+state 41
+
+    (21) clause -> clause OR . clause
+    (20) clause -> . NOT clause
+    (21) clause -> . clause OR clause
+    (22) clause -> . clause AND clause
+    (23) clause -> . expression EQ expression
+    (24) clause -> . expression NEQ expression
+    (25) clause -> . expression LT expression
+    (26) clause -> . expression GT expression
+    (27) clause -> . expression GEQ expression
+    (28) clause -> . expression LEQ expression
+    (29) clause -> . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    NOT             shift and go to state 27
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
+
+    funcall                        shift and go to state 16
+    clause                         shift and go to state 60
+    expression                     shift and go to state 28
 
 state 42
 
-    (29) expression -> LPAREN expression RPAREN .
+    (20) clause -> NOT clause .
+    (21) clause -> clause . OR clause
+    (22) clause -> clause . AND clause
 
-    PLUS            reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    MINUS           reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    TIMES           reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    DIVIDE          reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    NEWLINE         reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    EQ              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    LT              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    GT              reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    COLON           reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    RPAREN          reduce using rule 29 (expression -> LPAREN expression RPAREN .)
-    COMMA           reduce using rule 29 (expression -> LPAREN expression RPAREN .)
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for AND resolved as shift
+    COLON           reduce using rule 20 (clause -> NOT clause .)
+    RPAREN          reduce using rule 20 (clause -> NOT clause .)
+    COMMA           reduce using rule 20 (clause -> NOT clause .)
+    OR              shift and go to state 41
+    AND             shift and go to state 39
+
+  ! OR              [ reduce using rule 20 (clause -> NOT clause .) ]
+  ! AND             [ reduce using rule 20 (clause -> NOT clause .) ]
 
 
 state 43
 
-    (27) expression -> expression DIVIDE expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
-
-    PLUS            reduce using rule 27 (expression -> expression DIVIDE expression .)
-    MINUS           reduce using rule 27 (expression -> expression DIVIDE expression .)
-    TIMES           reduce using rule 27 (expression -> expression DIVIDE expression .)
-    DIVIDE          reduce using rule 27 (expression -> expression DIVIDE expression .)
-    NEWLINE         reduce using rule 27 (expression -> expression DIVIDE expression .)
-    EQ              reduce using rule 27 (expression -> expression DIVIDE expression .)
-    LT              reduce using rule 27 (expression -> expression DIVIDE expression .)
-    GT              reduce using rule 27 (expression -> expression DIVIDE expression .)
-    COLON           reduce using rule 27 (expression -> expression DIVIDE expression .)
-    RPAREN          reduce using rule 27 (expression -> expression DIVIDE expression .)
-    COMMA           reduce using rule 27 (expression -> expression DIVIDE expression .)
-
-  ! PLUS            [ shift and go to state 31 ]
-  ! MINUS           [ shift and go to state 32 ]
-  ! TIMES           [ shift and go to state 30 ]
-  ! DIVIDE          [ shift and go to state 29 ]
-
-
-state 44
-
-    (26) expression -> expression TIMES expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
-
-    PLUS            reduce using rule 26 (expression -> expression TIMES expression .)
-    MINUS           reduce using rule 26 (expression -> expression TIMES expression .)
-    TIMES           reduce using rule 26 (expression -> expression TIMES expression .)
-    DIVIDE          reduce using rule 26 (expression -> expression TIMES expression .)
-    NEWLINE         reduce using rule 26 (expression -> expression TIMES expression .)
-    EQ              reduce using rule 26 (expression -> expression TIMES expression .)
-    LT              reduce using rule 26 (expression -> expression TIMES expression .)
-    GT              reduce using rule 26 (expression -> expression TIMES expression .)
-    COLON           reduce using rule 26 (expression -> expression TIMES expression .)
-    RPAREN          reduce using rule 26 (expression -> expression TIMES expression .)
-    COMMA           reduce using rule 26 (expression -> expression TIMES expression .)
-
-  ! PLUS            [ shift and go to state 31 ]
-  ! MINUS           [ shift and go to state 32 ]
-  ! TIMES           [ shift and go to state 30 ]
-  ! DIVIDE          [ shift and go to state 29 ]
-
-
-state 45
-
-    (24) expression -> expression PLUS expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
-
-    PLUS            reduce using rule 24 (expression -> expression PLUS expression .)
-    MINUS           reduce using rule 24 (expression -> expression PLUS expression .)
-    NEWLINE         reduce using rule 24 (expression -> expression PLUS expression .)
-    EQ              reduce using rule 24 (expression -> expression PLUS expression .)
-    LT              reduce using rule 24 (expression -> expression PLUS expression .)
-    GT              reduce using rule 24 (expression -> expression PLUS expression .)
-    COLON           reduce using rule 24 (expression -> expression PLUS expression .)
-    RPAREN          reduce using rule 24 (expression -> expression PLUS expression .)
-    COMMA           reduce using rule 24 (expression -> expression PLUS expression .)
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
-
-  ! TIMES           [ reduce using rule 24 (expression -> expression PLUS expression .) ]
-  ! DIVIDE          [ reduce using rule 24 (expression -> expression PLUS expression .) ]
-  ! PLUS            [ shift and go to state 31 ]
-  ! MINUS           [ shift and go to state 32 ]
-
-
-state 46
-
-    (25) expression -> expression MINUS expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
-
-    PLUS            reduce using rule 25 (expression -> expression MINUS expression .)
-    MINUS           reduce using rule 25 (expression -> expression MINUS expression .)
-    NEWLINE         reduce using rule 25 (expression -> expression MINUS expression .)
-    EQ              reduce using rule 25 (expression -> expression MINUS expression .)
-    LT              reduce using rule 25 (expression -> expression MINUS expression .)
-    GT              reduce using rule 25 (expression -> expression MINUS expression .)
-    COLON           reduce using rule 25 (expression -> expression MINUS expression .)
-    RPAREN          reduce using rule 25 (expression -> expression MINUS expression .)
-    COMMA           reduce using rule 25 (expression -> expression MINUS expression .)
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
-
-  ! TIMES           [ reduce using rule 25 (expression -> expression MINUS expression .) ]
-  ! DIVIDE          [ reduce using rule 25 (expression -> expression MINUS expression .) ]
-  ! PLUS            [ shift and go to state 31 ]
-  ! MINUS           [ shift and go to state 32 ]
-
-
-state 47
-
-    (33) funcall -> ID LPAREN args RPAREN .
-
-    EQ              reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    LT              reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    GT              reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    PLUS            reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    MINUS           reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    TIMES           reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    DIVIDE          reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    RPAREN          reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    COMMA           reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    NEWLINE         reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-    COLON           reduce using rule 33 (funcall -> ID LPAREN args RPAREN .)
-
-
-state 48
-
-    (35) args -> args COMMA . test
-    (20) test -> . expression EQ expression
-    (21) test -> . expression LT expression
-    (22) test -> . expression GT expression
-    (23) test -> . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (27) clause -> expression GEQ . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
     INT             shift and go to state 15
     ID              shift and go to state 18
 
-    test                           shift and go to state 55
     funcall                        shift and go to state 16
-    expression                     shift and go to state 27
+    expression                     shift and go to state 61
+
+state 44
+
+    (26) clause -> expression GT . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
+
+    funcall                        shift and go to state 16
+    expression                     shift and go to state 62
+
+state 45
+
+    (28) clause -> expression LEQ . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
+
+    funcall                        shift and go to state 16
+    expression                     shift and go to state 63
+
+state 46
+
+    (25) clause -> expression LT . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
+
+    funcall                        shift and go to state 16
+    expression                     shift and go to state 64
+
+state 47
+
+    (23) clause -> expression EQ . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
+
+    funcall                        shift and go to state 16
+    expression                     shift and go to state 65
+
+state 48
+
+    (24) clause -> expression NEQ . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
+
+    funcall                        shift and go to state 16
+    expression                     shift and go to state 66
 
 state 49
 
-    (19) suite -> NEWLINE . INDENT statement_sequence DEDENT
+    (35) expression -> LPAREN expression RPAREN .
 
-    INDENT          shift and go to state 56
+    PLUS            reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    MINUS           reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    TIMES           reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    DIVIDE          reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    NEWLINE         reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    EQ              reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    NEQ             reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    LT              reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    GT              reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    GEQ             reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    LEQ             reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    COLON           reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    OR              reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    AND             reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 35 (expression -> LPAREN expression RPAREN .)
+    COMMA           reduce using rule 35 (expression -> LPAREN expression RPAREN .)
 
 
 state 50
+
+    (33) expression -> expression DIVIDE expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    PLUS            reduce using rule 33 (expression -> expression DIVIDE expression .)
+    MINUS           reduce using rule 33 (expression -> expression DIVIDE expression .)
+    TIMES           reduce using rule 33 (expression -> expression DIVIDE expression .)
+    DIVIDE          reduce using rule 33 (expression -> expression DIVIDE expression .)
+    NEWLINE         reduce using rule 33 (expression -> expression DIVIDE expression .)
+    EQ              reduce using rule 33 (expression -> expression DIVIDE expression .)
+    NEQ             reduce using rule 33 (expression -> expression DIVIDE expression .)
+    LT              reduce using rule 33 (expression -> expression DIVIDE expression .)
+    GT              reduce using rule 33 (expression -> expression DIVIDE expression .)
+    GEQ             reduce using rule 33 (expression -> expression DIVIDE expression .)
+    LEQ             reduce using rule 33 (expression -> expression DIVIDE expression .)
+    COLON           reduce using rule 33 (expression -> expression DIVIDE expression .)
+    OR              reduce using rule 33 (expression -> expression DIVIDE expression .)
+    AND             reduce using rule 33 (expression -> expression DIVIDE expression .)
+    RPAREN          reduce using rule 33 (expression -> expression DIVIDE expression .)
+    COMMA           reduce using rule 33 (expression -> expression DIVIDE expression .)
+
+  ! PLUS            [ shift and go to state 32 ]
+  ! MINUS           [ shift and go to state 33 ]
+  ! TIMES           [ shift and go to state 31 ]
+  ! DIVIDE          [ shift and go to state 30 ]
+
+
+state 51
+
+    (32) expression -> expression TIMES expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    PLUS            reduce using rule 32 (expression -> expression TIMES expression .)
+    MINUS           reduce using rule 32 (expression -> expression TIMES expression .)
+    TIMES           reduce using rule 32 (expression -> expression TIMES expression .)
+    DIVIDE          reduce using rule 32 (expression -> expression TIMES expression .)
+    NEWLINE         reduce using rule 32 (expression -> expression TIMES expression .)
+    EQ              reduce using rule 32 (expression -> expression TIMES expression .)
+    NEQ             reduce using rule 32 (expression -> expression TIMES expression .)
+    LT              reduce using rule 32 (expression -> expression TIMES expression .)
+    GT              reduce using rule 32 (expression -> expression TIMES expression .)
+    GEQ             reduce using rule 32 (expression -> expression TIMES expression .)
+    LEQ             reduce using rule 32 (expression -> expression TIMES expression .)
+    COLON           reduce using rule 32 (expression -> expression TIMES expression .)
+    OR              reduce using rule 32 (expression -> expression TIMES expression .)
+    AND             reduce using rule 32 (expression -> expression TIMES expression .)
+    RPAREN          reduce using rule 32 (expression -> expression TIMES expression .)
+    COMMA           reduce using rule 32 (expression -> expression TIMES expression .)
+
+  ! PLUS            [ shift and go to state 32 ]
+  ! MINUS           [ shift and go to state 33 ]
+  ! TIMES           [ shift and go to state 31 ]
+  ! DIVIDE          [ shift and go to state 30 ]
+
+
+state 52
+
+    (30) expression -> expression PLUS expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    PLUS            reduce using rule 30 (expression -> expression PLUS expression .)
+    MINUS           reduce using rule 30 (expression -> expression PLUS expression .)
+    NEWLINE         reduce using rule 30 (expression -> expression PLUS expression .)
+    EQ              reduce using rule 30 (expression -> expression PLUS expression .)
+    NEQ             reduce using rule 30 (expression -> expression PLUS expression .)
+    LT              reduce using rule 30 (expression -> expression PLUS expression .)
+    GT              reduce using rule 30 (expression -> expression PLUS expression .)
+    GEQ             reduce using rule 30 (expression -> expression PLUS expression .)
+    LEQ             reduce using rule 30 (expression -> expression PLUS expression .)
+    COLON           reduce using rule 30 (expression -> expression PLUS expression .)
+    OR              reduce using rule 30 (expression -> expression PLUS expression .)
+    AND             reduce using rule 30 (expression -> expression PLUS expression .)
+    RPAREN          reduce using rule 30 (expression -> expression PLUS expression .)
+    COMMA           reduce using rule 30 (expression -> expression PLUS expression .)
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
+
+  ! TIMES           [ reduce using rule 30 (expression -> expression PLUS expression .) ]
+  ! DIVIDE          [ reduce using rule 30 (expression -> expression PLUS expression .) ]
+  ! PLUS            [ shift and go to state 32 ]
+  ! MINUS           [ shift and go to state 33 ]
+
+
+state 53
+
+    (31) expression -> expression MINUS expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    PLUS            reduce using rule 31 (expression -> expression MINUS expression .)
+    MINUS           reduce using rule 31 (expression -> expression MINUS expression .)
+    NEWLINE         reduce using rule 31 (expression -> expression MINUS expression .)
+    EQ              reduce using rule 31 (expression -> expression MINUS expression .)
+    NEQ             reduce using rule 31 (expression -> expression MINUS expression .)
+    LT              reduce using rule 31 (expression -> expression MINUS expression .)
+    GT              reduce using rule 31 (expression -> expression MINUS expression .)
+    GEQ             reduce using rule 31 (expression -> expression MINUS expression .)
+    LEQ             reduce using rule 31 (expression -> expression MINUS expression .)
+    COLON           reduce using rule 31 (expression -> expression MINUS expression .)
+    OR              reduce using rule 31 (expression -> expression MINUS expression .)
+    AND             reduce using rule 31 (expression -> expression MINUS expression .)
+    RPAREN          reduce using rule 31 (expression -> expression MINUS expression .)
+    COMMA           reduce using rule 31 (expression -> expression MINUS expression .)
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
+
+  ! TIMES           [ reduce using rule 31 (expression -> expression MINUS expression .) ]
+  ! DIVIDE          [ reduce using rule 31 (expression -> expression MINUS expression .) ]
+  ! PLUS            [ shift and go to state 32 ]
+  ! MINUS           [ shift and go to state 33 ]
+
+
+state 54
+
+    (39) funcall -> ID LPAREN args RPAREN .
+
+    NEWLINE         reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    PLUS            reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    MINUS           reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    TIMES           reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    DIVIDE          reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    EQ              reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    NEQ             reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    LT              reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    GT              reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    GEQ             reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    LEQ             reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    COLON           reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    OR              reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    AND             reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    RPAREN          reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+    COMMA           reduce using rule 39 (funcall -> ID LPAREN args RPAREN .)
+
+
+state 55
+
+    (41) args -> args COMMA . clause
+    (20) clause -> . NOT clause
+    (21) clause -> . clause OR clause
+    (22) clause -> . clause AND clause
+    (23) clause -> . expression EQ expression
+    (24) clause -> . expression NEQ expression
+    (25) clause -> . expression LT expression
+    (26) clause -> . expression GT expression
+    (27) clause -> . expression GEQ expression
+    (28) clause -> . expression LEQ expression
+    (29) clause -> . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+
+    NOT             shift and go to state 27
+    MINUS           shift and go to state 20
+    LPAREN          shift and go to state 17
+    INT             shift and go to state 15
+    ID              shift and go to state 18
+
+    funcall                        shift and go to state 16
+    clause                         shift and go to state 67
+    expression                     shift and go to state 28
+
+state 56
+
+    (22) clause -> clause AND clause .
+    (21) clause -> clause . OR clause
+    (22) clause -> clause . AND clause
+
+    COLON           reduce using rule 22 (clause -> clause AND clause .)
+    OR              reduce using rule 22 (clause -> clause AND clause .)
+    AND             reduce using rule 22 (clause -> clause AND clause .)
+    RPAREN          reduce using rule 22 (clause -> clause AND clause .)
+    COMMA           reduce using rule 22 (clause -> clause AND clause .)
+
+  ! OR              [ shift and go to state 41 ]
+  ! AND             [ shift and go to state 39 ]
+
+
+state 57
+
+    (19) suite -> NEWLINE . INDENT statement_sequence DEDENT
+
+    INDENT          shift and go to state 68
+
+
+state 58
 
     (18) suite -> simple_statement .
 
@@ -1022,87 +1322,170 @@ state 50
     DEDENT          reduce using rule 18 (suite -> simple_statement .)
 
 
-state 51
+state 59
 
-    (13) if_statement -> IF test COLON suite . if_closure
+    (13) if_statement -> IF clause COLON suite . if_closure
     (14) if_closure -> . elif_statement
     (15) if_closure -> . ELSE COLON suite
     (16) if_closure -> . empty
-    (17) elif_statement -> . ELIF test COLON suite if_closure
+    (17) elif_statement -> . ELIF clause COLON suite if_closure
     (1) empty -> .
 
-    ELSE            shift and go to state 59
-    ELIF            shift and go to state 57
+    ELSE            shift and go to state 71
+    ELIF            shift and go to state 69
     ID              reduce using rule 1 (empty -> .)
     RETURN          reduce using rule 1 (empty -> .)
     IF              reduce using rule 1 (empty -> .)
     ENDMARKER       reduce using rule 1 (empty -> .)
     DEDENT          reduce using rule 1 (empty -> .)
 
-    elif_statement                 shift and go to state 58
-    if_closure                     shift and go to state 60
-    empty                          shift and go to state 61
+    elif_statement                 shift and go to state 70
+    if_closure                     shift and go to state 72
+    empty                          shift and go to state 73
 
-state 52
+state 60
 
-    (22) test -> expression GT expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
+    (21) clause -> clause OR clause .
+    (21) clause -> clause . OR clause
+    (22) clause -> clause . AND clause
 
-    COLON           reduce using rule 22 (test -> expression GT expression .)
-    RPAREN          reduce using rule 22 (test -> expression GT expression .)
-    COMMA           reduce using rule 22 (test -> expression GT expression .)
-    PLUS            shift and go to state 31
-    MINUS           shift and go to state 32
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
+    COLON           reduce using rule 21 (clause -> clause OR clause .)
+    OR              reduce using rule 21 (clause -> clause OR clause .)
+    AND             reduce using rule 21 (clause -> clause OR clause .)
+    RPAREN          reduce using rule 21 (clause -> clause OR clause .)
+    COMMA           reduce using rule 21 (clause -> clause OR clause .)
 
-
-state 53
-
-    (21) test -> expression LT expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
-
-    COLON           reduce using rule 21 (test -> expression LT expression .)
-    RPAREN          reduce using rule 21 (test -> expression LT expression .)
-    COMMA           reduce using rule 21 (test -> expression LT expression .)
-    PLUS            shift and go to state 31
-    MINUS           shift and go to state 32
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
+  ! OR              [ shift and go to state 41 ]
+  ! AND             [ shift and go to state 39 ]
 
 
-state 54
+state 61
 
-    (20) test -> expression EQ expression .
-    (24) expression -> expression . PLUS expression
-    (25) expression -> expression . MINUS expression
-    (26) expression -> expression . TIMES expression
-    (27) expression -> expression . DIVIDE expression
+    (27) clause -> expression GEQ expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
 
-    COLON           reduce using rule 20 (test -> expression EQ expression .)
-    RPAREN          reduce using rule 20 (test -> expression EQ expression .)
-    COMMA           reduce using rule 20 (test -> expression EQ expression .)
-    PLUS            shift and go to state 31
-    MINUS           shift and go to state 32
-    TIMES           shift and go to state 30
-    DIVIDE          shift and go to state 29
-
-
-state 55
-
-    (35) args -> args COMMA test .
-
-    RPAREN          reduce using rule 35 (args -> args COMMA test .)
-    COMMA           reduce using rule 35 (args -> args COMMA test .)
+    COLON           reduce using rule 27 (clause -> expression GEQ expression .)
+    OR              reduce using rule 27 (clause -> expression GEQ expression .)
+    AND             reduce using rule 27 (clause -> expression GEQ expression .)
+    RPAREN          reduce using rule 27 (clause -> expression GEQ expression .)
+    COMMA           reduce using rule 27 (clause -> expression GEQ expression .)
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
 
 
-state 56
+state 62
+
+    (26) clause -> expression GT expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    COLON           reduce using rule 26 (clause -> expression GT expression .)
+    OR              reduce using rule 26 (clause -> expression GT expression .)
+    AND             reduce using rule 26 (clause -> expression GT expression .)
+    RPAREN          reduce using rule 26 (clause -> expression GT expression .)
+    COMMA           reduce using rule 26 (clause -> expression GT expression .)
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
+
+
+state 63
+
+    (28) clause -> expression LEQ expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    COLON           reduce using rule 28 (clause -> expression LEQ expression .)
+    OR              reduce using rule 28 (clause -> expression LEQ expression .)
+    AND             reduce using rule 28 (clause -> expression LEQ expression .)
+    RPAREN          reduce using rule 28 (clause -> expression LEQ expression .)
+    COMMA           reduce using rule 28 (clause -> expression LEQ expression .)
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
+
+
+state 64
+
+    (25) clause -> expression LT expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    COLON           reduce using rule 25 (clause -> expression LT expression .)
+    OR              reduce using rule 25 (clause -> expression LT expression .)
+    AND             reduce using rule 25 (clause -> expression LT expression .)
+    RPAREN          reduce using rule 25 (clause -> expression LT expression .)
+    COMMA           reduce using rule 25 (clause -> expression LT expression .)
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
+
+
+state 65
+
+    (23) clause -> expression EQ expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    COLON           reduce using rule 23 (clause -> expression EQ expression .)
+    OR              reduce using rule 23 (clause -> expression EQ expression .)
+    AND             reduce using rule 23 (clause -> expression EQ expression .)
+    RPAREN          reduce using rule 23 (clause -> expression EQ expression .)
+    COMMA           reduce using rule 23 (clause -> expression EQ expression .)
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
+
+
+state 66
+
+    (24) clause -> expression NEQ expression .
+    (30) expression -> expression . PLUS expression
+    (31) expression -> expression . MINUS expression
+    (32) expression -> expression . TIMES expression
+    (33) expression -> expression . DIVIDE expression
+
+    COLON           reduce using rule 24 (clause -> expression NEQ expression .)
+    OR              reduce using rule 24 (clause -> expression NEQ expression .)
+    AND             reduce using rule 24 (clause -> expression NEQ expression .)
+    RPAREN          reduce using rule 24 (clause -> expression NEQ expression .)
+    COMMA           reduce using rule 24 (clause -> expression NEQ expression .)
+    PLUS            shift and go to state 32
+    MINUS           shift and go to state 33
+    TIMES           shift and go to state 31
+    DIVIDE          shift and go to state 30
+
+
+state 67
+
+    (41) args -> args COMMA clause .
+    (21) clause -> clause . OR clause
+    (22) clause -> clause . AND clause
+
+    RPAREN          reduce using rule 41 (args -> args COMMA clause .)
+    COMMA           reduce using rule 41 (args -> args COMMA clause .)
+    OR              shift and go to state 41
+    AND             shift and go to state 39
+
+
+state 68
 
     (19) suite -> NEWLINE INDENT . statement_sequence DEDENT
     (3) statement_sequence -> . statement statement_sequence
@@ -1115,9 +1498,9 @@ state 56
     (10) compound_statement -> . if_statement
     (11) assignment -> . ID ASSIGN expression
     (12) return_statement -> . RETURN expression
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
-    (13) if_statement -> . IF test COLON suite if_closure
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
+    (13) if_statement -> . IF clause COLON suite if_closure
 
     ID              shift and go to state 11
     RETURN          shift and go to state 5
@@ -1127,40 +1510,47 @@ state 56
     compound_statement             shift and go to state 6
     assignment                     shift and go to state 10
     simple_statement               shift and go to state 2
-    statement_sequence             shift and go to state 62
+    statement_sequence             shift and go to state 74
     return_statement               shift and go to state 7
     statement                      shift and go to state 8
     if_statement                   shift and go to state 9
 
-state 57
+state 69
 
-    (17) elif_statement -> ELIF . test COLON suite if_closure
-    (20) test -> . expression EQ expression
-    (21) test -> . expression LT expression
-    (22) test -> . expression GT expression
-    (23) test -> . expression
-    (24) expression -> . expression PLUS expression
-    (25) expression -> . expression MINUS expression
-    (26) expression -> . expression TIMES expression
-    (27) expression -> . expression DIVIDE expression
-    (28) expression -> . MINUS expression
-    (29) expression -> . LPAREN expression RPAREN
-    (30) expression -> . INT
-    (31) expression -> . ID
-    (32) expression -> . funcall
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (17) elif_statement -> ELIF . clause COLON suite if_closure
+    (20) clause -> . NOT clause
+    (21) clause -> . clause OR clause
+    (22) clause -> . clause AND clause
+    (23) clause -> . expression EQ expression
+    (24) clause -> . expression NEQ expression
+    (25) clause -> . expression LT expression
+    (26) clause -> . expression GT expression
+    (27) clause -> . expression GEQ expression
+    (28) clause -> . expression LEQ expression
+    (29) clause -> . expression
+    (30) expression -> . expression PLUS expression
+    (31) expression -> . expression MINUS expression
+    (32) expression -> . expression TIMES expression
+    (33) expression -> . expression DIVIDE expression
+    (34) expression -> . MINUS expression
+    (35) expression -> . LPAREN expression RPAREN
+    (36) expression -> . INT
+    (37) expression -> . ID
+    (38) expression -> . funcall
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
+    NOT             shift and go to state 27
     MINUS           shift and go to state 20
     LPAREN          shift and go to state 17
     INT             shift and go to state 15
     ID              shift and go to state 18
 
+    clause                         shift and go to state 75
     funcall                        shift and go to state 16
-    test                           shift and go to state 63
-    expression                     shift and go to state 27
+    expression                     shift and go to state 28
 
-state 58
+state 70
 
     (14) if_closure -> elif_statement .
 
@@ -1171,25 +1561,25 @@ state 58
     DEDENT          reduce using rule 14 (if_closure -> elif_statement .)
 
 
-state 59
+state 71
 
     (15) if_closure -> ELSE . COLON suite
 
-    COLON           shift and go to state 64
+    COLON           shift and go to state 76
 
 
-state 60
+state 72
 
-    (13) if_statement -> IF test COLON suite if_closure .
+    (13) if_statement -> IF clause COLON suite if_closure .
 
-    ID              reduce using rule 13 (if_statement -> IF test COLON suite if_closure .)
-    RETURN          reduce using rule 13 (if_statement -> IF test COLON suite if_closure .)
-    IF              reduce using rule 13 (if_statement -> IF test COLON suite if_closure .)
-    ENDMARKER       reduce using rule 13 (if_statement -> IF test COLON suite if_closure .)
-    DEDENT          reduce using rule 13 (if_statement -> IF test COLON suite if_closure .)
+    ID              reduce using rule 13 (if_statement -> IF clause COLON suite if_closure .)
+    RETURN          reduce using rule 13 (if_statement -> IF clause COLON suite if_closure .)
+    IF              reduce using rule 13 (if_statement -> IF clause COLON suite if_closure .)
+    DEDENT          reduce using rule 13 (if_statement -> IF clause COLON suite if_closure .)
+    ENDMARKER       reduce using rule 13 (if_statement -> IF clause COLON suite if_closure .)
 
 
-state 61
+state 73
 
     (16) if_closure -> empty .
 
@@ -1200,21 +1590,25 @@ state 61
     DEDENT          reduce using rule 16 (if_closure -> empty .)
 
 
-state 62
+state 74
 
     (19) suite -> NEWLINE INDENT statement_sequence . DEDENT
 
-    DEDENT          shift and go to state 65
+    DEDENT          shift and go to state 77
 
 
-state 63
+state 75
 
-    (17) elif_statement -> ELIF test . COLON suite if_closure
+    (17) elif_statement -> ELIF clause . COLON suite if_closure
+    (21) clause -> clause . OR clause
+    (22) clause -> clause . AND clause
 
-    COLON           shift and go to state 66
+    COLON           shift and go to state 78
+    OR              shift and go to state 41
+    AND             shift and go to state 39
 
 
-state 64
+state 76
 
     (15) if_closure -> ELSE COLON . suite
     (18) suite -> . simple_statement
@@ -1224,20 +1618,20 @@ state 64
     (9) simple_statement -> . funcall NEWLINE
     (11) assignment -> . ID ASSIGN expression
     (12) return_statement -> . RETURN expression
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
-    NEWLINE         shift and go to state 49
+    NEWLINE         shift and go to state 57
     ID              shift and go to state 11
     RETURN          shift and go to state 5
 
     funcall                        shift and go to state 4
     assignment                     shift and go to state 10
-    simple_statement               shift and go to state 50
+    simple_statement               shift and go to state 58
     return_statement               shift and go to state 7
-    suite                          shift and go to state 67
+    suite                          shift and go to state 79
 
-state 65
+state 77
 
     (19) suite -> NEWLINE INDENT statement_sequence DEDENT .
 
@@ -1250,9 +1644,9 @@ state 65
     DEDENT          reduce using rule 19 (suite -> NEWLINE INDENT statement_sequence DEDENT .)
 
 
-state 66
+state 78
 
-    (17) elif_statement -> ELIF test COLON . suite if_closure
+    (17) elif_statement -> ELIF clause COLON . suite if_closure
     (18) suite -> . simple_statement
     (19) suite -> . NEWLINE INDENT statement_sequence DEDENT
     (7) simple_statement -> . assignment NEWLINE
@@ -1260,20 +1654,20 @@ state 66
     (9) simple_statement -> . funcall NEWLINE
     (11) assignment -> . ID ASSIGN expression
     (12) return_statement -> . RETURN expression
-    (33) funcall -> . ID LPAREN args RPAREN
-    (34) funcall -> . ID LPAREN RPAREN
+    (39) funcall -> . ID LPAREN args RPAREN
+    (40) funcall -> . ID LPAREN RPAREN
 
-    NEWLINE         shift and go to state 49
+    NEWLINE         shift and go to state 57
     ID              shift and go to state 11
     RETURN          shift and go to state 5
 
     funcall                        shift and go to state 4
-    assignment                     shift and go to state 10
-    simple_statement               shift and go to state 50
+    simple_statement               shift and go to state 58
     return_statement               shift and go to state 7
-    suite                          shift and go to state 68
+    assignment                     shift and go to state 10
+    suite                          shift and go to state 80
 
-state 67
+state 79
 
     (15) if_closure -> ELSE COLON suite .
 
@@ -1284,34 +1678,39 @@ state 67
     DEDENT          reduce using rule 15 (if_closure -> ELSE COLON suite .)
 
 
-state 68
+state 80
 
-    (17) elif_statement -> ELIF test COLON suite . if_closure
+    (17) elif_statement -> ELIF clause COLON suite . if_closure
     (14) if_closure -> . elif_statement
     (15) if_closure -> . ELSE COLON suite
     (16) if_closure -> . empty
-    (17) elif_statement -> . ELIF test COLON suite if_closure
+    (17) elif_statement -> . ELIF clause COLON suite if_closure
     (1) empty -> .
 
-    ELSE            shift and go to state 59
-    ELIF            shift and go to state 57
+    ELSE            shift and go to state 71
+    ELIF            shift and go to state 69
     ID              reduce using rule 1 (empty -> .)
     RETURN          reduce using rule 1 (empty -> .)
     IF              reduce using rule 1 (empty -> .)
     ENDMARKER       reduce using rule 1 (empty -> .)
     DEDENT          reduce using rule 1 (empty -> .)
 
-    elif_statement                 shift and go to state 58
-    if_closure                     shift and go to state 69
-    empty                          shift and go to state 61
+    elif_statement                 shift and go to state 70
+    if_closure                     shift and go to state 81
+    empty                          shift and go to state 73
 
-state 69
+state 81
 
-    (17) elif_statement -> ELIF test COLON suite if_closure .
+    (17) elif_statement -> ELIF clause COLON suite if_closure .
 
-    ID              reduce using rule 17 (elif_statement -> ELIF test COLON suite if_closure .)
-    RETURN          reduce using rule 17 (elif_statement -> ELIF test COLON suite if_closure .)
-    IF              reduce using rule 17 (elif_statement -> ELIF test COLON suite if_closure .)
-    ENDMARKER       reduce using rule 17 (elif_statement -> ELIF test COLON suite if_closure .)
-    DEDENT          reduce using rule 17 (elif_statement -> ELIF test COLON suite if_closure .)
+    ID              reduce using rule 17 (elif_statement -> ELIF clause COLON suite if_closure .)
+    RETURN          reduce using rule 17 (elif_statement -> ELIF clause COLON suite if_closure .)
+    IF              reduce using rule 17 (elif_statement -> ELIF clause COLON suite if_closure .)
+    ENDMARKER       reduce using rule 17 (elif_statement -> ELIF clause COLON suite if_closure .)
+    DEDENT          reduce using rule 17 (elif_statement -> ELIF clause COLON suite if_closure .)
 
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for OR in state 42 resolved as shift
+WARNING: shift/reduce conflict for AND in state 42 resolved as shift

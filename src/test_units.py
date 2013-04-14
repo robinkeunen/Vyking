@@ -22,14 +22,16 @@ else:
 """
 
 elifStmt = """
-if a == b:
+if not a != b:
     a = a + 1
     return a
 elif a > 2:
-    if robin < genie:
-         return yay
+    if robin >= genie and not pierre < genie:
+        return yay
+    elif il or try(ceci):
+        do(this)
     lo = b/2
-elif a == 3:
+elif not a <= 3:
     return b
 else:
     return end
