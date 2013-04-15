@@ -30,7 +30,7 @@ class VykingIndentationError(VykingSyntaxError):
         self.message = message
 
     def __str__(self):
-        return "line %d: %s" % (self.lineno, self.message)
+        return "\n\tline %d: %s" % (self.lineno, self.message)
 
 
 class IndentFilter():
@@ -105,11 +105,13 @@ class IndentFilter():
 
         state = BOF
 
+        # helper function
         def need_DEDENT(token):
             """Returns True if DEDENT is needed"""
             if token.value > levels.read():
                 raise VykingIndentationError(token.lineno,
-                                             "indentation level is too high. Might be missing a colon.")
+                                             "indentation level is too high.\n"
+                                             " \tHint: check for missing colon or mismatch in indentation level.")
             else:
                 return token.value < levels.read()
 
@@ -129,9 +131,6 @@ class IndentFilter():
                     while need_DEDENT(token):
                         levels.pop()
                         yield self._DEDENT(token.lineno - 1)
-                        # need NEWLINE between two successive DEDENTS
-                        #if need_DEDENT(token):
-                        #    yield self._new_token("NEWLINE", token.lineno -1)
                 else:
                     yield token
 
@@ -155,7 +154,6 @@ class IndentFilter():
         # Yield DEDENTs at end of input
         while levels.pop() != 0:
             yield self._DEDENT(self.get_lineno())
-            #yield self._new_token("NEWLINE", self.get_lineno())
 
         yield self._new_token("ENDMARKER", self.get_lineno())
         yield None

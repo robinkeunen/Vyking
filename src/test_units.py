@@ -43,8 +43,7 @@ else:
 find_bounds = """
 defun find_bounds (f, y):
     x = 1.
-    while f(x) < y:
-        x = x*2.
+     while f(x) < y: x = x*2.
     if x == 1:
         lo = 0
     else:

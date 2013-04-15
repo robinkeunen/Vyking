@@ -372,7 +372,7 @@ class BasicVykingParser(Parser):
 
 # Usage
 if __name__ == "__main__":
-    data = inputs["zero"]
+    data = inputs["find_bounds"]
     print(data)
     # logger object
     logging.basicConfig(

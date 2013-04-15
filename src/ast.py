@@ -27,7 +27,6 @@ class Statement_sequence():
     def __init__(self, statement_sequence):
         self.type = "statement_sequence"
         self.statement_sequence = statement_sequence
-        print("- " + str(statement_sequence))
 
     def __str__(self):
         result = ""

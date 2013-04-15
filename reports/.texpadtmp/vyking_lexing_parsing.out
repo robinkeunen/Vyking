@@ -1,6 +1,10 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{Trois versions de Vyking}{}% 2
 \BOOKMARK [1][-]{section.3}{Choix des outils}{}% 3
-\BOOKMARK [1][-]{section.4}{Lexing de l'indentation}{}% 4
-\BOOKMARK [1][-]{section.5}{Filtre indentation}{}% 5
-\BOOKMARK [1][-]{section.6}{Remarques}{}% 6
+\BOOKMARK [1][-]{section.4}{L'indentation}{}% 4
+\BOOKMARK [2][-]{subsection.4.1}{Lexing de l'indentation}{section.4}% 5
+\BOOKMARK [2][-]{subsection.4.2}{D\351limitation des blocs}{section.4}% 6
+\BOOKMARK [3][-]{subsubsection.4.2.1}{G\351n\351ration des DEDENT}{subsection.4.2}% 7
+\BOOKMARK [1][-]{section.5}{Parsing}{}% 8
+\BOOKMARK [1][-]{section.6}{Gestion des erreurs}{}% 9
+\BOOKMARK [1][-]{section.7}{Remarques}{}% 10

@@ -140,6 +140,10 @@
 
 \section{Introduction}
 
+classes 
+endmarker
+    générateur
+    
 \section{Trois versions de Vyking}
     Pour séparer les difficultés dans la compilation du langage, nous travaillerons sur trois versions successives du langage.
     La première, \emph{basic\_vyking} n'implémente que les fonctions de bases, le noyau du langage.
@@ -163,29 +167,72 @@
         
     \paragraph{PLY}
         PLY est une implémentation de lex et yacc pour Python.
-        PLY est construit en Python pur, il n'est pas construit sur un noyau C.
-        Cette approche le rend plus lent que les outils construit en C mais il est plus efficace (en temps et espace)\cite{PLYtalk} que tous les autres outils Python.
+        PLY est programmé en Python pur, il n'est pas construit sur un noyau C.
+        Cette approche le rend plus lent que les outils construit en C mais il est plus efficace (en temps et espace)\cite{PLYtalk} que tous les autres librairies Python.
         Il existe beaucoup de ressources en ligne et l'outil fournit des outils de diagnostique.
         Le report d'erreur était un des objectifs de développement pour PLY.        
-        D'un point de vue pédagogique, nous avons retenu ce choix car il nous permet de nous familiariser avec Lex et Yacc tout en conservant une approche pythonesque.
+        D'un point de vue pédagogique, nous avons retenu ce choix car il nous permet de nous familiariser avec Lex et Yacc tout en conservant une approche \emph{pythonesque}.
         
-    \paragraph{} Nous avons retenu PLY, si nous avons assez de temps, nous essaierons de développer nos propres outils de lexing et/ou de parsing
+    \paragraph{} Nous avons retenu PLY. 
+        Une introduction est disponible ici \url{http://www.dabeaz.com/ply/ply.html}.
         
         
-\section{Lexing de l'indentation}
-    Dans une syntaxe à la python, les espaces et l'indentation n'est significative qu'en début de ligne. Les transitions sont illustrées à la figure ??? (CF EVERNOTE bol state transition).
+\section{L'indentation}    
+    Dans une syntaxe à la python, les espaces ne sont significatifs qu'en début de ligne et servent à délimiter les blocs.
+    L'indentation est représentée par les tokens \verb WS  dont la valeur est le nombre d'espaces en début de ligne.
+    
+    \subsection{Lexing de l'indentation}
+    Le lexer peut être dans deux états : \emph{initial} ou \emph{bol} (beginning of line).
     L'état \verb bol  est enclenché quand le lexer lit un retour à la ligne.
     Une fois dans l'état \verb bol , 3 actions sont possibles : 
     \begin{enumerate}
-    \item Lecture d'espace ou de tabulation : le token \verb INDENT  est émis, sa valeur est le nombre d'espaces. Une tabulation vaut 4 espaces par défaut.
+    \item Lecture d'espace(s) : le token \verb INDENT  est émis, sa valeur est le nombre d'espaces.
     \item Lecture d'un retour à la ligne, le lexer reste dans l'état \verb bol .
     \item Lecture d'un autre caractère, retour à l'état précédent.
     \end{enumerate}
+    Les transitions sont illustrées à la figure \ref{lexing_state_machine}.   
 
-\section{Filtre indentation}
+    \begin{figure}
+    \includegraphics[width=\textwidth]{lexing_state_machine.pdf}
+    \caption{Machine d'état du lexer}
+    \label{lexing_state_machine}
+    \end{figure}
+ 
+    \subsection{Délimitation des blocs}
+    Dans la grammaire, les blocs sont délimités par les token \verb INDENT  et \verb DEDENT .
+    La classe \emph{IndentFilter}  se place entre le lexer et le parser, son rôle est d'insérer des \verb INDENT  et des \verb DEDENT  dans le flux de token. 
+    La grammaire requiert un bloc indenté après les instructions composées (\emph{compound statement}).
+    Une instruction composée et son bloc sont séparés par un ":" (\verb COLON )
+    La grammaire est la suivante :
+    \begin{eqnarray*}    
+    compound\_statement &::=& statement\_name ~ COLON ~ suite\\
+    suite &::=& simple\_statement\\
+          &|& INDENT ~ statement\_sequence ~ DEDENT\\    
+    \end{eqnarray*}
+    Les niveaux d'indentation sont mémorisés sur une pile "\emph{levels}".
+    Les machines d'états sont illustrées à la figure \ref{filter}, page \pageref{filter}.
+    
+    \subsubsection*{Génération des INDENT}
+        Le filtre peut être dans 3 états : 
+        \begin{itemize}
+        \item NO\_INDENT : \emph{IndentFilter} n'attend pas d'indentation. 
+        Si le niveau d'indentation augmente, c'est une erreur, si le niveau d'indentation diminue, il faut insérer des \verb DEDENT .
+        Quand le filtre reçoit un \verb COLON , on passe à l'état MAY\_INDENT.
+        \item MAY\_INDENT : si \verb suite  est une instruction simple (sur une seule ligne), on retourne à l'état NO\_INDENT. Si on lit un \verb NEWLINE  on passe à l'état MUST\_INDENT.
+        \item MUST\_INDENT : \emph{IndentFilter} attend un \verb WS  dont le niveau d'indentation est plus haut que le niveau courant, si c'est le cas, \emph{IndentFilter} génère un \verb INDENT  et retourne à l'état NO\_INDENT.
+        Si il n'y a pas de bloc indenté, on lève une erreur.
+        \end{itemize}
+    
+    \subsubsection{Génération des DEDENT}
+        Quand \emph{IndentFilter} lit un \verb WS  dont la valeur est inférieure au niveau courant, 
+        il génére des \verb DEDENT  tant que le niveau au sommet de la pile n'est pas le même que celui de \verb WS .
+        Les états NO\_INDENT et NEED\_DEDENT ne sont pas explicites dans le code.
 
-state machine
-generation des dedent
+     \begin{figure}
+    \includegraphics[width=\textwidth]{filter.pdf}
+    \caption{Machine d'état de \emph{IndentFilter}. "WS.val" représente le nombre d'espaces lu en début de ligne. "level" est le niveau courant d'indentation.}
+    \label{filter}
+    \end{figure}
 
 \section{Parsing}
 \subsection*{if ... elif ... else}
@@ -207,13 +254,9 @@ indentation problems
 
 \section{Remarques}
     Les 3 étapes lexing, filtre et parsing sont découplées.
-    Mais grâce à l'utilisation de générateur/itérateurs pour construire les classes \verb Lexer  et \verb IndentFilter , les performances sont améliorées.
-    En effet, au lieu de passer tout le programme dans le \verb Lexer  et de conserver tous les tokens en mémoire, puis de faire un passe complet à travers le filtre, le \verb Lexer génère les tokens un à un et le filtre ajoute les indent et dedent au vol.
+    Mais grâce à l'utilisation de générateur/itérateurs pour construire les classes \verb Lexer  et \verb IndentFilter , l'exécution du code ne nécessite qu'un parcours du texte.
+    En effet, au lieu de passer tout le programme dans le \verb Lexer  et de conserver tous les tokens en mémoire, puis de faire un passe complet à travers le filtre, le \verb Lexer génère les tokens un à un et le filtre ajoute les \verb INDENTs   et \verb DEDENTs  au vol.
     
-    10ème règle de greespun
-        
-    
-            
 \bibliography{vyking_bib}
 \bibliographystyle{plain}
 
