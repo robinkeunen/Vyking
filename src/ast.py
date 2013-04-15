@@ -60,6 +60,7 @@ class Funcall(Statement):
         self.type = "funcall"
         self.id = id
         self.args = args
+
     def __str__(self):
         args_repr = "["
         for arg in self.args:
@@ -78,7 +79,7 @@ class If(Statement):
     def __str__(self):
         if self.if_closure is None:
             return "(IF %s \n\t %s)" \
-               % (str(self.clause), str(self.suite))
+                   % (str(self.clause), str(self.suite))
         else:
             return "(IF %s \n\t %s %s)" \
                    % (str(self.clause), str(self.suite), str(self.if_closure))
@@ -94,7 +95,7 @@ class Elif(Statement):
     def __str__(self):
         if self.if_closure is None:
             return "(ELIF %s \n\t %s)" \
-               % (str(self.clause), str(self.suite))
+                   % (str(self.clause), str(self.suite))
         else:
             return "(ELIF %s \n\t %s %s)" \
                    % (str(self.clause), str(self.suite), str(self.if_closure))
@@ -126,7 +127,7 @@ class Fundef(Statement):
         self.suite = suite
 
     def __str__(self):
-        parameters ="["
+        parameters = "["
         for p in self.parameters:
             parameters += str(p) + ' '
         parameters += "]"
@@ -142,7 +143,7 @@ class Expression(ASTNode):
 
     def __str__(self):
         if self.left is None:
-            return "(%s %s)" % (self.op, self. right)
+            return "(%s %s)" % (self.op, self.right)
         else:
             return "(%s %s %s)" % (self.op, str(self.left), str(self.right))
 
@@ -188,6 +189,7 @@ class ID(Atom):
     Represents an ID in the AST, if value is not set,
     semantic analysis must check it has been assigned
     """
+
     def __init__(self, name, value=None):
         self.type = "ID"
         self.name = name
@@ -198,6 +200,7 @@ class ID(Atom):
             return self.name
         else:
             return "(%s " % self.name + str(self.value) + ")"
+
 
 class Vstring(Atom):
     def __init__(self, data):

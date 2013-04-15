@@ -11,7 +11,7 @@ import ply.yacc as yacc
 from src.indent_filter import IndentFilter
 from src.ply import lex
 from src.test_units import inputs
-from b_vyking_lexer import BasicVykingLexer
+from src.b_vyking_lexer import BasicVykingLexer
 
 sys.path.insert(0, "../..")
 

@@ -4,7 +4,7 @@
 # -----------------------------------------------------------------------------
 
 import ply.lex as lex
-from test_units import lex_test
+from .test_units import lex_test
 
 
 class Lexer():

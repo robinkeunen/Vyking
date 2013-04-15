@@ -1,5 +1,5 @@
 from src.test_units import lex_test
-from b_vyking_lexer import BasicVykingLexer
+from .b_vyking_lexer import BasicVykingLexer
 __author__ = 'Robin Keunen'
 __author__ = 'pierrevyncke'
 

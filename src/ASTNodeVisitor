@@ -2,10 +2,9 @@
 # ASTVisitor.py
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
-from src import ast
-from src.ast import BinopExpression
+import src.ast as ast
+import src.visit as visit
 
-import visit
 
 class ASTNodeVisitor(object):
     @visit.on('ASTNode')
@@ -16,7 +15,7 @@ class ASTNodeVisitor(object):
         """
         pass
 
-    @visit.when(ast)
+    @visit.when(ast.ASTNode)
     def visit(self, ASTNode):
         """
         Will run for nodes that do not specifically
@@ -24,7 +23,7 @@ class ASTNodeVisitor(object):
         """
         pass
 
-    @visit.when(BinopExpression)
+    @visit.when(ast.Expression)
     def visit(self, BinopExpression):
         """Matches nodes of type BinopExpression"""
         # some code

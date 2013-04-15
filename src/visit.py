@@ -17,6 +17,7 @@ def decorator(d):
     update_wrapper(_d, d)
     return _d
 
+
 @decorator
 def on(param_name):
     def f(fn):
@@ -24,6 +25,7 @@ def on(param_name):
         return dispatcher
 
     return f
+
 
 @decorator
 def when(param_type):
@@ -57,10 +59,10 @@ class Dispatcher(object):
         if d is not None:
             return d(*args, **kw)
         else:
-            issub = issubclass
+            #issub = issubclass
             t = self.targets
             ks = t.iterkeys()
-            return [t[k](*args, **kw) for k in ks if issub(typ, k)]
+            return [t[k](*args, **kw) for k in ks if issubclass(typ, k)]
 
     def add_target(self, typ, target):
         self.targets[typ] = target

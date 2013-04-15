@@ -1,15 +1,17 @@
 __author__ = 'Robin Keunen'
 
+
 class EmptyStackException(Exception):
     pass
+
 
 class Node:
     def __init__(self, value, next):
         self.value = value
         self.next = next
 
-class Stack:
 
+class Stack:
     def __init__(self):
         self.head = None
 

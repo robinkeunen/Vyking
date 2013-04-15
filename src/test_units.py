@@ -129,16 +129,17 @@ while continuer_partie: # Tant qu'on doit continuer la partie
             continuer_partie = False
 """
 
-inputs = {"exp1":exp1,
-          "exp2":exp2,
-          "dangling_else":dangling_else,
-          "elifStmt":elifStmt,
-          "find_bounds":find_bounds,
-          "slow_inverse":slow_inverse,
-          "zero":zero,
+inputs = {"exp1": exp1,
+          "exp2": exp2,
+          "dangling_else": dangling_else,
+          "elifStmt": elifStmt,
+          "find_bounds": find_bounds,
+          "slow_inverse": slow_inverse,
+          "zero": zero,
           }
 
-def lex_test(lexer, test_index = -1):
+
+def lex_test(lexer, test_index=-1):
     """
 
     :param lexer:
@@ -176,7 +177,4 @@ def lex_test(lexer, test_index = -1):
                 print(tok.type, end=' ')
         print('\n')
 
-
-def parse_test(parser, test_index = -1):
-    print("dummy")
 

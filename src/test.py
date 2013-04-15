@@ -15,7 +15,7 @@ class MyLexer(object):
         'NAME','NUMBER',
         'PLUS','MINUS','EXP', 'TIMES','DIVIDE','EQUALS',
         'LPAREN','RPAREN',
-        )
+    )
 
     # Tokens
 

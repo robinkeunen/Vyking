@@ -49,7 +49,7 @@ class IndentFilter():
         """
         self.lexer = lexer
         # Get token list and update it
-        self.tokens = self.lexer.tokens # __class__.tokens
+        self.tokens = self.lexer.tokens  # __class__.tokens
         self.tokens.append('INDENT')
         self.tokens.append('DEDENT')
         self.tokens.append('ENDMARKER')
@@ -152,15 +152,13 @@ class IndentFilter():
                     raise VykingIndentationError(token.lineno,
                                                  "Expected indentation")
 
-
         # Yield DEDENTs at end of input
         while levels.pop() != 0:
             yield self._DEDENT(self.get_lineno())
             #yield self._new_token("NEWLINE", self.get_lineno())
 
         yield self._new_token("ENDMARKER", self.get_lineno())
-        yield  None
-
+        yield None
 
     def _new_token(self, token_type, lineno):
         """Returns new token
@@ -204,8 +202,10 @@ class IndentFilter():
         if token is None:
             pass
         elif token.type in next_line_tokens:
-            if token.type == "INDENT": self.level += 1
-            elif token.type == "DEDENT" : self.level -= 1
+            if token.type == "INDENT":
+                self.level += 1
+            elif token.type == "DEDENT":
+                self.level -= 1
 
             print(token.type + '\n', end=' ')
             self.printer_state = BOL
