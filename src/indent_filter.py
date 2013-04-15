@@ -84,7 +84,7 @@ class IndentFilter():
 
     def token(self):
         try:
-            return self.filtered_stream.next()
+            return next(self.filtered_stream)
         except StopIteration:
             return None
 
@@ -109,7 +109,7 @@ class IndentFilter():
             """Returns True if DEDENT is needed"""
             if token.value > levels.read():
                 raise VykingIndentationError(token.lineno,
-                                             "indentation level is too high")
+                                             "indentation level is too high. Might be missing a colon.")
             else:
                 return token.value < levels.read()
 
@@ -199,7 +199,7 @@ class IndentFilter():
         if self.printer_state == BOL:
             self.printer_state = INLINE
 
-            print str(token.lineno) + self.level * "   ",
+            print(str(token.lineno) + self.level * "   ", end=' ')
 
         if token is None:
             pass
@@ -207,19 +207,19 @@ class IndentFilter():
             if token.type == "INDENT": self.level += 1
             elif token.type == "DEDENT" : self.level -= 1
 
-            print token.type + '\n',
+            print(token.type + '\n', end=' ')
             self.printer_state = BOL
         elif token.type in extended_print:
-            print '(' + token.type + ', ' + str(token.value) + ')',
+            print('(' + token.type + ', ' + str(token.value) + ')', end=' ')
         else:
-            print token.type,
+            print(token.type, end=' ')
 
     def _print_input(self, data):
         lineno = 1
         for line in data.split('\n'):
-            print lineno, line
+            print(lineno, line)
             lineno += 1
-        print '\n'
+        print('\n')
 
     def get_lexpos(self):
         return self.lexer.get_lexpos()
@@ -243,7 +243,7 @@ class IndentFilter():
 
                 for token in self.filtered_stream:
                     self._pretty_print_token(token)
-                print '\n'
+                print('\n')
 
         else:
             data = inputs[test_index]
@@ -253,7 +253,7 @@ class IndentFilter():
 
             for token in self.filtered_stream:
                 self._pretty_print_token(token)
-            print '\n'
+            print('\n')
 
 
 if __name__ == "__main__":

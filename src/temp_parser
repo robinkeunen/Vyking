@@ -302,23 +302,22 @@ def p_expression_boolean(p):
 # Error rule for syntax errors.
 def p_error(p):
     if p is None:
-        print "fix for missing line"
+        print("fix for missing line")
         parser.errok()
         return new_token("ENDMARKER", mylexer.get_lineno())
-
     elif p.type == "ENDMARKER":
-        print "line %d: Missing new line at end of file." % p.lineno
+        print("line %d: Missing new line at end of file." % p.lineno)
         p.lexer.lookahead = p
         parser.errok()
         return new_token("NEWLINE", p.lineno)
     else:
-        print 'line %d: Syntax error when reading %s ' % (p.lineno, str(p))
+        print('line %d: Syntax error when reading %s:%s ' % (p.lineno, p.type, p.value))
 
 
 # Usage
 if __name__ == "__main__":
 
-    data = inputs["zero"]
+    data = inputs["find_bounds"]
 
     # logger object
     logging.basicConfig(
@@ -334,8 +333,8 @@ if __name__ == "__main__":
 
     lineno = 1
     for line in data.split('\n'):
-        print "%d: %s" % (lineno, line)
+        print("%d: %s" % (lineno, line))
         lineno += 1
-    print
+    print()
 
-    print result
+    print(result)

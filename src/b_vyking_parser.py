@@ -17,7 +17,7 @@ sys.path.insert(0, "../..")
 if sys.version_info[0] >= 3:
     raw_input = input
 
-from b_vyking_lexer import BasicVykingLexer
+from .b_vyking_lexer import BasicVykingLexer
 
 class Parser(object):
     """
@@ -33,7 +33,7 @@ class Parser(object):
         try:
             modname = os.path.split(os.path.splitext(__file__)[0])[1] + "_" + self.__class__.__name__
         except:
-            modname = "parser" + "_" + self.__class__.__name__
+            modname = self.__class__.__name__
         self.debugfile = modname + ".dbg"
         self.tabmodule = modname + "_" + "parsetab"
         #print self.debugfile, self.tabmodule
@@ -217,6 +217,11 @@ class BasicVykingParser(Parser):
         'fundef : DEFUN ID LPAREN parameters RPAREN COLON suite'
         p[0] = ast.Fundef(ast.ID(p[2]), p[7], p[4])
 
+    # resynchronization attempt
+    def p_fundef_error(self, p):
+        'fundef : DEFUN ID error parameters RPAREN COLON suite'
+        sys.stderr.write("line%d: expected opening parentheses, attempting to fix...")
+        p[0] = ast.Fundef(ast.ID(p[2]), p[7], p[4])
 
     def p_parameters(self, p):
         """
@@ -305,12 +310,6 @@ class BasicVykingParser(Parser):
         'expression : MINUS expression %prec UMINUS'
         p[0] = ast.Expression(None, 'UMINUS', p[2])
 
-
-    # def p_expression_group(self, p):
-    #     'expression : LPAREN expression RPAREN'
-    #     p[0] = p[2]
-
-
     def p_expression_numeric(self, p):
         'expression : numeric'
         p[0] = p[1]
@@ -347,17 +346,17 @@ class BasicVykingParser(Parser):
     # Error rule for syntax errors.
     def p_error(self, p):
         if p is None:
-            print "fix for missing line"
+            print("fix for missing line")
             parser.errok()
             return self.new_token("ENDMARKER", self.lexer.get_lineno())
 
         elif p.type == "ENDMARKER":
-            print "line %d: Missing new line at end of file." % p.lineno
+            print("line %d: Missing new line at end of file." % p.lineno)
             p.lexer.lookahead = p
             parser.errok()
             return self.new_token("NEWLINE", p.lineno)
         else:
-            print 'line %d: Syntax error when reading %s ' % (p.lineno, str(self, p))
+            print('line %d: Syntax error when reading %s ' % (p.lineno, str(self, p)))
 
     # helper function
     def new_token(self, token_type, lineno):
@@ -390,7 +389,7 @@ if __name__ == "__main__":
 
     parser = BasicVykingParser(debug=log)
     result = parser.parse(data, debug=log)
-    print result
+    print(result)
 
 
 

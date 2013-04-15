@@ -41,7 +41,7 @@ else:
 """
 
 find_bounds = """
-defun find_bounds(f, y):
+defun find_bounds (f, y):
     x = 1.
     while f(x) < y:
         x = x*2.
@@ -139,38 +139,43 @@ inputs = {"exp1":exp1,
           }
 
 def lex_test(lexer, test_index = -1):
+    """
 
+    :param lexer:
+    :param test_index:
+    """
     extended_print = ('ID', 'INT', 'FLOAT', 'STRING', 'WS')
 
     if test_index == -1:
         for data in inputs:
             lexer.input(data)
             lexer.lineno = 1
-            print data
+            print(data)
             for tok in lexer:
                 if tok.type == 'NEWLINE':
-                    print tok.type
+                    print(tok.type)
                 elif tok.type == 'WS':
-                    print '(' + tok.type + ', ' + str(tok.value) + ')',
+                    print('(' + tok.type + ', ' + str(tok.value) + ')', end=' ')
                 elif tok.type in extended_print:
-                    print '(' + tok.type + ', ' + str(tok.value) + ')',
+                    print('(' + tok.type + ', ' + str(tok.value) + ')', end=' ')
                 else:
-                    print tok.type,
-            print "\n"
+                    print(tok.type, end=' ')
+            print("\n")
     else:
         data = inputs[test_index]
         lexer.input(data)
         lexer.lineno = 1
-        print '"', data, '"'
+        print('"', data, '"')
 
         for tok in lexer:
             if tok.type == 'NEWLINE':
-                print tok.type
+                print(tok.type)
             elif tok.type in extended_print:
-                print '(' + tok.type + ', ' + str(tok.value) + ')',
+                print('(' + tok.type + ', ' + str(tok.value) + ')', end=' ')
             else:
-                print tok.type,
-        print '\n'
+                print(tok.type, end=' ')
+        print('\n')
+
 
 def parse_test(parser, test_index = -1):
     print("dummy")

@@ -223,11 +223,11 @@ class BasicVykingLexer(Lexer):
     # Error handling rule
     # Print offending character and skip
     def t_error(self, t):
-        print "Illegal character '%s'" % t.value[0]
+        print("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
     def t_bol_error(self, t):
-        print "Illegal character '%s'" % t.value[0]
+        print("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
     def get_lexpos(self):
@@ -250,4 +250,4 @@ if a == b:
     while True:
         tok = lexer.token()
         if not tok: break      # No more input
-        print tok
+        print(tok)
