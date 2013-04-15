@@ -67,62 +67,62 @@ defun slow_inverse(f, delta):
     """
 
 zero = """
-# Déclaration des variables de départ
-argent = 1000 # On a 1000 $ au début du jeu
-continuer_partie = True # Booléen qui est vrai tant qu'on doit
+# Declaration des variables de depart
+argent = 1000 # On a 1000 $ au debut du jeu
+continuer_partie = True # Booleen qui est vrai tant qu'on doit
                         # continuer la partie
 
-print("Vous vous installez à la table de roulette avec", argent, "$.")
+print("Vous vous installez a la table de roulette avec", argent, "$.")
 
 while continuer_partie: # Tant qu'on doit continuer la partie
-    # on demande à l'utilisateur de saisir le nombre sur
+    # on demande a l'utilisateur de saisir le nombre sur
     # lequel il va miser
     nombre_mise = -1
     while nombre_mise < 0 or nombre_mise > 49:
         nombre_mise = input("Tapez le nombre sur lequel vous voulez miser (entre 0 et 49) : ")
-        # On convertit le nombre misé
+        # On convertit le nombre mise
 
         nombre_mise = int(nombre_mise)
         if nombre_mise < 0:
-            print("Ce nombre est négatif")
+            print("Ce nombre est negatif")
         if nombre_mise > 49:
-            print("Ce nombre est supérieur à 49")
+            print("Ce nombre est superieur a 49")
 
-    # À présent, on sélectionne la somme à miser sur le nombre
+    # À present, on selectionne la somme a miser sur le nombre
     mise = 0
     while mise <= 0 or mise > argent:
         mise = input("Tapez le montant de votre mise : ")
         # On convertit la mise
         mise = int(mise)
         if mise <= 0:
-            print("La mise saisie est négative ou nulle.")
+            print("La mise saisie est negative ou nulle.")
         if mise > argent:
             print("Vous ne pouvez miser autant, vous n'avez que", argent, "$")
 
-    # Le nombre misé et la mise ont été sélectionnés par
+    # Le nombre mise et la mise ont ete selectionnes par
     # l'utilisateur, on fait tourner la roulette
     numero_gagnant = randrange(50)
-    print("La roulette tourne... ... et s'arrête sur le numéro", numero_gagnant)
+    print("La roulette tourne... ... et s'arrete sur le numero", numero_gagnant)
 
-    # On établit le gain du joueur
+    # On etablit le gain du joueur
     if numero_gagnant == nombre_mise:
-        print("Félicitations ! Vous obtenez", mise * 3, "$ !")
+        print("Felicitations ! Vous obtenez", mise * 3, "$ !")
         argent += mise * 3
-    elif numero_gagnant % 2 == nombre_mise % 2: # ils sont de la même couleur
+    elif numero_gagnant % 2 == nombre_mise % 2: # ils sont de la meme couleur
         mise = ceil(mise * 0.5)
-        print("Vous avez misé sur la bonne couleur. Vous obtenez", mise, "$")
+        print("Vous avez mise sur la bonne couleur. Vous obtenez", mise, "$")
         argent += mise
     else:
-        print("Désolé l'ami, c'est pas pour cette fois. Vous perdez votre mise.")
+        print("Desole l'ami, c'est pas pour cette fois. Vous perdez votre mise.")
         argent -= mise
 
-    # On interrompt la partie si le joueur est ruiné
+    # On interrompt la partie si le joueur est ruine
     if argent <= 0:
-        print("Vous êtes ruiné ! C'est la fin de la partie.")
+        print("Vous etes ruine ! C'est la fin de la partie.")
         continuer_partie = False
     else:
         # On affiche l'argent du joueur
-        print("Vous avez à présent", argent, "$")
+        print("Vous avez a present", argent, "$")
         quitter = input("Souhaitez-vous quitter le casino (o/n) ? ")
         if quitter == "o" or quitter == "O":
             print("Vous quittez le casino avec vos gains.")

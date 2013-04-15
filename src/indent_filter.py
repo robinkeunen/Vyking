@@ -64,7 +64,7 @@ class IndentFilter():
         """
         return self.filter_tokens()
 
-    def next(self):
+    def __next__(self):
         while True:
             token = self.token()
             if token is None:

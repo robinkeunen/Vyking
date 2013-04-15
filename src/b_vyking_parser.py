@@ -5,19 +5,20 @@
 
 import logging
 import sys
-import ast
-import os
+import src.ast as ast
 import ply.lex as lex
 import ply.yacc as yacc
 from src.indent_filter import IndentFilter
 from src.test_units import inputs
+from src.b_vyking_lexer import BasicVykingLexer
 
 sys.path.insert(0, "../..")
 
 if sys.version_info[0] >= 3:
     raw_input = input
 
-from .b_vyking_lexer import BasicVykingLexer
+
+
 
 class Parser(object):
     """
@@ -30,12 +31,9 @@ class Parser(object):
         self.debug = kw.get('debug', 0)
         self.names = {}
         self.start = start
-        try:
-            modname = os.path.split(os.path.splitext(__file__)[0])[1] + "_" + self.__class__.__name__
-        except:
-            modname = self.__class__.__name__
-        self.debugfile = modname + ".dbg"
-        self.tabmodule = modname + "_" + "parsetab"
+        dbg_filename = self.__class__.__name__
+        self.debugfile = dbg_filename + ".dbg"
+        self.tabmodule = dbg_filename + "_" + "parsetab"
         #print self.debugfile, self.tabmodule
 
         # Build the lexer and parser
@@ -51,7 +49,7 @@ class Parser(object):
                                 debugfile=self.debugfile,
                                 tabmodule=self.tabmodule,
                                 start=self.start
-        )
+                                )
 
     def run(self):
         while 1:
@@ -98,7 +96,7 @@ class BasicVykingParser(Parser):
 
     def p_vyking_input(self, p):
         'vyking_input : statement_sequence ENDMARKER'
-        p[0] = p[1]
+        p[0] = ast.Statement_sequence(p[1])
 
 
     def p_statement_sequence(self, p):
@@ -108,10 +106,9 @@ class BasicVykingParser(Parser):
         """
         # tuple of the statements
         if len(p) == 3:
-            p[0] = ast.Statement_sequence(p[1], p[2])
+            p[0] = [p[1]] + p[2]
         else:
-            p[0] = ast.Statement_sequence(p[1])
-
+            p[0] = [p[1]]
 
     def p_statement(self, p):
         """
@@ -137,7 +134,6 @@ class BasicVykingParser(Parser):
                            | fundef
         """
         p[0] = p[1]
-
 
     def p_assignment(self, p):
         """
@@ -242,7 +238,7 @@ class BasicVykingParser(Parser):
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = p[3]
+            p[0] = ast.Statement_sequence(p[3])
 
 
     def p_clause(self, p):
@@ -347,13 +343,13 @@ class BasicVykingParser(Parser):
     def p_error(self, p):
         if p is None:
             print("fix for missing line")
-            parser.errok()
+            self.parser.errok()
             return self.new_token("ENDMARKER", self.lexer.get_lineno())
 
         elif p.type == "ENDMARKER":
             print("line %d: Missing new line at end of file." % p.lineno)
             p.lexer.lookahead = p
-            parser.errok()
+            self.parser.errok()
             return self.new_token("NEWLINE", p.lineno)
         else:
             print('line %d: Syntax error when reading %s ' % (p.lineno, str(self, p)))
@@ -377,10 +373,10 @@ class BasicVykingParser(Parser):
 # Usage
 if __name__ == "__main__":
     data = inputs["zero"]
-
+    print(data)
     # logger object
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         filename="parselog.txt",
         filemode="w",
         format="%(message)s"

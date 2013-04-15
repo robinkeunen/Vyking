@@ -106,7 +106,7 @@ class BasicVykingLexer(Lexer):
     def __iter__(self):
         return self.lexer
 
-    def next(self):
+    def __next__(self):
         for tok in self.lexer.token():
             yield tok
         yield self._new_token('NEWLINE', lexer.lineno)

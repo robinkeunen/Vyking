@@ -1,12 +1,14 @@
+import sys
+
 __author__ = 'Robin Keunen'
 
 
 class ASTNode(object):
     """
-    Abstract class for nodes. Childs must implement
-     accept(ASTNodeVisitor)
+    Abstract class for nodes of the syntax tree.
+    Children must implement accept(ASTNodeVisitor)
+    (Visitor design pattern)
     """
-
     def accept(self):
         raise NotImplementedError("Should have implemented this")
 
@@ -22,16 +24,14 @@ class Statement(ASTNode):
 
 
 class Statement_sequence():
-    def __init__(self, statement, statement_sequence=None):
+    def __init__(self, statement_sequence):
         self.type = "statement_sequence"
-        if statement_sequence is None:
-            self.stat_list = [statement]
-        else:
-            self.stat_list = [statement] + statement_sequence.stat_list
+        self.statement_sequence = statement_sequence
+        print("- " + str(statement_sequence))
 
     def __str__(self):
         result = ""
-        for st in self.stat_list:
+        for st in self.statement_sequence:
             result += str(st) + "\n"
         return result
 
@@ -56,9 +56,14 @@ class Return(Statement):
 
 
 class Funcall(Statement):
-    def __init__(self, id, args=[]):
+    def __init__(self, name, args=[]):
+        """
+
+        :param name:
+        :param args:
+        """
         self.type = "funcall"
-        self.id = id
+        self.name = name
         self.args = args
 
     def __str__(self):
@@ -66,7 +71,7 @@ class Funcall(Statement):
         for arg in self.args:
             args_repr += str(arg)
         args_repr += "]"
-        return "(f:%s %s)" % (self.id, args_repr)
+        return "(f:%s %s)" % (self.name, args_repr)
 
 
 class If(Statement):
@@ -121,8 +126,14 @@ class While(Statement):
 
 
 class Fundef(Statement):
-    def __init__(self, id, suite, parameters=[]):
-        self.id = id
+    def __init__(self, name, suite, parameters=[]):
+        """
+
+        :param name:
+        :param suite:
+        :param parameters:
+        """
+        self.name = name
         self.parameters = parameters
         self.suite = suite
 
@@ -131,7 +142,7 @@ class Fundef(Statement):
         for p in self.parameters:
             parameters += str(p) + ' '
         parameters += "]"
-        return "(DEFUN %s %s \n %s)" % (str(self.id), parameters, str(self.suite))
+        return "(DEFUN %s %s \n %s)" % (str(self.name), parameters, str(self.suite))
 
 
 class Expression(ASTNode):
