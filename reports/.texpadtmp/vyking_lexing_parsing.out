@@ -1,10 +1,10 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
-\BOOKMARK [1][-]{section.2}{Trois versions de Vyking}{}% 2
-\BOOKMARK [1][-]{section.3}{Choix des outils}{}% 3
-\BOOKMARK [1][-]{section.4}{L'indentation}{}% 4
-\BOOKMARK [2][-]{subsection.4.1}{Lexing de l'indentation}{section.4}% 5
-\BOOKMARK [2][-]{subsection.4.2}{D\351limitation des blocs}{section.4}% 6
-\BOOKMARK [3][-]{subsubsection.4.2.1}{G\351n\351ration des DEDENT}{subsection.4.2}% 7
-\BOOKMARK [1][-]{section.5}{Parsing}{}% 8
-\BOOKMARK [1][-]{section.6}{Gestion des erreurs}{}% 9
-\BOOKMARK [1][-]{section.7}{Remarques}{}% 10
+\BOOKMARK [2][-]{subsection.1.1}{Structure des classes}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{Choix des outils}{}% 3
+\BOOKMARK [1][-]{section.3}{L'indentation}{}% 4
+\BOOKMARK [2][-]{subsection.3.1}{Lexing de l'indentation}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.2}{D\351limitation des blocs}{section.3}% 6
+\BOOKMARK [1][-]{section.4}{Parsing}{}% 7
+\BOOKMARK [2][-]{subsection.4.1}{if ... elif ... else}{section.4}% 8
+\BOOKMARK [2][-]{subsection.4.2}{Arbre syntaxique}{section.4}% 9
+\BOOKMARK [1][-]{section.5}{Remarques}{}% 10

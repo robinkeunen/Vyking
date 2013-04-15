@@ -140,15 +140,37 @@
 
 \section{Introduction}
 
-classes 
-endmarker
-    générateur
-    
-\section{Trois versions de Vyking}
     Pour séparer les difficultés dans la compilation du langage, nous travaillerons sur trois versions successives du langage.
     La première, \emph{basic\_vyking} n'implémente que les fonctions de bases, le noyau du langage.
     La deuxième, \emph{listed\_vyking} rajoute les listes et les opérateurs de liste.
-    La troisième et dernière version \emph{full\_vyking} implémentera les closures.
+    
+\subsection{Structure des classes}
+    La structure des classes est illustre à la figure \ref{static_structure}
+    \paragraph{}
+     \emph{Lexer} est une classe abstraite initiant les paramètres de base du lexer.\\
+    \emph{BasicVykingLexer} spécifie les règles pour un sous-ensemble du langage complet.\\
+    \emph{ListedVykingLexer} étend les règles pour ajouter les tokens correspondant aux listes.
+
+        \paragraph{}
+     \emph{Parser}, comme \emph{Lexer} est une classe abstraite initiant les paramètres de base du parser.
+    \emph{BasicVykingLexer} spécifie la grammaire pour un sous-ensemble du langage.\\
+    \emph{ListedVykingLexer} étend la grammaire pour y ajouter les listes.
+    
+        \paragraph{}
+     \emph{IndentFilter} se place entre le lexer et le parser pour générer des délimiteurs de bloc. \emph{IndentFilter} ajoute aussi un symbole ENDMARKER à la fin du flux de tokens.
+     Le filtre tire parti des générateur de python.
+    Son mécanisme est expliqué à la section \ref{filtersec}.
+    
+    \paragraph{}
+    \emph{Stack} implémente une pile pour le filtre. \emph{ASTNodes} est une classe abstraite représentant les noeuds de l'arbre syntaxique.
+    A chaque fois qu'un noeud doit retenir de de l'information, des actions ou des relations à d'autres noeuds, on crée une nouvelle classe héritant de \emph{ASTNodes} pour le représenter.
+    Se référer à la section \ref{astsec}.
+   
+    \begin{figure}[h]
+    \includegraphics[width=\textwidth]{static_structure}
+    \caption{Structure statique du compilateur (lexing et parsing)}
+    \label{static_structure}
+    \end{figure}
     
 \section{Choix des outils}
     Nous avons isolé quelques lexer/parser dans la multitudes des outils disponibles.
@@ -177,7 +199,7 @@ endmarker
         Une introduction est disponible ici \url{http://www.dabeaz.com/ply/ply.html}.
         
         
-\section{L'indentation}    
+\section{L'indentation} \label{filtersec}
     Dans une syntaxe à la python, les espaces ne sont significatifs qu'en début de ligne et servent à délimiter les blocs.
     L'indentation est représentée par les tokens \verb WS  dont la valeur est le nombre d'espaces en début de ligne.
     
@@ -223,7 +245,7 @@ endmarker
         Si il n'y a pas de bloc indenté, on lève une erreur.
         \end{itemize}
     
-    \subsubsection{Génération des DEDENT}
+    \subsubsection*{Génération des DEDENT}
         Quand \emph{IndentFilter} lit un \verb WS  dont la valeur est inférieure au niveau courant, 
         il génére des \verb DEDENT  tant que le niveau au sommet de la pile n'est pas le même que celui de \verb WS .
         Les états NO\_INDENT et NEED\_DEDENT ne sont pas explicites dans le code.
@@ -235,21 +257,13 @@ endmarker
     \end{figure}
 
 \section{Parsing}
-\subsection*{if ... elif ... else}
-dangling statement dont need mewline (dedent jour leur role)
+
+\subsection{if ... elif ... else}
+dangling statement dont need newline (dedent jour leur role)
 
 precedence empty < else < elif
 
-\section{Gestion des erreurs}
-explication
-
-\subsection*{detection}
-    missing colon
-    indentation error
-\subsection*{fixing}
-
-missing line at end of file
-indentation problems
+\subsection{Arbre syntaxique} \label{astsec}
 
 
 \section{Remarques}
