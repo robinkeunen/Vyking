@@ -1,5 +1,7 @@
 # -----------------------------------------------------------------------------
 # b_vyking_lexer.py
+# Implementation of the lexer for Vyking
+# Only implements a subset if the language (list-free)
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
 
@@ -69,7 +71,8 @@ class BasicVykingLexer(Lexer):
               'GEQ',
               'NEQ',
               'WS',
-              'COMMA'] + list(reserved.values())
+              'COMMA',
+              'ENDMARKER'] + list(reserved.values())
 
     # Token definitions
     # Token defined as functions when an action is needed
@@ -239,9 +242,10 @@ class BasicVykingLexer(Lexer):
     def find_column(self, token):
         """
         Computes column of token
-        :param token: token
-        :return:
+        :param token: token to find
+        :return: column number of token
         """
+        # cr for carriage return
         last_cr = self.lexer.lexdata.rfind('\n', 0, token.lexpos)
         if last_cr < 0:
             last_cr = 0
@@ -249,9 +253,15 @@ class BasicVykingLexer(Lexer):
         return column
 
     def get_lexpos(self):
+        """
+        :return: current position of the lexer in the input
+        """
         return self.lexer.lexpos
 
     def get_lineno(self):
+        """
+        :return: current line number of the lexer.
+        """
         return self.lexer.lineno
 
 # Usage

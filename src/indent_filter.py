@@ -1,15 +1,13 @@
 # -----------------------------------------------------------------------------
 # indent_filter.py
+# Filter between the lexer and the parser.
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
 
 from src.b_vyking_lexer import BasicVykingLexer
 from src.ply import lex
-from src.stack import Stack, EmptyStackException
+from src.stack import Stack
 from src.test_units import inputs
-
-__author__ = 'Robin Keunen'
-__author__ = 'Pierre Vyncke'
 
 
 class VykingSyntaxError(Exception):
@@ -26,6 +24,11 @@ class VykingIndentationError(VykingSyntaxError):
     """
 
     def __init__(self, lineno, message):
+        """
+        Exception initializer.
+        :param lineno: line number at which exception occured
+        :param message: cause of the indentation error
+        """
         self.lineno = lineno
         self.message = message
 
@@ -44,15 +47,14 @@ class IndentFilter():
 
     def __init__(self, lexer):
         """
-        Args:
-         lexer must be an iterator of token
+        Filter initilizer
+        :param lexer: lexer must be an iterator returning tokens
         """
         self.lexer = lexer
         # Get token list and update it
         self.tokens = self.lexer.tokens  # __class__.tokens
         self.tokens.append('INDENT')
         self.tokens.append('DEDENT')
-        self.tokens.append('ENDMARKER')
         self.tokens.remove('WS')
 
     def __iter__(self):
@@ -74,6 +76,10 @@ class IndentFilter():
         raise StopIteration
 
     def input(self, data):
+        """
+        Feeds data to the lexer and initialises the filter.
+        :param data: String of data to lex and filter
+        """
         self.lexer.lexer.lineno = 1
         self.lexer.input(data)
         # make iterator from generator
@@ -83,12 +89,22 @@ class IndentFilter():
         self.level = 0
 
     def token(self):
+        """
+        :return: next filtered token
+        """
         try:
             return next(self.filtered_stream)
         except StopIteration:
             return None
 
     def filter_tokens(self):
+        """
+        Requests tokens from the lexer and adds INDENT and DEDENT
+        to the stream where relevant.
+
+        :return: filtered token
+        :raise: VykingIndentationError
+        """
         # Vyking has 3 indentation states.
         # - no colon hence no need to indent
         # - COLON was read, next rule must be a single line statement
@@ -161,9 +177,8 @@ class IndentFilter():
     def _new_token(self, token_type, lineno):
         """Returns new token
 
-        Args:
-            type -- token type
-            lineno -- line number of token
+        :param token_type: type of token requested
+        :param lineno: line number of the token
         """
         tok = lex.LexToken()
         tok.type = token_type
@@ -183,9 +198,7 @@ class IndentFilter():
     def _pretty_print_token(self, token):
         """Pretty prints token on stdout
 
-        Args:
-            token -- LexToken to print
-
+        :param token: LexToken to print
         """
         INLINE = 0
         BOL = 1
@@ -213,6 +226,7 @@ class IndentFilter():
             print(token.type, end=' ')
 
     def _print_input(self, data):
+        """Prints data on stdout"""
         lineno = 1
         for line in data.split('\n'):
             print(lineno, line)
@@ -220,18 +234,18 @@ class IndentFilter():
         print('\n')
 
     def get_lexpos(self):
+        """Returns the lexing position of the lexer"""
         return self.lexer.get_lexpos()
 
     def get_lineno(self):
+        """Returns the line number of the lexer"""
         return self.lexer.get_lineno()
 
     def filter_test(self, test_index=-1):
         """Test the filter on inputs defined in test_units.py
 
-        Args:
-            test_id -- index of the program sample to test the filter on
-                       test on all inputs if test_id is -1 (default)
-
+        :param test_index: index of the program sample to test the filter on
+          test on all inputs if test_id is -1 (default)
         """
         if test_index == -1:
             for data in inputs:

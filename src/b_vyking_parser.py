@@ -1,5 +1,6 @@
 # -----------------------------------------------------------------------------
 # b_vyking_parser.py
+# Parser for a subset of the vyking language (list free)
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
 
@@ -18,19 +19,24 @@ if sys.version_info[0] >= 3:
     raw_input = input
 
 
-
-
 class Parser(object):
     """
     Base class for a lexer/parser that has the rules defined as methods
     """
     precedence = ()
 
-
     def __init__(self, lexer=None, start=None, **kw):
+        # Get arguments
+        """
+        Parser initializer
+        :param lexer: lexer used to tokenize the input
+        :param start: start symbol of the grammar
+        :param kw: keyword arguments
+        """
         self.debug = kw.get('debug', 0)
         self.names = {}
         self.start = start
+        # file name for the parse tables
         dbg_filename = self.__class__.__name__
         self.debugfile = dbg_filename + ".dbg"
         self.tabmodule = dbg_filename + "_" + "parsetab"
@@ -42,25 +48,29 @@ class Parser(object):
             self.lexer = lex.lex(module=self, debug=self.debug)
         else:
             self.lexer = lexer
+            # get token iterator
             self.tokens = self.lexer.tokens
 
+        # Initialise the parser
         self.parser = yacc.yacc(module=self,
                                 debug=self.debug,
                                 debugfile=self.debugfile,
                                 tabmodule=self.tabmodule,
                                 start=self.start
-                                )
-
-    def run(self):
-        while 1:
-            try:
-                s = raw_input('input > ')
-            except EOFError:
-                break
-            if not s: continue
-            self.parse(s)
+        )
 
     def parse(self, input=None, lexer=None, debug=0, tracking=0, tokenfunc=None):
+        """
+        Parses the input
+        :param input: string of the data to parse
+        :param lexer: lexer to user for the parsing, defaults
+               to the one specified on initialization
+        :param debug: True to get debugging messages in stdout.
+                      Can also receive a logging object to get more precise behaviour
+        :param tracking: True to ask the parser to follow line numbers.
+        :param tokenfunc: tokenize function
+        :return:
+        """
         if lexer is None:
             return self.parser.parse(input=input, lexer=self.lexer,
                                      debug=debug, tracking=tracking, tokenfunc=tokenfunc)
@@ -70,6 +80,10 @@ class Parser(object):
 
 
 class BasicVykingParser(Parser):
+    """
+    Parser for a parser of a list-free Vyking
+    """
+    #precedence rules
     precedence = (
         ('nonassoc', 'unmatched_if'),
         ('nonassoc', 'ELSE'),
@@ -82,13 +96,17 @@ class BasicVykingParser(Parser):
     )
 
     def __init__(self, **kw):
+        """
+    Parser initializer
+        :param kw: keyword arguments
+        """
         mylexer = IndentFilter(BasicVykingLexer())
         super(BasicVykingParser, self).__init__(lexer=mylexer,
                                                 start="vyking_input",
                                                 **kw)
         self.tokens = self.lexer.tokens
 
-
+    # empty rule
     def p_empty(self, p):
         'empty :'
         pass
@@ -300,7 +318,7 @@ class BasicVykingParser(Parser):
         elif p[2] == '%':
             p[0] = ast.Expression(p[1], 'MOD', p[3])
 
-
+    # unary minus
     def p_expression_uminus(self, p):
         'expression : MINUS expression %prec UMINUS'
         p[0] = ast.Expression(None, 'UMINUS', p[2])
@@ -309,26 +327,21 @@ class BasicVykingParser(Parser):
         'expression : numeric'
         p[0] = p[1]
 
-
     def p_numeric_int(self, p):
         'numeric : INT'
         p[0] = ast.Vinteger(p[1])
-
 
     def p_numeric_float(self, p):
         'numeric : FLOAT'
         p[0] = ast.Vfloat(p[1])
 
-
     def p_expression_id(self, p):
         'expression : ID'
         p[0] = ast.ID(p[1])
 
-
     def p_expression_string(self, p):
         'expression : STRING'
         p[0] = ast.Vstring(p[1])
-
 
     def p_expression_funcall(self, p):
         'expression : funcall'
@@ -357,9 +370,8 @@ class BasicVykingParser(Parser):
     def new_token(self, token_type, lineno):
         """Returns new token
 
-        Args:
-            type -- token type
-            lineno -- line number of token
+        :param token_type: token type
+        :param lineno: line number of token
         """
         tok = lex.LexToken()
         tok.type = token_type

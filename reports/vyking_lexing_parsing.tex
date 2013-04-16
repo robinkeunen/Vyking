@@ -153,6 +153,7 @@
      \emph{Lexer} est une classe abstraite initiant les paramètres de base du lexer.\\
     \emph{BasicVykingLexer} spécifie les règles pour un sous-ensemble du langage complet.\\
     \emph{ListedVykingLexer} étend les règles pour ajouter les tokens correspondant aux listes.
+    Le lexer ajoute un symbole ENDMARKER à la fin du flux de tokens.
 
         \paragraph{}
      \emph{Parser}, comme \emph{Lexer} est une classe abstraite initiant les paramètres de base du parser.
@@ -160,7 +161,7 @@
     \emph{ListedVykingLexer} étend la grammaire pour y ajouter les listes.
     
         \paragraph{}
-     \emph{IndentFilter} se place entre le lexer et le parser pour générer des délimiteurs de bloc. \emph{IndentFilter} ajoute aussi un symbole ENDMARKER à la fin du flux de tokens.
+     \emph{IndentFilter} se place entre le lexer et le parser pour générer des délimiteurs de bloc.
      Le filtre tire parti des générateur de python.
     Son mécanisme est expliqué à la section \ref{filtersec}.
     

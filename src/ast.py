@@ -1,4 +1,9 @@
-import sys
+# -----------------------------------------------------------------------------
+# ast.py
+# Nodes of the abstract syntax tree for the Vyking language.
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
+
 
 __author__ = 'Robin Keunen'
 
@@ -9,6 +14,8 @@ class ASTNode(object):
     Children must implement accept(ASTNodeVisitor)
     (Visitor design pattern)
     """
+
+    # accept visitor (not implemented yet)
     def accept(self):
         raise NotImplementedError("Should have implemented this")
 
