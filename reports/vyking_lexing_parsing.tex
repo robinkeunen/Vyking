@@ -145,6 +145,8 @@
     La deuxième, \emph{listed\_vyking} rajoute les listes et les opérateurs de liste.
     Nous nous attaquerons à cette version quand la première version du langage sera opérationnelle (du lexing à la génération de code).
     
+    Le parser est implémenté en Python 3.
+    
 \subsubsection*{Structure des classes}
     La structure des classes est illustre à la figure \ref{static_structure}
     \paragraph{}
@@ -258,14 +260,50 @@
     \end{figure}
 
 \section{Parsing}
-
-\subsection{if ... elif ... else}
+    
+    \subsubsection*{Instructions simples et composées}
+    Les instructions peuvent être simples ou composées.
+    Les instructions simples sont fermées par un \verb NEWLINE , les instructions composées sont suivies d'un bloc \verb suite . 
+    Le bloc \verb suite  est fermé par un \verb DEDENT .
+        
 dangling statement dont need newline (dedent jour leur role)
+    
+    \subsubsection*{if .. elif ... else}
+        Nous cherchons à associer les tokens \verb ELSE  aux bons \verb IF , c'est à dire à celui le plus proche.
+        Le problème du \emph{"dangling else"} a été résolu en spécifiant la précédence des règles de la grammaire.
+        La grammaire d'une instruction "if" est la suivante :
+        
+    \begin{eqnarray*}    
+    if\_statement &::=& IF ~ clause ~ COLON ~ suite ~ if\_closure \\
+    if\_closure &::=& elif\_statement\\
+          &|&  ELSE ~ COLON ~ suite \\
+          &|& empty ~ \%prec ~ unmatched\_if
+    \end{eqnarray*}
+Le parser essaie d'associer une \emph{if\_closure} (fermeture de if) à chaque instruction if.
+Une \emph{if\_closure} peut être une instruction elif, un else ou vide.
+La liste de précédende indique au parser l'ordre correct de réduction des règles.
+La commande \verb|%prec unmatched_if| permet d'associer une priorité de la table des priorités à une règle.
+        
+        \begin{verbatim}
+precedence = (
+    ('nonassoc', 'unmatched_if'),
+    ('nonassoc', 'ELSE'),
+    ('nonassoc', 'ELIF'),
+    ...
+    )}
+    \end{verbatim}
 
-precedence empty < else < elif
-
-\subsection{Arbre syntaxique} \label{astsec}
-
+    \subsection{Arbre syntaxique} \label{astsec}
+        La classe \emph{ASTNode} représente un noeud de l'arbre syntaxique.
+        Pour chaque sorte de noeud, une nouvelle classe est implémentée.
+        Ces classes héritent de ASTNodes et représente la structure du noeud.
+        La figure \ref{ast} illustre le diagramme de structure statique de ast.py.
+        
+     \begin{figure}
+    \includegraphics[angle=90,width=11cm]{ast.pdf}
+    \caption{Structure statique des noeuds de l'arbre syntaxique.}
+    \label{ast}
+    \end{figure}
 
 \section{Remarques}
     Les 3 étapes lexing, filtre et parsing sont découplées.

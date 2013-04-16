@@ -4,6 +4,5 @@
 \BOOKMARK [2][-]{subsection.3.1}{Lexing de l'indentation}{section.3}% 4
 \BOOKMARK [2][-]{subsection.3.2}{D\351limitation des blocs}{section.3}% 5
 \BOOKMARK [1][-]{section.4}{Parsing}{}% 6
-\BOOKMARK [2][-]{subsection.4.1}{if ... elif ... else}{section.4}% 7
-\BOOKMARK [2][-]{subsection.4.2}{Arbre syntaxique}{section.4}% 8
-\BOOKMARK [1][-]{section.5}{Remarques}{}% 9
+\BOOKMARK [2][-]{subsection.4.1}{Arbre syntaxique}{section.4}% 7
+\BOOKMARK [1][-]{section.5}{Remarques}{}% 8

@@ -185,7 +185,7 @@ class BasicVykingParser(Parser):
 
     def p_if_closure(self, p):
         """
-        if_closure : elif_statement %prec ELIF
+        if_closure : elif_statement
                    | ELSE COLON suite
         """
         if len(p) == 2:
@@ -289,7 +289,6 @@ class BasicVykingParser(Parser):
                    | expression DIVIDE expression
                    | expression MOD expression
         """
-        #print [repr(p[i]) for i in range(0,4)]
         if p[2] == '+':
             p[0] = ast.Expression(p[1], 'PLUS', p[3])
         elif p[2] == '-':
@@ -372,7 +371,7 @@ class BasicVykingParser(Parser):
 
 # Usage
 if __name__ == "__main__":
-    data = inputs["find_bounds"]
+    data = inputs["zero"]
     print(data)
     # logger object
     logging.basicConfig(
@@ -386,6 +385,3 @@ if __name__ == "__main__":
     parser = BasicVykingParser(debug=False)
     result = parser.parse(data, debug=False)
     print(result)
-
-
-

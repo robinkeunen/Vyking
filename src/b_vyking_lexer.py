@@ -4,11 +4,20 @@
 # -----------------------------------------------------------------------------
 
 import ply.lex as lex
-from .test_units import lex_test
+from src.test_units import lex_test
 
 
 class Lexer():
-    pass
+    def __init__(self, **kw):
+    # Get arguments
+        self.debug = kw.get('debug', 0)
+        self.optimize = kw.get('optimize', 0)
+        # initialize lexer
+        self.lexer = lex.lex(module=self, debug=self.debug,
+                             optimize=self.optimize)
+
+    def __iter__(self):
+        return self.lexer
 
 
 class BasicVykingLexer(Lexer):
@@ -97,33 +106,35 @@ class BasicVykingLexer(Lexer):
         ('bol', 'exclusive'),  # bol -> beginning if line
     )
 
-    def __init__(self, **kw):
-        self.debug = kw.get('debug', 0)
-        self.optimize = kw.get('optimize', 0)
-        self.lexer = lex.lex(module=self, debug=self.debug,
-                             optimize=self.optimize)
-
-    def __iter__(self):
-        return self.lexer
-
     def __next__(self):
         for tok in self.lexer.token():
             yield tok
+        # NEWLINE at the end of token stream
         yield self._new_token('NEWLINE', lexer.lineno)
+        yield self._new_token("ENDMARKER", self.get_lineno())
         raise StopIteration
 
     def input(self, data):
+        """
+        Feeds data to the lexer
+        :param data: target string to lex
+        """
         self.lexer.input(data)
 
     def token(self):
+        """
+        Returns next token from the lexer.
+        Returns None if the lexer is empty.
+        :return: next token from lexer
+        """
         return self.lexer.token()
 
     def _new_token(self, type, lineno):
-        """Returns new token
-
-        Args:
-            type -- token type
-            lineno -- line number of token
+        """
+        Returns a new token
+        :param type: token type
+        :param lineno: line number of token
+        :return:
         """
         tok = lex.LexToken()
         tok.type = type
@@ -131,16 +142,18 @@ class BasicVykingLexer(Lexer):
         tok.lineno = lineno
         return tok
 
+    # switch to bol state
     def t_begin_bol(self, t):
         r'start_bol'
-        #print 'begin bol'
         t.lexer.begin('bol')  # starts bol state
 
+    # exit bol state
     def t_bol_end(self, t):
         r'end_bol'
         #print 'end bol'
         t.lexer.begin('INITIAL')  # back to initial state
 
+    # Token rules
 
     @lex.TOKEN(number + r'\.\d*' + exponent + r'?')
     def t_FLOAT(self, t):
@@ -168,10 +181,9 @@ class BasicVykingLexer(Lexer):
         pass
         # No return value. Token discarded
 
-    # Track line number
     def t_NEWLINE(self, t):
         r'(\n|\n\r|\r\n)'
-        t.lexer.lineno += 1
+        t.lexer.lineno += 1  # Track line number
         self.t_begin_bol(t)
         return t
 
@@ -192,7 +204,15 @@ class BasicVykingLexer(Lexer):
         pass
         # token discarded
 
-    # Only active in bol state, tracks beginning of line whitespaces.
+    # Error handling rule
+    # Print offending character and skip
+    def t_error(self, t):
+        print("Illegal character '%s'" % t.value[0])
+        t.lexer.skip(1)
+
+    # bol state token rules
+
+    # Tracks beginning of line whitespaces.
     def t_bol_WS(self, t):
         r'\s+'
         t.value = len(t.value)
@@ -209,26 +229,24 @@ class BasicVykingLexer(Lexer):
         t.value = 0
         return t
 
+    # error rule while in bol state
+    def t_bol_error(self, t):
+        print("Illegal character '%s'" % t.value[0])
+        t.lexer.skip(1)
 
-    # Compute column.
-    #    input is the input text string
-    #    token is a token instance
+    # Helper functions
+
     def find_column(self, token):
+        """
+        Computes column of token
+        :param token: token
+        :return:
+        """
         last_cr = self.lexer.lexdata.rfind('\n', 0, token.lexpos)
         if last_cr < 0:
             last_cr = 0
         column = (token.lexpos - last_cr) + 1
         return column
-
-    # Error handling rule
-    # Print offending character and skip
-    def t_error(self, t):
-        print("Illegal character '%s'" % t.value[0])
-        t.lexer.skip(1)
-
-    def t_bol_error(self, t):
-        print("Illegal character '%s'" % t.value[0])
-        t.lexer.skip(1)
 
     def get_lexpos(self):
         return self.lexer.lexpos
