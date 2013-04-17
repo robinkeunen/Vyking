@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2011.7.3)  16 APR 2013 15:49
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2011.7.3)  16 APR 2013 17:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -794,7 +794,7 @@ t)
 \@outlinefile=\write3
 \openout3 = `vyking_lexing_parsing.out'.
 
- <vyking-logo2.jpg, id=36, 602.25pt x 602.25pt>
+ <vyking-logo2.jpg, id=40, 602.25pt x 602.25pt>
 File: vyking-logo2.jpg Graphic file (type jpg)
  <use vyking-logo2.jpg>
 Package pdftex.def Info: vyking-logo2.jpg used on input line 125.
@@ -842,7 +842,7 @@ LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 141.
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <10.95> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 150.
- <static_structure.pdf, id=47, 686.565pt x 287.0725pt>
+ <static_structure.pdf, id=51, 686.565pt x 287.0725pt>
 File: static_structure.pdf Graphic file (type pdf)
 
 <use static_structure.pdf>
@@ -861,7 +861,7 @@ LaTeX Font Info:    Try loading font information for T1+pcr on input line 203.
 (/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
-<lexing_state_machine.pdf, id=98, 489.83pt x 189.70876pt>
+<lexing_state_machine.pdf, id=102, 489.83pt x 189.70876pt>
 File: lexing_state_machine.pdf Graphic file (type pdf)
 
 <use lexing_state_machine.pdf>
@@ -875,15 +875,15 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
  This may cause the page layout to be inconsistent, however.
 
 [3]
-Overfull \hbox (2.70682pt too wide) in paragraph at lines 247--248
+Overfull \hbox (2.70682pt too wide) in paragraph at lines 246--247
 \T1/ptm/m/n/10.95 tourne à l'état NO_INDENT. Si on lit un []\T1/pcr/m/n/10.95 N
 EWLINE \T1/ptm/m/n/10.95 on passe à l'état MUST_INDENT. 
  []
 
-<filter.pdf, id=117, 528.97626pt x 761.84625pt>
+<filter.pdf, id=121, 528.97626pt x 761.84625pt>
 File: filter.pdf Graphic file (type pdf)
  <use filter.pdf>
-Package pdftex.def Info: filter.pdf used on input line 258.
+Package pdftex.def Info: filter.pdf used on input line 260.
 (pdftex.def)             Requested size: 398.3386pt x 573.69662pt.
 
 
@@ -899,11 +899,15 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
  We now make it that large for the rest of the document.
  This may cause the page layout to be inconsistent, however.
 
-[5 <./filter.pdf>] <ast.pdf, id=229, 761.84625pt x 374.39874pt>
+[5 <./filter.pdf>] <ast.pdf, id=233, 790.955pt x 397.485pt>
 File: ast.pdf Graphic file (type pdf)
  <use ast.pdf>
 Package pdftex.def Info: ast.pdf used on input line 304.
-(pdftex.def)             Requested size: 761.84439pt x 374.39783pt.
+(pdftex.def)             Requested size: 790.95308pt x 397.48402pt.
+
+
+LaTeX Warning: Float too large for page by 2.76205pt on input line 307.
+
 
 (/Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_lexing_parsing.bb
 l
@@ -918,9 +922,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 4--8
 1 / 03 /
  []
 
-)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 317.
-
 
 Package Fancyhdr Warning: \headheight is too small (12.0pt): 
  Make it at least 13.59999pt.
@@ -934,7 +935,16 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
  We now make it that large for the rest of the document.
  This may cause the page layout to be inconsistent, however.
 
-[7 <./ast.pdf>]
+[7 <./ast.pdf>])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 317.
+
+
+Package Fancyhdr Warning: \headheight is too small (12.0pt): 
+ Make it at least 13.59999pt.
+ We now make it that large for the rest of the document.
+ This may cause the page layout to be inconsistent, however.
+
+[8]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 317.
 
 (/Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_lexing_parsing.au
@@ -946,13 +956,13 @@ Package rerunfilecheck Info: File `vyking_lexing_parsing.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 317.
  ) 
 Here is how much of TeX's memory you used:
- 10003 strings out of 493633
- 142630 string characters out of 3143378
- 347357 words of memory out of 3000000
- 13092 multiletter control sequences out of 15000+200000
+ 10007 strings out of 493633
+ 142677 string characters out of 3143378
+ 348357 words of memory out of 3000000
+ 13093 multiletter control sequences out of 15000+200000
  57962 words of font info for 65 fonts, out of 3000000 for 9000
  831 hyphenation exceptions out of 8191
- 29i,16n,43p,323b,394s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 29i,16n,43p,324b,510s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2011/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2011/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2011/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texl
@@ -962,10 +972,10 @@ texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2011/texmf-dist
 /fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/typ
 e1/urw/times/utmri8a.pfb>
 Output written on /Users/roke/PycharmProjects/Vyking/reports/.texpadtmp/vyking_
-lexing_parsing.pdf (7 pages, 330666 bytes).
+lexing_parsing.pdf (8 pages, 332778 bytes).
 PDF statistics:
- 364 PDF objects out of 1000 (max. 8388607)
- 258 compressed objects within 3 object streams
- 39 named destinations out of 1000 (max. 500000)
- 90 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 377 PDF objects out of 1000 (max. 8388607)
+ 268 compressed objects within 3 object streams
+ 42 named destinations out of 1000 (max. 500000)
+ 98 words of extra memory for PDF output out of 10000 (max. 10000000)
 

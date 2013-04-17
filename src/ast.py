@@ -235,3 +235,11 @@ class Vboolean(Atom):
 
     def __str__(self):
         return str(self.value)
+
+class Map(Statement):
+    def __init__(self, funcname, vlist):
+        self.funcname = funcname
+        self.vlist
+
+    def __str__(self):
+        return "(%s %s" %(self.funcname, str(self.vlist))

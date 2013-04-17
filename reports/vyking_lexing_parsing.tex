@@ -140,7 +140,7 @@
 
 \section{Introduction}
 
-    Pour séparer les difficultés dans la compilation du langage, nous travaillerons sur deux versions successives du langage.
+    Pour séparer les difficultés dans la réalisation du compilateur, nous travaillerons sur deux versions successives du langage.
     La première, \emph{basic\_vyking} n'implémente que les fonctions de bases, le noyau du langage.
     La deuxième, \emph{listed\_vyking} rajoute les listes et les opérateurs de liste.
     Nous nous attaquerons à cette version quand la première version du langage sera opérationnelle (du lexing à la génération de code).
@@ -212,7 +212,7 @@
     L'état \verb bol  est enclenché quand le lexer lit un retour à la ligne.
     Une fois dans l'état \verb bol , 3 actions sont possibles : 
     \begin{enumerate}
-    \item Lecture d'espace(s) : le token \verb INDENT  est émis, sa valeur est le nombre d'espaces.
+    \item Lecture d'espace(s) : le token \verb WS  est émis, sa valeur est le nombre d'espaces.
     \item Lecture d'un retour à la ligne, le lexer reste dans l'état \verb bol .
     \item Lecture d'un autre caractère, retour à l'état précédent.
     \end{enumerate}
@@ -236,7 +236,6 @@
           &|& INDENT ~ statement\_sequence ~ DEDENT\\    
     \end{eqnarray*}
     Les niveaux d'indentation sont mémorisés sur une pile "\emph{levels}".
-    Les machines d'états sont illustrées à la figure \ref{filter}, page \pageref{filter}.
     
     \subsubsection*{Génération des INDENT}
         Le filtre peut être dans 3 états : 
@@ -251,8 +250,11 @@
     
     \subsubsection*{Génération des DEDENT}
         Quand \emph{IndentFilter} lit un \verb WS  dont la valeur est inférieure au niveau courant, 
-        il génére des \verb DEDENT  tant que le niveau au sommet de la pile n'est pas le même que celui de \verb WS .
+        il faut générer des \verb DEDENT  tant que le niveau au sommet de la pile n'est pas le même que celui de \verb WS .
         Les états NO\_INDENT et NEED\_DEDENT ne sont pas explicites dans le code.
+        
+        \paragraph{}
+         Les machines d'états sont illustrées à la figure \ref{filter}, page \pageref{filter}.
 
      \begin{figure}
     \includegraphics[width=\textwidth]{filter.pdf}
@@ -261,16 +263,14 @@
     \end{figure}
 
 \section{Parsing}
-    
+    \subsection{Instructions}
     \subsubsection*{Instructions simples et composées}
     Les instructions peuvent être simples ou composées.
     Les instructions simples sont fermées par un \verb NEWLINE , les instructions composées sont suivies d'un bloc \verb suite . 
     Le bloc \verb suite  est fermé par un \verb DEDENT .
-        
-dangling statement dont need newline (dedent jour leur role)
-    
+            
     \subsubsection*{if .. elif ... else}
-        Nous cherchons à associer les tokens \verb ELSE  aux bons \verb IF , c'est à dire à celui le plus proche.
+        Nous cherchons à associer les \verb ELSE  aux bons \verb IF , c'est à dire à celui le plus proche.
         Le problème du \emph{"dangling else"} a été résolu en spécifiant la précédence des règles de la grammaire.
         La grammaire d'une instruction "if" est la suivante :
         
@@ -281,9 +281,9 @@ dangling statement dont need newline (dedent jour leur role)
           &|& empty ~ \%prec ~ unmatched\_if
     \end{eqnarray*}
 Le parser essaie d'associer une \emph{if\_closure} (fermeture de if) à chaque instruction if.
-Une \emph{if\_closure} peut être une instruction elif, un else ou vide.
+Une \emph{if\_closure} peut être une instruction elif, une instruction else ou être vide.
 La liste de précédende indique au parser l'ordre correct de réduction des règles.
-La commande \verb|%prec unmatched_if| permet d'associer une priorité de la table des priorités à une règle.
+La commande \\\verb|%prec unmatched_if| permet d'associer une priorité de la table des priorités à une règle.
         
         \begin{verbatim}
 precedence = (
@@ -297,19 +297,19 @@ precedence = (
     \subsection{Arbre syntaxique} \label{astsec}
         La classe \emph{ASTNode} représente un noeud de l'arbre syntaxique.
         Pour chaque sorte de noeud, une nouvelle classe est implémentée.
-        Ces classes héritent de ASTNodes et représente la structure du noeud.
+        Ces classes héritent de \emph{ASTNodes} et représente la structure du noeud.
         La figure \ref{ast} illustre le diagramme de structure statique de ast.py.
         
      \begin{figure}
-    \includegraphics[angle=90,width=11cm]{ast.pdf}
+    \includegraphics[angle=90,width=11.5cm]{ast.pdf}
     \caption{Structure statique des noeuds de l'arbre syntaxique.}
     \label{ast}
     \end{figure}
 
 \section{Remarques}
     Les 3 étapes lexing, filtre et parsing sont découplées.
-    Mais grâce à l'utilisation de générateur/itérateurs pour construire les classes \verb Lexer  et \verb IndentFilter , l'exécution du code ne nécessite qu'un parcours du texte.
-    En effet, au lieu de passer tout le programme dans le \verb Lexer  et de conserver tous les tokens en mémoire, puis de faire un passe complet à travers le filtre, le \verb Lexer génère les tokens un à un et le filtre ajoute les \verb INDENTs   et \verb DEDENTs  au vol.
+    Mais grâce à l'utilisation de générateur/itérateurs pour construire les classes \verb Lexer  et \verb IndentFilter , l'exécution du code ne nécessite qu'un seul parcours du texte.
+    En effet, au lieu de passer tout le programme dans le \verb Lexer  et de conserver tous les tokens en mémoire, puis de faire un passe complet à travers le filtre, le \verb Lexer  génère les tokens un à un et le filtre ajoute les \verb INDENTs   et \verb DEDENTs  au vol.
     
 \bibliography{vyking_bib}
 \bibliographystyle{plain}

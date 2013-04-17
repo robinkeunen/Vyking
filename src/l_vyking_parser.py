@@ -22,9 +22,6 @@ from .b_vyking_parser import BasicVykingParser
 
 class ListVykingParser(BasicVykingParser):
 
-     def p_import_stat(self, p):
-         'FROM id IMPORT name'
-
      def p_list_fun(self, p):
          """list_fun : cons_fun
                      | append_fun
@@ -34,15 +31,15 @@ class ListVykingParser(BasicVykingParser):
                      | map_fun"""
 
      def p_cons_fun(self, p):
-         """cons_fun : CONS LPAREN list RPAREN
+         """cons_fun : CONS LPAREN clause list RPAREN
                      | atom PLUS list"""
 
      def p_append_fun(self, p):
-         """append_fun : APPEND LPAREN list RPAREN
+         """append_fun : APPEND LPAREN list list RPAREN
                        | list PLUS list"""
 
      def p_list_fun(self, p):
-         'list_fun : LIST LPAREN list RPAREN'
+         'list_fun : LIST LPAREN args RPAREN'
 
      def p_head_fun(self, p):
          'head_fun : HEAD LPAREN list RPAREN'
