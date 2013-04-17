@@ -45,20 +45,19 @@ class ListVykingParser(BasicVykingParser):
          """append_fun : APPEND LPAREN pair pair RPAREN
                        | pair PLUS pair"""
          if len(6):
-             p[0] = ast.Pair(p[3], p[4])
-        else:
-            p[0] = ast.Pair(p[1], p[3])
+             temp = p[3)]
+             while temp.tail
 
      def p_pair_fun(self, p):
          'pair_fun : LIST LPAREN args RPAREN'
 
      def p_head_fun(self, p):
          'head_fun : HEAD LPAREN pair RPAREN'
-         p[0] = pair.head
+         p[0] = p[3].head
 
      def p_tail_fun(self, p):
          'tail_fun : TAIL LPAREN pair RPAREN'
-         p[0] = pair.tail
+         p[0] = p[3].tail
 
      def p_map_fun(self, p):
          'map_fun : MAP LAPREN id COMMA pair RPAREN'
