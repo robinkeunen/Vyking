@@ -243,3 +243,11 @@ class Map(Statement):
 
     def __str__(self):
         return "(%s %s" %(self.funcname, str(self.vlist))
+
+class Pair(Atom):
+    def __init__(self, head, tail):
+        self.head = head
+        self.tail = tail
+
+    def __str__(self):
+        pass

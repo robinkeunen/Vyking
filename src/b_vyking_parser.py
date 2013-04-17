@@ -394,6 +394,6 @@ if __name__ == "__main__":
     )
     log = logging.getLogger()
 
-    parser = BasicVykingParser(debug=False)
-    result = parser.parse(data, debug=False)
+    parser = BasicVykingParser(debug=log)
+    result = parser.parse(data, debug=log)
     print(result)
