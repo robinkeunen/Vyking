@@ -28,7 +28,7 @@ return_stat = 'return', (exp | list);
 import_stat = 'from', id, 'import', name;
 
 list_fun = cons_fun | append_fun | list_fun | head_fun | tail_fun | map_fun;
-cons_fun = 'cons', '(', list, ')' | atom, '+', list;
+cons_fun = 'cons', '(', clause, list, ')' | atom, '+', list;
 append_fun = 'append', '(', list, ')' | list, '+', list;
 list_fun = 'list', '(', list, ')';
 head_fun = 'head', '(', list, ')';
