@@ -16,7 +16,6 @@ class ListedVykingLexer(BasicVykingLexer):
         'not':    'NOT',
         'defun':  'DEFUN',
         'return': 'RETURN',
-        'is': 'IS',
         'for': 'FOR',
         'apply': 'APPLY',
         'map': 'MAP',
@@ -27,6 +26,14 @@ class ListedVykingLexer(BasicVykingLexer):
         'tail': 'TAIL',
         'in': 'IN'
     }
+
+    tokens = tokens + [
+        'LBRACK',
+        'RBRACK',
+    ]
+
+    t_LBRACK = r'\['
+    t_RBRACK = r'\]'
 
 lexer = ListedVykingLexer()
 lex_test(lexer)
