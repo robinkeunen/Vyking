@@ -112,8 +112,7 @@ class BasicVykingLexer(Lexer):
     def __next__(self):
         for tok in self.lexer.token():
             yield tok
-        # NEWLINE at the end of token stream
-        yield self._new_token('NEWLINE', lexer.lineno)
+
         yield self._new_token("ENDMARKER", self.get_lineno())
         raise StopIteration
 
