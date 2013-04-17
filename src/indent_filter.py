@@ -171,7 +171,7 @@ class IndentFilter():
         while levels.pop() != 0:
             yield self._DEDENT(self.get_lineno())
 
-        #yield self._new_token("ENDMARKER", self.get_lineno())
+        yield self._new_token("ENDMARKER", self.get_lineno())
         yield None
 
     def _new_token(self, token_type, lineno):
