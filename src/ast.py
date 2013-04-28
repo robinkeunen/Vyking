@@ -80,6 +80,15 @@ class Funcall(Statement):
         return "(f:%s %s)" % (self.name, args_repr)
 
 
+class Print(Statement):
+    def __init__(self, expression):
+        self.type = 'print'
+        self.expression = expression
+
+    def __str__(self):
+        return "(print %s)" % str(self.expression)
+
+
 class If(Statement):
     def __init__(self, clause, suite, if_closure=None):
         self.type = "if_statement"

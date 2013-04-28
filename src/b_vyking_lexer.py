@@ -35,15 +35,16 @@ class BasicVykingLexer(Lexer):
 
     # Reserved keywords
     reserved = {
-        'if': 'IF',
-        'elif': 'ELIF',
-        'else': 'ELSE',
-        'while': 'WHILE',
-        'and': 'AND',
-        'or': 'OR',
-        'not': 'NOT',
-        'defun': 'DEFUN',
-        'return': 'RETURN'
+        'if'    : 'IF',
+        'elif'  : 'ELIF',
+        'else'  : 'ELSE',
+        'while' : 'WHILE',
+        'and'   : 'AND',
+        'or'    : 'OR',
+        'not'   : 'NOT',
+        'defun' : 'DEFUN',
+        'return': 'RETURN',
+        'print' : 'PRINT'
     }
 
     # Token list

@@ -1,6 +1,8 @@
 # coding=utf-8
 __author__ = 'Robin Keunen'
 
+import src.pydot
+
 exp1 = "x = 3 + 42 * (s - t)"
 
 exp2 = """

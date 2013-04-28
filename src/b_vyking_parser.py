@@ -56,7 +56,7 @@ class Parser(object):
                                 debug=self.debug,
                                 debugfile=self.debugfile,
                                 tabmodule=self.tabmodule,
-                                start=self.start
+                                start=self.start,
         )
 
     def parse(self, input=None, lexer=None, debug=0, tracking=0, tokenfunc=None):
@@ -89,11 +89,29 @@ class BasicVykingParser(Parser):
         ('nonassoc', 'ELSE'),
         ('nonassoc', 'ELIF'),
         ('left', 'AND', 'OR'),
-        ('nonassoc', 'NOT'),
+        ('right', 'NOT'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIVIDE', 'MOD'),
+        ('nonassoc', 'LPAREN', 'RPAREN'),
         ('right', 'UMINUS')  # unary minus operator
     )
+
+    # operation dictionary, allows for simpler rules definition.
+    operations = {
+        'or':  lambda x, y: ast.Clause(x, 'OR', y),
+        'and': lambda x, y: ast.Clause(x, 'AND', y),
+        '==':  lambda x, y: ast.Clause(x, 'EQ', y),
+        '!=':  lambda x, y: ast.Clause(x, 'NEQ', y),
+        '<':   lambda x, y: ast.Clause(x, 'LT', y),
+        '>':   lambda x, y: ast.Clause(x, 'GT', y),
+        '<=':  lambda x, y: ast.Clause(x, 'LEQ', y),
+        '>=':  lambda x, y: ast.Clause(x, 'GEQ', y),
+        '+':   lambda x, y: ast.Expression(x, 'PLUS', y),
+        '-':   lambda x, y: ast.Expression(x, 'MINUS', y),
+        '*':   lambda x, y: ast.Expression(x, 'TIMES', y),
+        '/':   lambda x, y: ast.Expression(x, 'DIVIDE', y),
+        '%':   lambda x, y: ast.Expression(x, 'MOD', y),
+    }
 
     def __init__(self, **kw):
         """
@@ -141,6 +159,7 @@ class BasicVykingParser(Parser):
         simple_statement : assignment NEWLINE
                          | return_statement NEWLINE
                          | funcall NEWLINE
+                         | print NEWLINE
         """
         p[0] = p[1]
 
@@ -181,6 +200,16 @@ class BasicVykingParser(Parser):
             p[0] = ast.Funcall(ast.ID(p[1]), p[3])
         else:
             p[0] = ast.Funcall(ast.ID(p[1]))
+
+    def p_print(self, p):
+        """
+        print : PRINT LPAREN expression RPAREN
+              | PRINT LPAREN RPAREN
+        """
+        if len(p) == 5:
+            p[0] = ast.Print(p[3])
+        else:
+            p[0] = ast.Print(None)
 
 
     def p_args(self, p):
@@ -276,28 +305,34 @@ class BasicVykingParser(Parser):
             p[0] = ast.Clause(None, "NOT", p[2])
         elif p[1] == '(':
             p[0] = p[2]
-        elif p[2] == 'or':
-            p[0] = ast.Clause(p[1], "OR", p[3])
-        elif p[2] == 'and':
-            p[0] = ast.Clause(p[1], "AND", p[3])
-        elif p[2] == '==':
-            p[0] = ast.Clause(p[1], "EQ", p[3])
-        elif p[2] == '!=':
-            p[0] = ast.Clause(p[1], "NEQ", p[3])
-        elif p[2] == '<':
-            p[0] = ast.Clause(p[1], "LT", p[3])
-        elif p[2] == '>':
-            p[0] = ast.Clause(p[1], "GT", p[3])
-        elif p[2] == '<=':
-            p[0] = ast.Clause(p[1], "LEQ", p[3])
-        elif p[2] == '>=':
-            p[0] = ast.Clause(p[1], "GEQ", p[3])
+        else:
+            p[0] = self.operations[p[2]](p[1], p[3])
+
+        # elif p[2] == 'or':
+        #     p[0] = ast.Clause(p[1], "OR", p[3])
+        # elif p[2] == 'and':
+        #     p[0] = ast.Clause(p[1], "AND", p[3])
+        # elif p[2] == '==':
+        #     p[0] = ast.Clause(p[1], "EQ", p[3])
+        # elif p[2] == '!=':
+        #     p[0] = ast.Clause(p[1], "NEQ", p[3])
+        # elif p[2] == '<':
+        #     p[0] = ast.Clause(p[1], "LT", p[3])
+        # elif p[2] == '>':
+        #     p[0] = ast.Clause(p[1], "GT", p[3])
+        # elif p[2] == '<=':
+        #     p[0] = ast.Clause(p[1], "LEQ", p[3])
+        # elif p[2] == '>=':
+        #     p[0] = ast.Clause(p[1], "GEQ", p[3])
 
 
     def p_clause_exp(self, p):
         'clause : expression'
         p[0] = p[1]
 
+    def p_expression_group(self, p):
+        'expression : LPAREN expression RPAREN'
+        p[0] = p[2]
 
     def p_expression_binop(self, p):
         """
@@ -307,16 +342,19 @@ class BasicVykingParser(Parser):
                    | expression DIVIDE expression
                    | expression MOD expression
         """
-        if p[2] == '+':
-            p[0] = ast.Expression(p[1], 'PLUS', p[3])
-        elif p[2] == '-':
-            p[0] = ast.Expression(p[1], 'MINUS', p[3])
-        elif p[2] == '*':
-            p[0] = ast.Expression(p[1], 'TIMES', p[3])
-        elif p[2] == '/':
-            p[0] = ast.Expression(p[1], 'DIVIDE', p[3])
-        elif p[2] == '%':
-            p[0] = ast.Expression(p[1], 'MOD', p[3])
+        # get function in operation dictionnary
+        p[0] = self.operations[p[2]](p[1], p[3])
+
+        # if p[2] == '+':
+        #     p[0] = ast.Expression(p[1], 'PLUS', p[3])
+        # elif p[2] == '-':
+        #     p[0] = ast.Expression(p[1], 'MINUS', p[3])
+        # elif p[2] == '*':
+        #     p[0] = ast.Expression(p[1], 'TIMES', p[3])
+        # elif p[2] == '/':
+        #     p[0] = ast.Expression(p[1], 'DIVIDE', p[3])
+        # elif p[2] == '%':
+        #     p[0] = ast.Expression(p[1], 'MOD', p[3])
 
     # unary minus
     def p_expression_uminus(self, p):
@@ -364,7 +402,7 @@ class BasicVykingParser(Parser):
             self.parser.errok()
             return self.new_token("NEWLINE", p.lineno)
         else:
-            print('line %d: Syntax error when reading %s ' % (p.lineno, str(self, p)))
+            print('line %d: Syntax error when reading %s ' % (p.lineno, str(p)))
 
     # helper function
     def new_token(self, token_type, lineno):
