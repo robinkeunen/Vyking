@@ -73,7 +73,9 @@ argent = 1000 # On a 1000 $ au debut du jeu
 continuer_partie = True # Booleen qui est vrai tant qu'on doit
                         # continuer la partie
 
-print("Vous vous installez a la table de roulette avec", argent, "$.")
+print("Vous vous installez a la table de roulette avec")
+print(argent)
+print("$.")
 
 while continuer_partie: # Tant qu'on doit continuer la partie
     # on demande a l'utilisateur de saisir le nombre sur
@@ -98,12 +100,13 @@ while continuer_partie: # Tant qu'on doit continuer la partie
         if mise <= 0:
             print("La mise saisie est negative ou nulle.")
         if mise > argent:
-            print("Vous ne pouvez miser autant, vous n'avez que", argent, "$")
+            print("Vous ne pouvez miser autant.")
 
     # Le nombre mise et la mise ont ete selectionnes par
     # l'utilisateur, on fait tourner la roulette
     numero_gagnant = randrange(50)
-    print("La roulette tourne... ... et s'arrete sur le numero", numero_gagnant)
+    print("La roulette tourne... ... et s'arrete sur le numero")
+    print(numero_gagnant)
 
     # On etablit le gain du joueur
     if numero_gagnant == nombre_mise:

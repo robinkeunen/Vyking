@@ -85,9 +85,9 @@ class BasicVykingParser(Parser):
     """
     #precedence rules
     precedence = (
-        ('nonassoc', 'unmatched_if'),
-        ('nonassoc', 'ELSE'),
-        ('nonassoc', 'ELIF'),
+        #('nonassoc', 'unmatched_if'),
+        #('nonassoc', 'ELSE'),
+        #('nonassoc', 'ELIF'),
         ('left', 'AND', 'OR'),
         ('right', 'NOT'),
         ('left', 'PLUS', 'MINUS'),
@@ -119,9 +119,10 @@ class BasicVykingParser(Parser):
         :param kw: keyword arguments
         """
         mylexer = IndentFilter(BasicVykingLexer())
-        super(BasicVykingParser, self).__init__(lexer=mylexer,
-                                                start="vyking_input",
-                                                **kw)
+        #super(BasicVykingParser, self).__init__(lexer=mylexer,
+        super().__init__(lexer=mylexer,
+                         start="vyking_input",
+                         **kw)
         self.tokens = self.lexer.tokens
 
     # empty rule
@@ -242,7 +243,7 @@ class BasicVykingParser(Parser):
 
 
     def p_if_closure_empty(self, p):
-        'if_closure : empty %prec unmatched_if'
+        'if_closure : empty '#%prec unmatched_if'
         p[0] = p[1]
 
 
@@ -421,8 +422,11 @@ class BasicVykingParser(Parser):
 
 # Usage
 if __name__ == "__main__":
-    data = inputs["find_bounds"]
-    print(data)
+    data = inputs["elifStmt"]
+    for lino, line in enumerate(data.splitlines()):
+        print("%d: %s" %(lino, line))
+    print()
+
     # logger object
     logging.basicConfig(
         level=logging.DEBUG,
@@ -434,4 +438,8 @@ if __name__ == "__main__":
 
     parser = BasicVykingParser(debug=log)
     result = parser.parse(data, debug=log)
+    print(result.__class__)
+    tree = result.make_tree_graph()
+    tree.write("./tree", format="ps")
     print(result)
+

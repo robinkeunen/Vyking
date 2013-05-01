@@ -4,8 +4,7 @@
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
 
-
-__author__ = 'Robin Keunen'
+import src.pydot as pydot
 
 
 class ASTNode(object):
@@ -15,22 +14,43 @@ class ASTNode(object):
     (Visitor design pattern)
     """
 
+    def __init__(self):
+        self.type = None
+
     # accept visitor (not implemented yet)
     def accept(self):
         raise NotImplementedError("Should have implemented this")
 
     def get_type(self):
-        raise NotImplementedError("Should have implemented this")
+        return self.type
 
     def get_children(self):
+        """Returns a list of the node's children"""
         raise NotImplementedError("Should have implemented this")
+
+    def make_tree_graph(self, dot=None, edgeLabels=True):
+        """
+        Makes a dot object to write subtree to output
+        """
+        if not dot: dot = pydot.Dot()
+        dot.add_node(pydot.Node(self.type, label=self.type))
+        label = edgeLabels and len(self.get_children()) - 1
+
+        for i, c in enumerate(self.get_children()):
+            if issubclass(c.__class__, ASTNode):
+                c.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
+                edge = pydot.Edge(self.type, c.type)
+                if label:
+                    edge.set_label(str(i))
+                dot.add_edge(edge)
+        return dot
 
 
 class Statement(ASTNode):
     pass
 
 
-class Statement_sequence():
+class Statement_sequence(ASTNode):
     def __init__(self, statement_sequence):
         self.type = "statement_sequence"
         self.statement_sequence = statement_sequence
@@ -40,6 +60,9 @@ class Statement_sequence():
         for st in self.statement_sequence:
             result += str(st) + "\n"
         return result
+
+    def get_children(self):
+        return self.statement_sequence
 
 
 class Assignment(Statement):
@@ -51,6 +74,9 @@ class Assignment(Statement):
     def __str__(self):
         return "(ASSIGN %s " % self.name + str(self.right) + ")"
 
+    def get_children(self):
+        return [self.name, self.right]
+
 
 class Return(Statement):
     def __init__(self, value):
@@ -59,6 +85,9 @@ class Return(Statement):
 
     def __str__(self):
         return "(RETURN %s)" % self.value
+
+    def get_children(self):
+        return [self.value]
 
 
 class Funcall(Statement):
@@ -79,6 +108,9 @@ class Funcall(Statement):
         args_repr += "]"
         return "(f:%s %s)" % (self.name, args_repr)
 
+    def get_children(self):
+        return [self.name, self.args]
+
 
 class Print(Statement):
     def __init__(self, expression):
@@ -87,6 +119,9 @@ class Print(Statement):
 
     def __str__(self):
         return "(print %s)" % str(self.expression)
+
+    def get_children(self):
+        return [self.expression]
 
 
 class If(Statement):
@@ -104,6 +139,9 @@ class If(Statement):
             return "(IF %s \n\t %s %s)" \
                    % (str(self.clause), str(self.suite), str(self.if_closure))
 
+    def get_children(self):
+        return [self.clause, self.suite, self. if_closure]
+
 
 class Elif(Statement):
     def __init__(self, clause, suite, if_closure=None):
@@ -120,6 +158,9 @@ class Elif(Statement):
             return "(ELIF %s \n\t %s %s)" \
                    % (str(self.clause), str(self.suite), str(self.if_closure))
 
+    def get_children(self):
+        return [self.clause, self.suite, self. if_closure]
+
 
 class Else(Statement):
     def __init__(self, suite):
@@ -128,6 +169,9 @@ class Else(Statement):
 
     def __str__(self):
         return "(ELSE %s)" % str(self.suite)
+
+    def get_children(self):
+        return [self.suite]
 
 
 class While(Statement):
@@ -138,6 +182,9 @@ class While(Statement):
 
     def __str__(self):
         return "(WHILE %s \n %s)" % (str(self.clause), str(self.suite))
+
+    def get_children(self):
+        return [self.clause, self.suite]
 
 
 class Fundef(Statement):
@@ -159,19 +206,8 @@ class Fundef(Statement):
         parameters += "]"
         return "(DEFUN %s %s \n %s)" % (str(self.name), parameters, str(self.suite))
 
-
-class Expression(ASTNode):
-    def __init__(self, left, op, right):
-        self.type = "Expression"
-        self.left = left
-        self.right = right
-        self.op = op
-
-    def __str__(self):
-        if self.left is None:
-            return "(%s %s)" % (self.op, self.right)
-        else:
-            return "(%s %s %s)" % (self.op, str(self.left), str(self.right))
+    def get_children(self):
+        return [self.name, self.parameters, self.suite]
 
 
 class Clause(ASTNode):
@@ -187,6 +223,25 @@ class Clause(ASTNode):
         else:
             return "(%s %s %s)" % (self.op, self.left, self.right)
 
+    def get_children(self):
+        return [self.left, self.right]
+
+
+class Expression(ASTNode):
+    def __init__(self, left, op, right):
+        self.type = "Expression"
+        self.left = left
+        self.right = right
+        self.op = op
+
+    def __str__(self):
+        if self.left is None:
+            return "(%s %s)" % (self.op, self.right)
+        else:
+            return "(%s %s %s)" % (self.op, str(self.left), str(self.right))
+
+    def get_children(self):
+        return [self.left, self.right]
 
 class Atom(ASTNode):
     pass
@@ -200,6 +255,9 @@ class Vinteger(Atom):
     def __str__(self):
         return "(INT %d)" % self.value
 
+    def get_children(self):
+        return list()
+
 
 class Vfloat(Atom):
     def __init__(self, value):
@@ -208,6 +266,9 @@ class Vfloat(Atom):
 
     def __str__(self):
         return "(FLOAT %d)" % self.value
+
+    def get_children(self):
+        return list()
 
 
 class ID(Atom):
@@ -227,6 +288,9 @@ class ID(Atom):
         else:
             return "(%s " % self.name + str(self.value) + ")"
 
+    def get_children(self):
+        return list()
+
 
 class Vstring(Atom):
     def __init__(self, data):
@@ -235,6 +299,9 @@ class Vstring(Atom):
 
     def __str__(self):
         return self.data
+
+    def get_children(self):
+        return list()
 
 
 class Vboolean(Atom):
@@ -245,13 +312,21 @@ class Vboolean(Atom):
     def __str__(self):
         return str(self.value)
 
+    def get_children(self):
+        return list()
+
+
 class Map(Statement):
     def __init__(self, funcname, vlist):
         self.funcname = funcname
-        self.vlist
+        self.vlist = vlist
 
     def __str__(self):
         return "(%s %s" %(self.funcname, str(self.vlist))
+
+    def get_children(self):
+        return [self.funcname, self.vlist]
+
 
 class Pair(Atom):
     def __init__(self, head, tail):
@@ -260,3 +335,13 @@ class Pair(Atom):
 
     def __str__(self):
         pass
+
+    def get_children(self):
+        return [self.head, self.tail]
+
+
+# add graphical representation
+import src.draw_tree
+
+if __name__ == "__main__":
+    node = Vinteger(10)

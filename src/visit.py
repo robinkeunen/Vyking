@@ -3,19 +3,8 @@
 # modified by Robin Keunen
 
 import inspect
-from functools import update_wrapper
 
 __all__ = ['on', 'when']
-
-
-def decorator(d):
-    """Make function d a decorator: d wraps a function fn."""
-
-    def _d(fn):
-        return update_wrapper(d(fn), fn)
-
-    update_wrapper(_d, d)
-    return _d
 
 
 @decorator
