@@ -130,11 +130,9 @@ class BasicVykingParser(Parser):
         'empty :'
         pass
 
-
     def p_vyking_input(self, p):
         'vyking_input : statement_sequence ENDMARKER'
         p[0] = ast.Statement_sequence(p[1])
-
 
     def p_statement_sequence(self, p):
         """
@@ -154,7 +152,6 @@ class BasicVykingParser(Parser):
         """
         p[0] = p[1]
 
-
     def p_simple_statement(self, p):
         """
         simple_statement : assignment NEWLINE
@@ -163,7 +160,6 @@ class BasicVykingParser(Parser):
                          | print NEWLINE
         """
         p[0] = p[1]
-
 
     def p_compound_statement(self, p):
         """
@@ -180,17 +176,15 @@ class BasicVykingParser(Parser):
                    | ID DEC expression
         """
         if p[2] == '=':
-            p[0] = ast.Assignment(p[1], p[3])
+            p[0] = ast.Assignment(ast.ID(p[1]), p[3])
         elif p[2] == '+=':
-            p[0] = ast.Assignment(p[1], ast.Expression(p[1], "PLUS", p[3]))
+            p[0] = ast.Assignment(ast.ID(p[1]), ast.Expression(p[1], "PLUS", p[3]))
         elif p[2] == '-=':
-            p[0] = ast.Assignment(p[1], ast.Expression(p[1], "MINUS", p[3]))
-
+            p[0] = ast.Assignment(ast.ID(p[1]), ast.Expression(p[1], "MINUS", p[3]))
 
     def p_return_statement(self, p):
         'return_statement : RETURN expression'
         p[0] = ast.Return(p[2])
-
 
     def p_funcall(self, p):
         """
@@ -212,7 +206,6 @@ class BasicVykingParser(Parser):
         else:
             p[0] = ast.Print(None)
 
-
     def p_args(self, p):
         """
         args : args COMMA clause
@@ -223,13 +216,11 @@ class BasicVykingParser(Parser):
         else:
             p[0] = [p[1]]
 
-
     def p_if_statement(self, p):
         """
         if_statement : IF clause COLON suite if_closure
         """
         p[0] = ast.If(p[2], p[4], p[5])
-
 
     def p_if_closure(self, p):
         """
@@ -241,21 +232,17 @@ class BasicVykingParser(Parser):
         else:
             p[0] = ast.Else(p[3])
 
-
     def p_if_closure_empty(self, p):
-        'if_closure : empty '#%prec unmatched_if'
+        'if_closure : empty'  # %prec unmatched_if'
         p[0] = p[1]
-
 
     def p_elif_statement(self, p):
         'elif_statement : ELIF clause COLON suite if_closure'
         p[0] = ast.Elif(p[2], p[4], p[5])
 
-
     def p_while_statement(self, p):
         'while_statement : WHILE clause COLON suite'
         p[0] = ast.While(p[2], p[4])
-
 
     def p_fundef(self, p):
         'fundef : DEFUN ID LPAREN parameters RPAREN COLON suite'
@@ -277,7 +264,6 @@ class BasicVykingParser(Parser):
         else:
             p[0] = [ast.ID(p[1])]
 
-
     def p_suite(self, p):
         """
         suite : simple_statement
@@ -287,7 +273,6 @@ class BasicVykingParser(Parser):
             p[0] = p[1]
         else:
             p[0] = ast.Statement_sequence(p[3])
-
 
     def p_clause(self, p):
         """
@@ -325,7 +310,6 @@ class BasicVykingParser(Parser):
         #     p[0] = ast.Clause(p[1], "LEQ", p[3])
         # elif p[2] == '>=':
         #     p[0] = ast.Clause(p[1], "GEQ", p[3])
-
 
     def p_clause_exp(self, p):
         'clause : expression'
@@ -419,12 +403,12 @@ class BasicVykingParser(Parser):
         tok.lexpos = self.lexer.get_lexpos()
         return tok
 
-
 # Usage
 if __name__ == "__main__":
-    data = inputs["elifStmt"]
+    import src.draw_tree
+    data = inputs["zero"]
     for lino, line in enumerate(data.splitlines()):
-        print("%d: %s" %(lino, line))
+        print("%d: %s" % (lino, line))
     print()
 
     # logger object
@@ -438,8 +422,7 @@ if __name__ == "__main__":
 
     parser = BasicVykingParser(debug=log)
     result = parser.parse(data, debug=log)
-    print(result.__class__)
     tree = result.make_tree_graph()
-    tree.write("./tree", format="ps")
+    tree.write("./tree", format="png")
     print(result)
 

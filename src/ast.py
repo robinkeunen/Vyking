@@ -3,8 +3,11 @@
 # Nodes of the abstract syntax tree for the Vyking language.
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
+import itertools
+from src import pydot
 
-import src.pydot as pydot
+
+counter = itertools.count()
 
 
 class ASTNode(object):
@@ -13,9 +16,14 @@ class ASTNode(object):
     Children must implement accept(ASTNodeVisitor)
     (Visitor design pattern)
     """
+    id_counter = 0
 
+    #def __init__(self, lineno, lexpos):
     def __init__(self):
         self.type = None
+        #self.lineno = lineno
+        #self.lexpos = lexpos
+        self.id = counter.__next__()
 
     # accept visitor (not implemented yet)
     def accept(self):
@@ -33,13 +41,13 @@ class ASTNode(object):
         Makes a dot object to write subtree to output
         """
         if not dot: dot = pydot.Dot()
-        dot.add_node(pydot.Node(self.type, label=self.type))
+        dot.add_node(pydot.Node(self.id, label=self.type))
         label = edgeLabels and len(self.get_children()) - 1
 
         for i, c in enumerate(self.get_children()):
             if issubclass(c.__class__, ASTNode):
                 c.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
-                edge = pydot.Edge(self.type, c.type)
+                edge = pydot.Edge(self.id, c.id)
                 if label:
                     edge.set_label(str(i))
                 dot.add_edge(edge)
@@ -52,6 +60,7 @@ class Statement(ASTNode):
 
 class Statement_sequence(ASTNode):
     def __init__(self, statement_sequence):
+        super().__init__()
         self.type = "statement_sequence"
         self.statement_sequence = statement_sequence
 
@@ -67,6 +76,7 @@ class Statement_sequence(ASTNode):
 
 class Assignment(Statement):
     def __init__(self, name, right):
+        super().__init__()
         self.type = "assignment"
         self.name = name
         self.right = right
@@ -80,6 +90,7 @@ class Assignment(Statement):
 
 class Return(Statement):
     def __init__(self, value):
+        super().__init__()
         self.type = "return_statement"
         self.value = value
 
@@ -97,15 +108,16 @@ class Funcall(Statement):
         :param name:
         :param args:
         """
+        super().__init__()
         self.type = "funcall"
         self.name = name
         self.args = args
 
     def __str__(self):
-        args_repr = "["
+        args_repr = "("
         for arg in self.args:
             args_repr += str(arg)
-        args_repr += "]"
+        args_repr += ")"
         return "(f:%s %s)" % (self.name, args_repr)
 
     def get_children(self):
@@ -114,6 +126,7 @@ class Funcall(Statement):
 
 class Print(Statement):
     def __init__(self, expression):
+        super().__init__()
         self.type = 'print'
         self.expression = expression
 
@@ -126,6 +139,7 @@ class Print(Statement):
 
 class If(Statement):
     def __init__(self, clause, suite, if_closure=None):
+        super().__init__()
         self.type = "if_statement"
         self.clause = clause
         self.suite = suite
@@ -140,11 +154,12 @@ class If(Statement):
                    % (str(self.clause), str(self.suite), str(self.if_closure))
 
     def get_children(self):
-        return [self.clause, self.suite, self. if_closure]
+        return [self.clause, self.suite, self.if_closure]
 
 
 class Elif(Statement):
     def __init__(self, clause, suite, if_closure=None):
+        super().__init__()
         self.type = "elif_statement"
         self.clause = clause
         self.suite = suite
@@ -159,11 +174,12 @@ class Elif(Statement):
                    % (str(self.clause), str(self.suite), str(self.if_closure))
 
     def get_children(self):
-        return [self.clause, self.suite, self. if_closure]
+        return [self.clause, self.suite, self.if_closure]
 
 
 class Else(Statement):
     def __init__(self, suite):
+        super().__init__()
         self.type = "else"
         self.suite = suite
 
@@ -176,6 +192,7 @@ class Else(Statement):
 
 class While(Statement):
     def __init__(self, clause, suite):
+        super().__init__()
         self.type = "while"
         self.clause = clause
         self.suite = suite
@@ -195,15 +212,16 @@ class Fundef(Statement):
         :param suite:
         :param parameters:
         """
+        super().__init__()
         self.name = name
         self.parameters = parameters
         self.suite = suite
 
     def __str__(self):
-        parameters = "["
+        parameters = "("
         for p in self.parameters:
             parameters += str(p) + ' '
-        parameters += "]"
+        parameters += ")"
         return "(DEFUN %s %s \n %s)" % (str(self.name), parameters, str(self.suite))
 
     def get_children(self):
@@ -212,6 +230,7 @@ class Fundef(Statement):
 
 class Clause(ASTNode):
     def __init__(self, left, op, right):
+        super().__init__()
         self.type = 'clause'
         self.left = left
         self.op = op
@@ -229,6 +248,7 @@ class Clause(ASTNode):
 
 class Expression(ASTNode):
     def __init__(self, left, op, right):
+        super().__init__()
         self.type = "Expression"
         self.left = left
         self.right = right
@@ -243,12 +263,14 @@ class Expression(ASTNode):
     def get_children(self):
         return [self.left, self.right]
 
+
 class Atom(ASTNode):
     pass
 
 
 class Vinteger(Atom):
     def __init__(self, value):
+        super().__init__()
         self.type = "INT"
         self.value = value
 
@@ -261,6 +283,7 @@ class Vinteger(Atom):
 
 class Vfloat(Atom):
     def __init__(self, value):
+        super().__init__()
         self.type = "FLOAT"
         self.value = value
 
@@ -278,6 +301,7 @@ class ID(Atom):
     """
 
     def __init__(self, name, value=None):
+        super().__init__()
         self.type = "ID"
         self.name = name
         self.value = value
@@ -294,6 +318,7 @@ class ID(Atom):
 
 class Vstring(Atom):
     def __init__(self, data):
+        super().__init__()
         self.type = "string"
         self.data = data
 
@@ -306,6 +331,7 @@ class Vstring(Atom):
 
 class Vboolean(Atom):
     def __init__(self, value):
+        super().__init__()
         self.type = "boolean"
         self.value = value
 
@@ -318,11 +344,12 @@ class Vboolean(Atom):
 
 class Map(Statement):
     def __init__(self, funcname, vlist):
+        super().__init__()
         self.funcname = funcname
         self.vlist = vlist
 
     def __str__(self):
-        return "(%s %s" %(self.funcname, str(self.vlist))
+        return "(%s %s" % (self.funcname, str(self.vlist))
 
     def get_children(self):
         return [self.funcname, self.vlist]
@@ -330,6 +357,7 @@ class Map(Statement):
 
 class Pair(Atom):
     def __init__(self, head, tail):
+        super().__init__()
         self.head = head
         self.tail = tail
 
@@ -339,9 +367,6 @@ class Pair(Atom):
     def get_children(self):
         return [self.head, self.tail]
 
-
-# add graphical representation
-import src.draw_tree
 
 if __name__ == "__main__":
     node = Vinteger(10)

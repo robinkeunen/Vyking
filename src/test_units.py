@@ -1,45 +1,58 @@
 # coding=utf-8
 __author__ = 'Robin Keunen'
 
-import src.pydot
-
-exp1 = "x = 3 + 42 * (s - t)"
+exp1 = "x = 3 + 42 * (2 - 8)"
 
 exp2 = """
-while 1 != 5:
-    print(this)
-    return "say hello"
 t = 3
+s = 3
 x = 3 + 42 * (s - t)
 """
 
 dangling_else = """
+a = 2
+b = a
 if a == b:
     a = a + 1
     if a == 2:
-        print(x)
+        print(a)
     else:
         a = b + 6
-        dothis(b+6)
+        print(b)
 else:
-    return func(x, y)
+    return print("diff")
 """
 
+printtest = """
+print("Coucou !")
+unNombre = 50
+if unNombre < "50" :
+    print("Votre nombre est plus petit que 50.")
+elif unNombre == "50" :
+    print("Votre nombre est exactement 50")
+else :
+    print("Votre nombre est plus grand que 50.")
+
+    """
+
 elifStmt = """
-if not a != b:
-    a = a + 1
-    r -= 2 + 3
-    return a
-elif a > 2:
-    if robin >= genie and not pierre < genie:
-        return yay
-    elif il or try(ceci):
-        print("this message")
-    lo += b/2.
-elif not a <= 3:
-    return b
-else:
-    return end
+a = 2
+b = 2
+
+defun dummy(a, b):
+    if not a != b:
+
+        return a + b
+    elif a > 2:
+        if robin >= genie and not pierre < genie:
+            return yay
+        elif il or try(ceci):
+            print("this message")
+        lo += b/2.
+    elif not a <= 3:
+        return b
+    else:
+        return end
 """
 
 find_bounds = """
@@ -51,6 +64,22 @@ defun find_bounds (f, y):
     else:
         lo = x/2.
     return lo
+"""
+
+function_def = """
+defun f2(s1, s2) :
+    print(s1)
+    print(s2)
+
+f2("HAHAHA !", 34)
+"""
+
+addfun = """
+defun add(a, b):
+   r = a + b
+   return r
+
+print(add(1, 2)
 """
 
 slow_inverse = """
@@ -133,7 +162,58 @@ while continuer_partie: # Tant qu'on doit continuer la partie
             continuer_partie = False
 """
 
+chain_add = addfun + """
+defun sum_list(l):
+    if tail(l) == []:
+        return head(l)
+    else:
+        return head(l) + sum_list(tail(l))
 
+ll = [1, 2, 3, 4]
+print(sum_list(ll))
+"""
+
+alt_map = """
+defun alt_map(f, l):
+    if tail(l) == []:
+        return list(f(head(l)))
+    else:
+        return cons(f(head(l)), alt_map(f, tail(l)))
+"""
+
+fact = """
+def fact(n) :
+    if n == 1 or n == 0 :
+        return 1
+    else :
+        return n * fact(n - 1)
+
+print fact(6)
+"""
+
+n_ary = """
+
+defun len(l):
+
+
+defun n_ary(f):
+    #Given binary function f(x, y), return an n_ary function such
+    #that f([x, y, z]) = f(x, f([y, z])), etc. Also allow f(x) = x.
+
+    defun n_ary_f(argsl):
+        if len(argsl) == 2:
+            return f(head(argsl), head(tail(argsl)))
+        else:
+            return f(head(argsl), n_ary_f(tail(argsl)))
+    return n_ary_f
+
+def add(a, b):
+    return a + b
+
+add_n = n_ary(add)
+
+print add_n([1, 2, 3, 4, 5])
+"""
 
 inputs = {"exp1": exp1,
           "exp2": exp2,
@@ -142,6 +222,13 @@ inputs = {"exp1": exp1,
           "find_bounds": find_bounds,
           "slow_inverse": slow_inverse,
           "zero": zero,
+          "printtest": printtest,
+          "fundef": function_def,
+          "addfun": addfun,
+          "chain_add": chain_add,
+          "alt_map": alt_map,
+          "fact": fact,
+          "n_ary": n_ary,
           }
 
 
