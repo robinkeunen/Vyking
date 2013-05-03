@@ -406,7 +406,7 @@ class BasicVykingParser(Parser):
 # Usage
 if __name__ == "__main__":
     import src.draw_tree
-    data = inputs["zero"]
+    data = inputs["exp2"]
     for lino, line in enumerate(data.splitlines()):
         print("%d: %s" % (lino, line))
     print()

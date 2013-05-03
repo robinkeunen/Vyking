@@ -16,13 +16,12 @@ class ASTNode(object):
     Children must implement accept(ASTNodeVisitor)
     (Visitor design pattern)
     """
-    id_counter = 0
 
     #def __init__(self, lineno, lexpos):
     def __init__(self):
         self.type = None
-        #self.lineno = lineno
-        #self.lexpos = lexpos
+        self.lineno = 0  # lineno
+        self.lexpos = 0  # lexpos
         self.id = counter.__next__()
 
     # accept visitor (not implemented yet)

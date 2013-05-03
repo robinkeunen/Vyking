@@ -1,7 +1,6 @@
-from src import pydot
-
 __author__ = 'Robin Keunen'
 
+from src import pydot
 from src.misc import add_to_class
 import src.ast as ast
 
