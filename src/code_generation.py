@@ -2,21 +2,24 @@ __author__ = 'Robin Keunen', 'Robin Keunen'
 
 from src.misc import add_to_class
 import src.ast as ast
-import llvm
 import llvm.core as lc
 #import llvm.ee as le
 #import llvm.passes as lp
 
 # The LLVM module, which holds all the IR code.
 g_llvm_module = lc.Module.new('jit')
+# FIXME make this non-local
+#ast.ASTNode.llvm_module = lc.Module.new('jit')
 
 # The LLVM instruction builder. Created whenever a new function is entered.
 g_llvm_builder = None
-# FIXME might need  a fix
-g_llvm_builder = lc.Builder.new(lc.BasicBlock)
+# FIXME make this non-local
+# ast.ASTNode.llvm_builder = None
 
 # A dictionary that keeps track of which values are defined in the current scope
 # and what their LLVM representation is.
+# TODO fix to get closures (using Scopes?)
+# FIXME make this non-local
 g_named_values = {}
 
 
@@ -41,6 +44,17 @@ class Scope(object):
             raise NameError("NameError : name '%s' is not defined" % name)
 
 
+def CreateEntryBlockAlloca(function, var_name):
+    """
+    Creates an alloca instruction in the entry block of the function.
+    This is used for mutable variables.
+    """
+    entry = function.get_entry_basic_block()
+    builder = lc.Builder.new(entry)
+    builder.position_at_beginning(entry)
+    return builder.alloca(lc.Type.double(), var_name)
+
+
 @add_to_class(ast.Statement_sequence)
 def generate_code(self):
     pass
@@ -58,7 +72,16 @@ def generate_code(self):
 
 @add_to_class(ast.Funcall)
 def generate_code(self):
-    pass
+    # Look up the name in the global module table.
+    f = g_llvm_module.get_function_named(self.name)
+
+    # Check for argument mismatch error.
+    if len(f.args) != len(self.args):
+        raise RuntimeError('Incorrect number of arguments passed.')
+
+    arg_values = [i.CodeGen() for i in self.args]
+
+    return g_llvm_builder.call(f, arg_values, 'calltmp')
 
 
 @add_to_class(ast.Print)
@@ -91,31 +114,33 @@ def generate_code(self):
     pass
 
 int_binops = {
-    'OR':     lambda l, r: g_llvm_builder.or_(l, r, 'ortmp'),
-    'AND':    lambda l, r: g_llvm_builder.and_(l, r, 'andtmp'),
-    'EQ':     lambda l, r: g_llvm_builder.icmp(lc.icmp_EQ, l, r, 'cmptmp'),
-    'NEQ':    lambda l, r: g_llvm_builder.icmp(lc.icmp_NEQ, l, r, 'cmptmp'),
-    'LT':     lambda l, r: g_llvm_builder.icmp(lc.icmp_SLT, l, r, 'cmptmp'),
-    'GT':     lambda l, r: g_llvm_builder.icmp(lc.icmp_SGT, l, r, 'cmptmp'),
-    'LEQ':    lambda l, r: g_llvm_builder.icmp(lc.icmp_SLE, l, r, 'cmptmp'),
-    'GEQ':    lambda l, r: g_llvm_builder.icmp(lc.icmp_SGE, l, r, 'cmptmp'),
-    'PLUS':   lambda l, r: g_llvm_builder.add(l, r, 'addtemp'),
-    'MINUS':  lambda l, r: g_llvm_builder.sub(l, r, 'suntemp'),
-    'TIMES':  lambda l, r: g_llvm_builder.mul(l, r, 'multemp'),
-    'DIVIDE': lambda l, r: g_llvm_builder.sdiv(l, r, 'divtemp'),
+    'OR':  lambda l, r: g_llvm_builder.or_(l, r, 'or_tmp'),
+    'AND': lambda l, r: g_llvm_builder.and_(l, r, 'and_tmp'),
+    'EQ':  lambda l, r: g_llvm_builder.icmp(lc.icmp_EQ, l, r, 'eq_tmp'),
+    'NEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_NEQ, l, r, 'neq_tmp'),
+    'LT':  lambda l, r: g_llvm_builder.icmp(lc.icmp_SLT, l, r, 'lt_tmp'),
+    'GT':  lambda l, r: g_llvm_builder.icmp(lc.icmp_SGT, l, r, 'gt_tmp'),
+    'LEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_SLE, l, r, 'leq_tmp'),
+    'GEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_SGE, l, r, 'geq_tmp'),
+    'PLUS':   lambda l, r: g_llvm_builder.add(l, r, 'add_temp'),
+    'MINUS':  lambda l, r: g_llvm_builder.sub(l, r, 'sub_temp'),
+    'TIMES':  lambda l, r: g_llvm_builder.mul(l, r, 'mul_temp'),
+    'DIVIDE': lambda l, r: g_llvm_builder.sdiv(l, r, 'div_temp'),
     'MOD':    lambda l, r: print("Modulo not implemented")
 }
+
 
 @add_to_class(ast.Clause)
 def generate_code(self):
     # TODO type check
     # TODO NOT operand
-    # TODO grouped clauses or useless? p[0] = p[2]
+    # TODO grouped clauses or useless? note: p[0] = p[2]
 
     left = self.left.generate_code()
     right = self.right.generate_code()
 
     return int_binops[self.op](left, right)
+
 
 @add_to_class(ast.Expression)
 def generate_code(self):

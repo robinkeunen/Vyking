@@ -7,7 +7,7 @@ exp2 = """
 t = 3
 s = 3
 x = 3 + 42 * (s - t)
-print(x)
+#print(x)
 """
 
 dangling_else = """

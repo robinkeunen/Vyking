@@ -17,16 +17,11 @@ class ASTNode(object):
     (Visitor design pattern)
     """
 
-    #def __init__(self, lineno, lexpos):
-    def __init__(self):
+    def __init__(self, lineno, lexpos):
         self.type = None
-        self.lineno = 0  # lineno
-        self.lexpos = 0  # lexpos
+        self.lineno = lineno
+        self.lexpos = lexpos
         self.id = counter.__next__()
-
-    # accept visitor (not implemented yet)
-    def accept(self):
-        raise NotImplementedError("Should have implemented this")
 
     def get_type(self):
         return self.type
@@ -58,8 +53,8 @@ class Statement(ASTNode):
 
 
 class Statement_sequence(ASTNode):
-    def __init__(self, statement_sequence):
-        super().__init__()
+    def __init__(self, statement_sequence, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "statement_sequence"
         self.statement_sequence = statement_sequence
 
@@ -74,8 +69,8 @@ class Statement_sequence(ASTNode):
 
 
 class Assignment(Statement):
-    def __init__(self, name, right):
-        super().__init__()
+    def __init__(self, name, right, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "assignment"
         self.name = name
         self.right = right
@@ -88,8 +83,8 @@ class Assignment(Statement):
 
 
 class Return(Statement):
-    def __init__(self, value):
-        super().__init__()
+    def __init__(self, value, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "return_statement"
         self.value = value
 
@@ -101,13 +96,8 @@ class Return(Statement):
 
 
 class Funcall(Statement):
-    def __init__(self, name, args=[]):
-        """
-
-        :param name:
-        :param args:
-        """
-        super().__init__()
+    def __init__(self, name, lineno, lexpos, args=[]):
+        super().__init__(lineno, lexpos)
         self.type = "funcall"
         self.name = name
         self.args = args
@@ -124,8 +114,8 @@ class Funcall(Statement):
 
 
 class Print(Statement):
-    def __init__(self, expression):
-        super().__init__()
+    def __init__(self, expression, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = 'print'
         self.expression = expression
 
@@ -137,8 +127,8 @@ class Print(Statement):
 
 
 class If(Statement):
-    def __init__(self, clause, suite, if_closure=None):
-        super().__init__()
+    def __init__(self, clause, suite, lineno, lexpos, if_closure=None):
+        super().__init__(lineno, lexpos)
         self.type = "if_statement"
         self.clause = clause
         self.suite = suite
@@ -157,8 +147,8 @@ class If(Statement):
 
 
 class Elif(Statement):
-    def __init__(self, clause, suite, if_closure=None):
-        super().__init__()
+    def __init__(self, clause, suite, lineno, lexpos, if_closure=None):
+        super().__init__(lineno, lexpos)
         self.type = "elif_statement"
         self.clause = clause
         self.suite = suite
@@ -177,8 +167,8 @@ class Elif(Statement):
 
 
 class Else(Statement):
-    def __init__(self, suite):
-        super().__init__()
+    def __init__(self, suite, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "else"
         self.suite = suite
 
@@ -190,8 +180,8 @@ class Else(Statement):
 
 
 class While(Statement):
-    def __init__(self, clause, suite):
-        super().__init__()
+    def __init__(self, clause, suite, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "while"
         self.clause = clause
         self.suite = suite
@@ -204,14 +194,14 @@ class While(Statement):
 
 
 class Fundef(Statement):
-    def __init__(self, name, suite, parameters=[]):
+    def __init__(self, name, suite, lineno, lexpos, parameters=[]):
         """
 
         :param name:
         :param suite:
         :param parameters:
         """
-        super().__init__()
+        super().__init__(lineno, lexpos)
         self.name = name
         self.parameters = parameters
         self.suite = suite
@@ -228,8 +218,8 @@ class Fundef(Statement):
 
 
 class Clause(ASTNode):
-    def __init__(self, left, op, right):
-        super().__init__()
+    def __init__(self, left, op, right, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = 'clause'
         self.left = left
         self.op = op
@@ -246,8 +236,8 @@ class Clause(ASTNode):
 
 
 class Expression(ASTNode):
-    def __init__(self, left, op, right):
-        super().__init__()
+    def __init__(self, left, op, right, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "Expression"
         self.left = left
         self.right = right
@@ -268,8 +258,8 @@ class Atom(ASTNode):
 
 
 class Vinteger(Atom):
-    def __init__(self, value):
-        super().__init__()
+    def __init__(self, value, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "INT"
         self.value = value
 
@@ -281,8 +271,8 @@ class Vinteger(Atom):
 
 
 class Vfloat(Atom):
-    def __init__(self, value):
-        super().__init__()
+    def __init__(self, value, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "FLOAT"
         self.value = value
 
@@ -299,8 +289,8 @@ class ID(Atom):
     semantic analysis must check it has been assigned
     """
 
-    def __init__(self, name, value=None):
-        super().__init__()
+    def __init__(self, name, lineno, lexpos, value=None):
+        super().__init__(lineno, lexpos)
         self.type = "ID"
         self.name = name
         self.value = value
@@ -316,8 +306,8 @@ class ID(Atom):
 
 
 class Vstring(Atom):
-    def __init__(self, data):
-        super().__init__()
+    def __init__(self, data, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "string"
         self.data = data
 
@@ -329,8 +319,8 @@ class Vstring(Atom):
 
 
 class Vboolean(Atom):
-    def __init__(self, value):
-        super().__init__()
+    def __init__(self, value, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.type = "boolean"
         self.value = value
 
@@ -342,8 +332,8 @@ class Vboolean(Atom):
 
 
 class Map(Statement):
-    def __init__(self, funcname, vlist):
-        super().__init__()
+    def __init__(self, funcname, vlist, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.funcname = funcname
         self.vlist = vlist
 
@@ -355,8 +345,8 @@ class Map(Statement):
 
 
 class Pair(Atom):
-    def __init__(self, head, tail):
-        super().__init__()
+    def __init__(self, head, tail, lineno, lexpos):
+        super().__init__(lineno, lexpos)
         self.head = head
         self.tail = tail
 
@@ -365,7 +355,3 @@ class Pair(Atom):
 
     def get_children(self):
         return [self.head, self.tail]
-
-
-if __name__ == "__main__":
-    node = Vinteger(10)

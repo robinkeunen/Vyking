@@ -98,19 +98,19 @@ class BasicVykingParser(Parser):
 
     # operation dictionary, allows for simpler rules definition.
     operations = {
-        'or':  lambda x, y: ast.Clause(x, 'OR', y),
-        'and': lambda x, y: ast.Clause(x, 'AND', y),
-        '==':  lambda x, y: ast.Clause(x, 'EQ', y),
-        '!=':  lambda x, y: ast.Clause(x, 'NEQ', y),
-        '<':   lambda x, y: ast.Clause(x, 'LT', y),
-        '>':   lambda x, y: ast.Clause(x, 'GT', y),
-        '<=':  lambda x, y: ast.Clause(x, 'LEQ', y),
-        '>=':  lambda x, y: ast.Clause(x, 'GEQ', y),
-        '+':   lambda x, y: ast.Expression(x, 'PLUS', y),
-        '-':   lambda x, y: ast.Expression(x, 'MINUS', y),
-        '*':   lambda x, y: ast.Expression(x, 'TIMES', y),
-        '/':   lambda x, y: ast.Expression(x, 'DIVIDE', y),
-        '%':   lambda x, y: ast.Expression(x, 'MOD', y),
+        'or':  lambda l, r, li, le: ast.Clause(r, 'OR', r, li, le),
+        'and': lambda l, r, li, le: ast.Clause(r, 'AND', r, li, le),
+        '==':  lambda l, r, li, le: ast.Clause(r, 'EQ', r, li, le),
+        '!=':  lambda l, r, li, le: ast.Clause(r, 'NEQ', r, li, le),
+        '<':   lambda l, r, li, le: ast.Clause(r, 'LT', r, li, le),
+        '>':   lambda l, r, li, le: ast.Clause(r, 'GT', r, li, le),
+        '<=':  lambda l, r, li, le: ast.Clause(r, 'LEQ', r, li, le),
+        '>=':  lambda l, r, li, le: ast.Clause(r, 'GEQ', r, li, le),
+        '+':   lambda l, r, li, le: ast.Expression(r, 'PLUS', r, li, le),
+        '-':   lambda l, r, li, le: ast.Expression(r, 'MINUS', r, li, le),
+        '*':   lambda l, r, li, le: ast.Expression(r, 'TIMES', r, li, le),
+        '/':   lambda l, r, li, le: ast.Expression(r, 'DIVIDE', r, li, le),
+        '%':   lambda l, r, li, le: ast.Expression(r, 'MOD', r, li, le),
     }
 
     def __init__(self, **kw):
@@ -132,7 +132,7 @@ class BasicVykingParser(Parser):
 
     def p_vyking_input(self, p):
         'vyking_input : statement_sequence ENDMARKER'
-        p[0] = ast.Statement_sequence(p[1])
+        p[0] = ast.Statement_sequence(p[1], p.lineno(1), p.lexpos(1))
 
     def p_statement_sequence(self, p):
         """
@@ -176,7 +176,8 @@ class BasicVykingParser(Parser):
                    | ID DEC expression
         """
         if p[2] == '=':
-            p[0] = ast.Assignment(ast.ID(p[1]), p[3])
+            p[0] = ast.Assignment(ast.ID(p[1], p.lineno(1), p.lexpos(1)),
+                                  p[3], p.lineno(2), p.lexpos(2))
         elif p[2] == '+=':
             p[0] = ast.Assignment(ast.ID(p[1]), ast.Expression(p[1], "PLUS", p[3]))
         elif p[2] == '-=':
@@ -328,18 +329,7 @@ class BasicVykingParser(Parser):
                    | expression MOD expression
         """
         # get function in operation dictionnary
-        p[0] = self.operations[p[2]](p[1], p[3])
-
-        # if p[2] == '+':
-        #     p[0] = ast.Expression(p[1], 'PLUS', p[3])
-        # elif p[2] == '-':
-        #     p[0] = ast.Expression(p[1], 'MINUS', p[3])
-        # elif p[2] == '*':
-        #     p[0] = ast.Expression(p[1], 'TIMES', p[3])
-        # elif p[2] == '/':
-        #     p[0] = ast.Expression(p[1], 'DIVIDE', p[3])
-        # elif p[2] == '%':
-        #     p[0] = ast.Expression(p[1], 'MOD', p[3])
+        p[0] = self.operations[p[2]](p[1], p[3], p.lineno(2), p.lexpos(2))
 
     # unary minus
     def p_expression_uminus(self, p):
@@ -406,6 +396,7 @@ class BasicVykingParser(Parser):
 # Usage
 if __name__ == "__main__":
     import src.draw_tree
+    import src.code_generation
     data = inputs["exp2"]
     for lino, line in enumerate(data.splitlines()):
         print("%d: %s" % (lino, line))
@@ -425,4 +416,5 @@ if __name__ == "__main__":
     tree = result.make_tree_graph()
     tree.write("./tree", format="png")
     print(result)
+    print(result.generate_code())
 
