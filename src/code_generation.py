@@ -8,18 +8,18 @@ import llvm.core as lc
 
 # The LLVM module, which holds all the IR code.
 g_llvm_module = lc.Module.new('jit')
-# FIXME make this non-local
+# FIXME make this non-global
 #ast.ASTNode.llvm_module = lc.Module.new('jit')
 
 # The LLVM instruction builder. Created whenever a new function is entered.
 g_llvm_builder = None
-# FIXME make this non-local
+# FIXME make this non-global
 # ast.ASTNode.llvm_builder = None
 
 # A dictionary that keeps track of which values are defined in the current scope
 # and what their LLVM representation is.
 # TODO fix to get closures (using Scopes?)
-# FIXME make this non-local
+# FIXME make this non-global
 g_named_values = {}
 
 
@@ -44,25 +44,88 @@ class Scope(object):
             raise NameError("NameError : name '%s' is not defined" % name)
 
 
-def CreateEntryBlockAlloca(function, var_name):
+# helper function
+def CreateEntryBlockAlloca(function, ty, var_name):
     """
     Creates an alloca instruction in the entry block of the function.
     This is used for mutable variables.
     """
-    entry = function.get_entry_basic_block()
+    entry = function.entry_basic_block
     builder = lc.Builder.new(entry)
     builder.position_at_beginning(entry)
-    return builder.alloca(lc.Type.double(), var_name)
+    return builder.alloca(ty, var_name)
 
 
 @add_to_class(ast.Statement_sequence)
 def generate_code(self):
-    pass
+    # create anonymous function to link statements
+    # FIXME global module
+    # FIXME only
+
+    # make anonymous function on entry point
+    global g_llvm_builder
+    if g_llvm_builder is None:
+        ty = lc.Type.void()
+        func_type = lc.Type.function(ty, [])
+        function = lc.Function.new (g_llvm_module, func_type, "")
+            # Create a new basic block to start insertion into.
+        block = function.append_basic_block('top-level')
+        g_llvm_builder = lc.Builder.new(block)
+
+
+
+    for statement in self.statement_sequence:
+        statement.generate_code()
 
 
 @add_to_class(ast.Assignment)
+def create_local_variable(self):
+    """
+    Creates a local variable into scope
+    """
+    # TODO scoping
+    old_bindings = {}
+    function = g_llvm_builder.basic_block.function
+
+    # Register all variables and emit their initializer.
+    var_name = self.left.name
+    var_expression = self.right
+    var_value = var_expression.generate_code()
+
+    # FIXME type
+    alloca = CreateEntryBlockAlloca(function, lc.Type.int(), var_name)
+    g_llvm_builder.store(var_value, alloca)
+
+    # Remember the old variable binding so that we can restore the binding
+    # when we unrecurse.
+    old_bindings[var_name] = g_named_values.get(var_name, None)
+
+    # Remember this binding.
+    g_named_values[var_name] = alloca
+
+    # FIXME clean local variables
+    # # Pop all our variables from scope.
+    # for var_name in self.variables:
+    #     if old_bindings[var_name] is not None:
+    #         g_named_values[var_name] = old_bindings[var_name]
+    #     else:
+    #         del g_named_values[var_name]
+
+    # Return the body computation.
+    return alloca
+
+@add_to_class(ast.Assignment)
 def generate_code(self):
-    pass
+    if not isinstance(self.left, ast.ID):
+        raise SyntaxError("line %d: can't assign to %s"
+                          % (self.lineno, self.left.type))
+
+    try:
+        variable = g_named_values[self.left.name]
+        value = self.right.generate_code()
+        g_llvm_builder.store(value, variable)
+    except KeyError:
+        self.create_local_variable()
 
 
 @add_to_class(ast.Return)
@@ -109,24 +172,87 @@ def generate_code(self):
     pass
 
 
+# helper function
+@add_to_class(ast.Fundef)
+def CreateArgumentAllocas(self, function):
+    """
+    Create an alloca for each argument and register the argument in the symbol
+    table so that references to it will succeed.
+    """
+    for arg_name, arg in zip(self.parameters, function.args):
+        # FIXME type
+        alloca = CreateEntryBlockAlloca(function, lc.Type.int(), arg_name)
+        g_llvm_builder.store(arg, alloca)
+        # FIXME scope
+        g_named_values[arg_name] = alloca
+
+
 @add_to_class(ast.Fundef)
 def generate_code(self):
-    pass
+    # clear scope
+    # FIXME closures, might have to play here
+    g_named_values.clear()
+
+    # create function signature
+    # FIXME other function types
+
+    func_type = lc.Type.function(lc.Type.int(),
+                                 (lc.Type.int(),) * len(self.parameters),
+                                 False)
+    function = lc.Function.new(g_llvm_module,
+                               func_type,
+                               self.id.name)
+
+    # FIXME check
+    # check if defined?
+    # if function.name != self.name:
+
+    # TODO closures
+    # add parameters to function block
+    for param, p_name in zip(function.args, self.parameters):
+        param.name = p_name
+
+    # Create a new basic block to start insertion into.
+    block = function.append_basic_block('entry')
+    # FIXME make non global
+    global g_llvm_builder
+    g_llvm_builder = lc.Builder.new(block)
+
+    # Add all arguments to the symbol table and create their allocas.
+    self.CreateArgumentAllocas(function)
+
+    # Finish off the function.
+    try:
+        return_value = self.suite.generate_code()
+        g_llvm_builder.ret(return_value)
+
+        # Validate the generated code, checking for consistency.
+        function.verify()
+
+        # Optimize the function.
+        # TODO optimizer support
+        # g_llvm_pass_manager.run(function)
+    except:
+        function.delete()
+        raise
+
+    return function
+
 
 int_binops = {
-    'OR':  lambda l, r: g_llvm_builder.or_(l, r, 'or_tmp'),
+    'OR': lambda l, r: g_llvm_builder.or_(l, r, 'or_tmp'),
     'AND': lambda l, r: g_llvm_builder.and_(l, r, 'and_tmp'),
-    'EQ':  lambda l, r: g_llvm_builder.icmp(lc.icmp_EQ, l, r, 'eq_tmp'),
+    'EQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_EQ, l, r, 'eq_tmp'),
     'NEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_NEQ, l, r, 'neq_tmp'),
-    'LT':  lambda l, r: g_llvm_builder.icmp(lc.icmp_SLT, l, r, 'lt_tmp'),
-    'GT':  lambda l, r: g_llvm_builder.icmp(lc.icmp_SGT, l, r, 'gt_tmp'),
+    'LT': lambda l, r: g_llvm_builder.icmp(lc.icmp_SLT, l, r, 'lt_tmp'),
+    'GT': lambda l, r: g_llvm_builder.icmp(lc.icmp_SGT, l, r, 'gt_tmp'),
     'LEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_SLE, l, r, 'leq_tmp'),
     'GEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_SGE, l, r, 'geq_tmp'),
-    'PLUS':   lambda l, r: g_llvm_builder.add(l, r, 'add_temp'),
-    'MINUS':  lambda l, r: g_llvm_builder.sub(l, r, 'sub_temp'),
-    'TIMES':  lambda l, r: g_llvm_builder.mul(l, r, 'mul_temp'),
+    'PLUS': lambda l, r: g_llvm_builder.add(l, r, 'add_temp'),
+    'MINUS': lambda l, r: g_llvm_builder.sub(l, r, 'sub_temp'),
+    'TIMES': lambda l, r: g_llvm_builder.mul(l, r, 'mul_temp'),
     'DIVIDE': lambda l, r: g_llvm_builder.sdiv(l, r, 'div_temp'),
-    'MOD':    lambda l, r: print("Modulo not implemented")
+    'MOD': lambda l, r: print("Modulo not implemented")
 }
 
 
@@ -157,9 +283,11 @@ def generate_code(self):
 def generate_code(self):
     # TODO scope lookup
     if self.name in g_named_values:
-        return g_named_values[self.name]
+        # load from stack
+        return g_llvm_builder.load(g_named_values[self.name], self.name)
     else:
-        raise NameError("NameError : name '%s' is not defined" % self.name)
+        raise NameError("line %d: NameError : name '%s' is not defined"
+                        % (self.lineno, self.name))
 
 
 @add_to_class(ast.Vinteger)

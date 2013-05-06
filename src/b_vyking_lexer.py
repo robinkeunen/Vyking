@@ -44,7 +44,12 @@ class BasicVykingLexer(Lexer):
         'not'   : 'NOT',
         'defun' : 'DEFUN',
         'return': 'RETURN',
-        'print' : 'PRINT'
+        'print' : 'PRINT',
+        'extern': 'EXTERN',
+        'int'   : 'TY_INT',
+        'float' : 'TY_FLOAT',
+        'string': 'TY_STRING',
+        'void'  : 'TY_VOID'
     }
 
     # Token list
@@ -64,6 +69,7 @@ class BasicVykingLexer(Lexer):
               'LPAREN',
               'RPAREN',
               'COLON',
+              'SEMICOLON'
               'NEWLINE',
               'EQ',
               'LT',
@@ -98,6 +104,7 @@ class BasicVykingLexer(Lexer):
     t_GEQ = r'>='
     t_NEQ = r'!='
     t_COMMA = r','
+    t_SEMICOLON = r';'
 
     # Ignores whitespaces in lines
     t_ignore_WHITESPACE = r'\s+'

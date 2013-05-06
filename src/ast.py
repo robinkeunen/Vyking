@@ -69,14 +69,14 @@ class Statement_sequence(ASTNode):
 
 
 class Assignment(Statement):
-    def __init__(self, name, right, lineno, lexpos):
+    def __init__(self, left, right, lineno, lexpos):
         super().__init__(lineno, lexpos)
         self.type = "assignment"
-        self.name = name
+        self.left = left
         self.right = right
 
     def __str__(self):
-        return "(ASSIGN %s " % self.name + str(self.right) + ")"
+        return "(ASSIGN %s " % self.left + str(self.right) + ")"
 
     def get_children(self):
         return [self.name, self.right]
@@ -194,7 +194,7 @@ class While(Statement):
 
 
 class Fundef(Statement):
-    def __init__(self, name, suite, lineno, lexpos, parameters=[]):
+    def __init__(self, id, suite, lineno, lexpos, parameters=[]):
         """
 
         :param name:
@@ -202,7 +202,7 @@ class Fundef(Statement):
         :param parameters:
         """
         super().__init__(lineno, lexpos)
-        self.name = name
+        self.id = id
         self.parameters = parameters
         self.suite = suite
 
@@ -211,10 +211,10 @@ class Fundef(Statement):
         for p in self.parameters:
             parameters += str(p) + ' '
         parameters += ")"
-        return "(DEFUN %s %s \n %s)" % (str(self.name), parameters, str(self.suite))
+        return "(DEFUN %s %s \n %s)" % (str(self.id), parameters, str(self.suite))
 
     def get_children(self):
-        return [self.name, self.parameters, self.suite]
+        return [self.id, self.parameters, self.suite]
 
 
 class Clause(ASTNode):
@@ -289,17 +289,13 @@ class ID(Atom):
     semantic analysis must check it has been assigned
     """
 
-    def __init__(self, name, lineno, lexpos, value=None):
+    def __init__(self, name, lineno, lexpos):
         super().__init__(lineno, lexpos)
         self.type = "ID"
         self.name = name
-        self.value = value
 
     def __str__(self):
-        if self.value is None:
-            return self.name
-        else:
-            return "(%s " % self.name + str(self.value) + ")"
+        return self.name
 
     def get_children(self):
         return list()

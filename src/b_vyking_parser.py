@@ -98,24 +98,24 @@ class BasicVykingParser(Parser):
 
     # operation dictionary, allows for simpler rules definition.
     operations = {
-        'or':  lambda l, r, li, le: ast.Clause(r, 'OR', r, li, le),
-        'and': lambda l, r, li, le: ast.Clause(r, 'AND', r, li, le),
-        '==':  lambda l, r, li, le: ast.Clause(r, 'EQ', r, li, le),
-        '!=':  lambda l, r, li, le: ast.Clause(r, 'NEQ', r, li, le),
-        '<':   lambda l, r, li, le: ast.Clause(r, 'LT', r, li, le),
-        '>':   lambda l, r, li, le: ast.Clause(r, 'GT', r, li, le),
-        '<=':  lambda l, r, li, le: ast.Clause(r, 'LEQ', r, li, le),
-        '>=':  lambda l, r, li, le: ast.Clause(r, 'GEQ', r, li, le),
-        '+':   lambda l, r, li, le: ast.Expression(r, 'PLUS', r, li, le),
-        '-':   lambda l, r, li, le: ast.Expression(r, 'MINUS', r, li, le),
-        '*':   lambda l, r, li, le: ast.Expression(r, 'TIMES', r, li, le),
-        '/':   lambda l, r, li, le: ast.Expression(r, 'DIVIDE', r, li, le),
-        '%':   lambda l, r, li, le: ast.Expression(r, 'MOD', r, li, le),
+        'or':  lambda l, r, li, le: ast.Clause(l, 'OR', r, li, le),
+        'and': lambda l, r, li, le: ast.Clause(l, 'AND', r, li, le),
+        '==':  lambda l, r, li, le: ast.Clause(l, 'EQ', r, li, le),
+        '!=':  lambda l, r, li, le: ast.Clause(l, 'NEQ', r, li, le),
+        '<':   lambda l, r, li, le: ast.Clause(l, 'LT', r, li, le),
+        '>':   lambda l, r, li, le: ast.Clause(l, 'GT', r, li, le),
+        '<=':  lambda l, r, li, le: ast.Clause(l, 'LEQ', r, li, le),
+        '>=':  lambda l, r, li, le: ast.Clause(l, 'GEQ', r, li, le),
+        '+':   lambda l, r, li, le: ast.Expression(l, 'PLUS', r, li, le),
+        '-':   lambda l, r, li, le: ast.Expression(l, 'MINUS', r, li, le),
+        '*':   lambda l, r, li, le: ast.Expression(l, 'TIMES', r, li, le),
+        '/':   lambda l, r, li, le: ast.Expression(l, 'DIVIDE', r, li, le),
+        '%':   lambda l, r, li, le: ast.Expression(l, 'MOD', r, li, le),
     }
 
     def __init__(self, **kw):
         """
-    Parser initializer
+        Parser initializer
         :param kw: keyword arguments
         """
         mylexer = IndentFilter(BasicVykingLexer())
@@ -158,6 +158,7 @@ class BasicVykingParser(Parser):
                          | return_statement NEWLINE
                          | funcall NEWLINE
                          | print NEWLINE
+                         | C_prototype NEWLINE
         """
         p[0] = p[1]
 
@@ -179,13 +180,17 @@ class BasicVykingParser(Parser):
             p[0] = ast.Assignment(ast.ID(p[1], p.lineno(1), p.lexpos(1)),
                                   p[3], p.lineno(2), p.lexpos(2))
         elif p[2] == '+=':
-            p[0] = ast.Assignment(ast.ID(p[1]), ast.Expression(p[1], "PLUS", p[3]))
+            p[0] = ast.Assignment(ast.ID(p[1], p.lineno(1), p.lexpos(1)),
+                                  ast.Expression(p[1], "PLUS", p[3], p.lineno(3), p.lexpos(3)),
+                                  p.lineno(2), p.lexpos(2))
         elif p[2] == '-=':
-            p[0] = ast.Assignment(ast.ID(p[1]), ast.Expression(p[1], "MINUS", p[3]))
+            p[0] = ast.Assignment(ast.ID(p[1], p.lineno(1), p.lexpos(1)),
+                                  ast.Expression(p[1], "MINUS", p[3], p.lineno(3), p.lexpos(3)),
+                                  p.lineno(2), p.lexpos(2))
 
     def p_return_statement(self, p):
         'return_statement : RETURN expression'
-        p[0] = ast.Return(p[2])
+        p[0] = ast.Return(p[2], p.lineno(2), p.lexpos(2))
 
     def p_funcall(self, p):
         """
@@ -193,9 +198,12 @@ class BasicVykingParser(Parser):
                 | ID LPAREN RPAREN
         """
         if len(p) == 5:
-            p[0] = ast.Funcall(ast.ID(p[1]), p[3])
+            p[0] = ast.Funcall(ast.ID(p[1], p.lineno(1), p.lexpos(1)),
+                               p.lineno(0), p.lexpos(0),
+                               args=p[3])
         else:
-            p[0] = ast.Funcall(ast.ID(p[1]))
+            p[0] = ast.Funcall(ast.ID(p[1], p.lineno(2), p.lexpos(2)),
+                               p.lineno(0), p.lexpos(0))
 
     def p_print(self, p):
         """
@@ -203,9 +211,39 @@ class BasicVykingParser(Parser):
               | PRINT LPAREN RPAREN
         """
         if len(p) == 5:
-            p[0] = ast.Print(p[3])
+            p[0] = ast.Print(p[3], p.lineno(1), p.lexpos(1))
         else:
-            p[0] = ast.Print(None)
+            p[0] = ast.Print(None, p.lineno(1), p.lexpos(1))
+
+    def p_C_prototype(self, p):
+        """
+        EXTERN Vtype ID LPAREN typed_params RPAREN SEMICOLON
+        """
+        p[0] = ast.C_prototype()
+
+    def p_typed_params(self, p):
+        """
+        typed_params : typed_params COMMA ty_param
+                     | ty_param
+        """
+        if len(p) == 4:
+            p[0] = p[1] + [p[3]]
+        else:
+            p[0] = [p[1]]
+
+    def p_ty_param(self, p):
+        """
+        ty_param : Vtype ID
+        """
+        p[0] = (p[1], ast.ID(p[3], p.lineno(E), p.lexpos(3)))
+
+    def p_Vtype(self, p):
+        """
+        Vtype : TY_INT
+              | TY_FLOAT
+              | TY_STRING
+              | TY_VOID
+        """
 
     def p_args(self, p):
         """
@@ -221,7 +259,7 @@ class BasicVykingParser(Parser):
         """
         if_statement : IF clause COLON suite if_closure
         """
-        p[0] = ast.If(p[2], p[4], p[5])
+        p[0] = ast.If(p[2], p[4], p.lineno(1), p.lexpos(1), if_closure=p[5])
 
     def p_if_closure(self, p):
         """
@@ -231,7 +269,7 @@ class BasicVykingParser(Parser):
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = ast.Else(p[3])
+            p[0] = ast.Else(p[3], p.lineno(1), p.lexpos(1))
 
     def p_if_closure_empty(self, p):
         'if_closure : empty'  # %prec unmatched_if'
@@ -239,21 +277,27 @@ class BasicVykingParser(Parser):
 
     def p_elif_statement(self, p):
         'elif_statement : ELIF clause COLON suite if_closure'
-        p[0] = ast.Elif(p[2], p[4], p[5])
+        p[0] = ast.Elif(p[2], p[4], p.lineno(1), p.lexpos(1), if_closure=p[5])
 
     def p_while_statement(self, p):
         'while_statement : WHILE clause COLON suite'
-        p[0] = ast.While(p[2], p[4])
+        p[0] = ast.While(p[2], p[4], p.lineno(1), p.lexpos(1))
 
     def p_fundef(self, p):
         'fundef : DEFUN ID LPAREN parameters RPAREN COLON suite'
-        p[0] = ast.Fundef(ast.ID(p[2]), p[7], p[4])
+        p[0] = ast.Fundef(ast.ID(p[2], p.lineno(2), p.lexpos(2)),
+                          p[7],
+                          p.lineno(1), p.lexpos(1),
+                          parameters=p[4])
 
     # resynchronization attempt
     def p_fundef_error(self, p):
         'fundef : DEFUN ID error parameters RPAREN COLON suite'
         sys.stderr.write("line%d: expected opening parentheses, attempting to fix...")
-        p[0] = ast.Fundef(ast.ID(p[2]), p[7], p[4])
+        p[0] = ast.Fundef(ast.ID(p[2], p.lineno(2), p.lexpos(2)),
+                          p[7], p[4],
+                          p.lineno(1), p.lexpos(1),
+                          parameters=p[4])
 
     def p_parameters(self, p):
         """
@@ -261,9 +305,9 @@ class BasicVykingParser(Parser):
                    | ID
         """
         if len(p) == 4:
-            p[0] = p[1] + [ast.ID(p[3])]
+            p[0] = p[1] + [ast.ID(p[3], p.lineno(3), p.lexpos(3))]
         else:
-            p[0] = [ast.ID(p[1])]
+            p[0] = [ast.ID(p[1], p.lineno(1), p.lexpos(1))]
 
     def p_suite(self, p):
         """
@@ -273,7 +317,7 @@ class BasicVykingParser(Parser):
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = ast.Statement_sequence(p[3])
+            p[0] = ast.Statement_sequence(p[3], p.lineno(3), p.lexpos(3))
 
     def p_clause(self, p):
         """
@@ -289,28 +333,11 @@ class BasicVykingParser(Parser):
              | expression LEQ expression
         """
         if len(p) == 3:
-            p[0] = ast.Clause(None, "NOT", p[2])
+            p[0] = ast.Clause(None, "NOT", p[2], p.lineno(1), p.lexpos(1))
         elif p[1] == '(':
             p[0] = p[2]
         else:
-            p[0] = self.operations[p[2]](p[1], p[3])
-
-        # elif p[2] == 'or':
-        #     p[0] = ast.Clause(p[1], "OR", p[3])
-        # elif p[2] == 'and':
-        #     p[0] = ast.Clause(p[1], "AND", p[3])
-        # elif p[2] == '==':
-        #     p[0] = ast.Clause(p[1], "EQ", p[3])
-        # elif p[2] == '!=':
-        #     p[0] = ast.Clause(p[1], "NEQ", p[3])
-        # elif p[2] == '<':
-        #     p[0] = ast.Clause(p[1], "LT", p[3])
-        # elif p[2] == '>':
-        #     p[0] = ast.Clause(p[1], "GT", p[3])
-        # elif p[2] == '<=':
-        #     p[0] = ast.Clause(p[1], "LEQ", p[3])
-        # elif p[2] == '>=':
-        #     p[0] = ast.Clause(p[1], "GEQ", p[3])
+            p[0] = self.operations[p[2]](p[1], p[3], p.lineno(2), p.lexpos(2))
 
     def p_clause_exp(self, p):
         'clause : expression'
@@ -334,7 +361,7 @@ class BasicVykingParser(Parser):
     # unary minus
     def p_expression_uminus(self, p):
         'expression : MINUS expression %prec UMINUS'
-        p[0] = ast.Expression(None, 'UMINUS', p[2])
+        p[0] = ast.Expression(None, 'UMINUS', p[2], p.lineno(2), p.lexpos(2))
 
     def p_expression_numeric(self, p):
         'expression : numeric'
@@ -342,19 +369,19 @@ class BasicVykingParser(Parser):
 
     def p_numeric_int(self, p):
         'numeric : INT'
-        p[0] = ast.Vinteger(p[1])
+        p[0] = ast.Vinteger(p[1], p.lineno(1), p.lexpos(1))
 
     def p_numeric_float(self, p):
         'numeric : FLOAT'
-        p[0] = ast.Vfloat(p[1])
+        p[0] = ast.Vfloat(p[1], p.lineno(1), p.lexpos(1))
 
     def p_expression_id(self, p):
         'expression : ID'
-        p[0] = ast.ID(p[1])
+        p[0] = ast.ID(p[1], p.lineno(1), p.lexpos(1))
 
     def p_expression_string(self, p):
         'expression : STRING'
-        p[0] = ast.Vstring(p[1])
+        p[0] = ast.Vstring(p[1], p.lineno(1), p.lexpos(1))
 
     def p_expression_funcall(self, p):
         'expression : funcall'
@@ -362,7 +389,7 @@ class BasicVykingParser(Parser):
 
     def p_expression_boolean(self, p):
         'expression : BOOLEAN'
-        p[0] = ast.Vboolean(p[1])
+        p[0] = ast.Vboolean(p[1], p.lineno(1), p.lexpos(1))
 
     # Error rule for syntax errors.
     def p_error(self, p):
@@ -396,8 +423,8 @@ class BasicVykingParser(Parser):
 # Usage
 if __name__ == "__main__":
     import src.draw_tree
-    import src.code_generation
-    data = inputs["exp2"]
+
+    data = inputs["dangling_else"]
     for lino, line in enumerate(data.splitlines()):
         print("%d: %s" % (lino, line))
     print()
@@ -416,5 +443,5 @@ if __name__ == "__main__":
     tree = result.make_tree_graph()
     tree.write("./tree", format="png")
     print(result)
-    print(result.generate_code())
+
 

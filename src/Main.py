@@ -10,11 +10,7 @@ import src.code_generation
 
 from llvm.passes import FunctionPassManager
 
-from llvm.passes import(PASS_PROMOTE_MEMORY_TO_REGISTER,
-                        PASS_INSTRUCTION_COMBINING,
-                        PASS_REASSOCIATE,
-                        PASS_GVN,
-                        PASS_CFG_SIMPLIFICATION)
+import llvm.passes as lp
 
 
 def main():
@@ -53,12 +49,11 @@ def main():
 
     parser = BasicVykingParser(debug=log)
     ast = parser.parse(data, debug=log)
-
-    dot_tree = ast.make_tree_graph()
-    dot_tree.write("./tree", format="png")
+    ast.generate_code()
+    # dot_tree = ast.make_tree_graph()
+    # dot_tree.write("./tree", format="png")
 
     print(ast)
-    print(ast.generate_code())
 
     # Print out all of the generated code.
     print('', src.code_generation.g_llvm_module)

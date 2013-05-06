@@ -1,11 +1,12 @@
 # coding=utf-8
 __author__ = 'Robin Keunen'
 
-exp1 = "x = 3 + 42 * (2 - 8)"
+exp1 = """x = 3 + 42 * (2 - 8)
+"""
 
 exp2 = """
 t = 3
-s = 3
+s = 5
 x = 3 + 42 * (s - t)
 #print(x)
 """
@@ -21,7 +22,12 @@ if a == b:
         a = b + 6
         print(b)
 else:
-    return print("diff")
+    print("diff")
+"""
+
+extern = """
+
+extern void strcat(string s);
 """
 
 printtest = """
