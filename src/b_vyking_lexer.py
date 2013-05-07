@@ -69,7 +69,7 @@ class BasicVykingLexer(Lexer):
               'LPAREN',
               'RPAREN',
               'COLON',
-              'SEMICOLON'
+              'SEMICOLON',
               'NEWLINE',
               'EQ',
               'LT',
@@ -270,19 +270,3 @@ class BasicVykingLexer(Lexer):
         :return: current line number of the lexer.
         """
         return self.lexer.lineno
-
-# Usage
-if __name__ == "__main__":
-    lexer = BasicVykingLexer()
-    lex_test(lexer, 2)
-    ifStmt = """
-if a == b:
-    a = a + 1
-    return a
-
-"""
-    lexer.input(ifStmt)
-    while True:
-        tok = lexer.token()
-        if not tok: break      # No more input
-        print(tok)

@@ -113,6 +113,21 @@ class Funcall(Statement):
         return [self.name, self.args]
 
 
+class C_prototype(Statement):
+    def __init__(self, return_ty, name, ty_params, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.type = "C_prototype"
+        self.return_ty = return_ty
+        self.name = name
+        self.ty_params = ty_params
+
+    def __str__(self):
+        return "extern " + str(self.return_ty) + " " + str(self.name)
+
+    def get_children(self):
+        return [self.return_ty, self.name, self.ty_params]
+
+
 class Print(Statement):
     def __init__(self, expression, lineno, lexpos):
         super().__init__(lineno, lexpos)

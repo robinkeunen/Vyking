@@ -47,6 +47,10 @@ y = gcd.args[1]; y.name = "y"
 #implement the function
 
 #blocks...
+declare i32 @printf(i8* noalias nocapture, ...)
+declare i32 @atoi(i8 zeroext)
+declare signext i8 @returns_signed_char()
+
 entry = gcd.append_basic_block("entry")
 ret = gcd.append_basic_block("return")
 cond_false = gcd.append_basic_block("cond_false")

@@ -236,6 +236,7 @@ inputs = {"exp1": exp1,
           "alt_map": alt_map,
           "fact": fact,
           "n_ary": n_ary,
+          "extern": extern,
           }
 
 

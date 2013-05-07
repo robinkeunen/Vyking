@@ -217,9 +217,12 @@ class BasicVykingParser(Parser):
 
     def p_C_prototype(self, p):
         """
-        EXTERN Vtype ID LPAREN typed_params RPAREN SEMICOLON
+        C_prototype : EXTERN Vtype ID LPAREN typed_params RPAREN SEMICOLON
         """
-        p[0] = ast.C_prototype()
+        p[0] = ast.C_prototype(p[2],
+                               ast.ID(p[3], p.lineno(3), p.lexpos(3)),
+                               p[5],
+                               p.lineno(1), p.lexpos(1))
 
     def p_typed_params(self, p):
         """
@@ -235,7 +238,7 @@ class BasicVykingParser(Parser):
         """
         ty_param : Vtype ID
         """
-        p[0] = (p[1], ast.ID(p[3], p.lineno(E), p.lexpos(3)))
+        p[0] = (p[1], ast.ID(p[2], p.lineno(2), p.lexpos(2)))
 
     def p_Vtype(self, p):
         """
@@ -244,6 +247,7 @@ class BasicVykingParser(Parser):
               | TY_STRING
               | TY_VOID
         """
+        p[0] = p[1]
 
     def p_args(self, p):
         """
@@ -424,7 +428,7 @@ class BasicVykingParser(Parser):
 if __name__ == "__main__":
     import src.draw_tree
 
-    data = inputs["dangling_else"]
+    data = inputs["extern"]
     for lino, line in enumerate(data.splitlines()):
         print("%d: %s" % (lino, line))
     print()

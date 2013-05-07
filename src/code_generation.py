@@ -20,7 +20,7 @@ g_llvm_builder = None
 # and what their LLVM representation is.
 # TODO fix to get closures (using Scopes?)
 # FIXME make this non-global
-g_named_values = {}
+# g_named_values = {}
 
 
 class Scope(object):
@@ -32,16 +32,21 @@ class Scope(object):
         self.local = {}
         self.environment = environment
 
-    def add(self):
-        pass
+    def add(self, name, data):
+        self.local[name] = data
 
     def get(self, name):
         if name in self.local:
             return self.local[name]
-        elif name in self.environment:
+        elif self.environment is not None and name in self.environment:
             return self.environment[name]
         else:
             raise NameError("NameError : name '%s' is not defined" % name)
+
+    def copy(self):
+        obj_copy = Scope()
+        obj_copy.local = self.local.copy()
+        obj_copy.environment = self.environment.copy()
 
 
 # helper function
@@ -67,12 +72,10 @@ def generate_code(self):
     if g_llvm_builder is None:
         ty = lc.Type.void()
         func_type = lc.Type.function(ty, [])
-        function = lc.Function.new (g_llvm_module, func_type, "")
-            # Create a new basic block to start insertion into.
+        function = lc.Function.new(g_llvm_module, func_type, "")
+        # Create a new basic block to start insertion into.
         block = function.append_basic_block('top-level')
         g_llvm_builder = lc.Builder.new(block)
-
-
 
     for statement in self.statement_sequence:
         statement.generate_code()
@@ -114,6 +117,7 @@ def create_local_variable(self):
     # Return the body computation.
     return alloca
 
+
 @add_to_class(ast.Assignment)
 def generate_code(self):
     if not isinstance(self.left, ast.ID):
@@ -154,17 +158,96 @@ def generate_code(self):
 
 @add_to_class(ast.If)
 def generate_code(self):
-    pass
+    clause = self.clause.generate_code()
+
+    # convert to 1-bit bool
+    # FIXME type
+    condition_bool = g_llvm_builder.icmp(
+        lc.ICMP_NE, clause, lc.Constant.real(lc.Type.int(), 0), 'ifcond')
+
+    function = g_llvm_builder.basic_block.function
+
+    # Create blocks for the then and else cases. Insert the 'then' block at the
+    # end of the function.
+    suite_block = function.append_basic_block('suite')
+    closure_block = function.append_basic_block('closure')
+    merge_block = function.append_basic_block('ifcond')
+
+    g_llvm_builder.cbranch(condition_bool, suite_block, closure_block)
+
+    # Build suite block
+    g_llvm_builder.position_at_end(suite_block)
+    suite_value = self.suite.generate_code()
+    g_llvm_builder.branch(merge_block)
+
+    # Computation of suite can change de block, get block for the phi node
+    suite_block = g_llvm_builder.basic_block
+
+    # Build closure block
+    g_llvm_builder.position_at_end(closure_block)
+    closure_value = self.if_closure.generate_code
+    g_llvm_builder.branch(merge_block)
+
+    # Computation of suite can change de block, get block for the phi node
+    closure_block = g_llvm_builder.basic_block
+
+    # Build merge block.
+    g_llvm_builder.position_at_end(merge_block)
+    phi = g_llvm_builder.phi(lc.Type.int(), 'iftmp')
+    phi.add_incoming(suite_block, suite_block)
+    phi.add_incoming(closure_value, closure_block)
+
+    return phi
+
 
 
 @add_to_class(ast.Elif)
 def generate_code(self):
-    pass
+    clause = self.clause.generate_code()
+
+    # convert to 1-bit bool
+    # FIXME type
+    condition_bool = g_llvm_builder.icmp(
+        lc.ICMP_NE, clause, lc.Constant.real(lc.Type.int(), 0), 'elifcond')
+
+    function = g_llvm_builder.basic_block.function
+
+    # Create blocks for the then and else cases. Insert the 'then' block at the
+    # end of the function.
+    suite_block = function.append_basic_block('suite')
+    closure_block = function.append_basic_block('closure')
+    merge_block = function.append_basic_block('elifcond')
+
+    g_llvm_builder.cbranch(condition_bool, suite_block, closure_block)
+
+    # Build suite block
+    g_llvm_builder.position_at_end(suite_block)
+    suite_value = self.suite.generate_code()
+    g_llvm_builder.branch(merge_block)
+
+    # Computation of suite can change de block, get block for the phi node
+    suite_block = g_llvm_builder.basic_block
+
+    # Build closure block
+    g_llvm_builder.position_at_end(closure_block)
+    closure_value = self.if_closure.generate_code
+    g_llvm_builder.branch(merge_block)
+
+    # Computation of suite can change de block, get block for the phi node
+    closure_block = g_llvm_builder.basic_block
+
+    # Build merge block.
+    g_llvm_builder.position_at_end(merge_block)
+    phi = g_llvm_builder.phi(lc.Type.int(), 'eliftmp')
+    phi.add_incoming(suite_block, suite_block)
+    phi.add_incoming(closure_value, closure_block)
+
+    return phi
 
 
 @add_to_class(ast.Else)
 def generate_code(self):
-    pass
+    return self.suite.generate_code()
 
 
 @add_to_class(ast.While)
@@ -242,12 +325,12 @@ def generate_code(self):
 int_binops = {
     'OR': lambda l, r: g_llvm_builder.or_(l, r, 'or_tmp'),
     'AND': lambda l, r: g_llvm_builder.and_(l, r, 'and_tmp'),
-    'EQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_EQ, l, r, 'eq_tmp'),
-    'NEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_NEQ, l, r, 'neq_tmp'),
-    'LT': lambda l, r: g_llvm_builder.icmp(lc.icmp_SLT, l, r, 'lt_tmp'),
-    'GT': lambda l, r: g_llvm_builder.icmp(lc.icmp_SGT, l, r, 'gt_tmp'),
-    'LEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_SLE, l, r, 'leq_tmp'),
-    'GEQ': lambda l, r: g_llvm_builder.icmp(lc.icmp_SGE, l, r, 'geq_tmp'),
+    'EQ': lambda l, r: g_llvm_builder.icmp(lc.ICMP_EQ, l, r, 'eq_tmp'),
+    'NEQ': lambda l, r: g_llvm_builder.icmp(lc.ICMP_NEQ, l, r, 'neq_tmp'),
+    'LT': lambda l, r: g_llvm_builder.icmp(lc.ICMP_SLT, l, r, 'lt_tmp'),
+    'GT': lambda l, r: g_llvm_builder.icmp(lc.ICMP_SGT, l, r, 'gt_tmp'),
+    'LEQ': lambda l, r: g_llvm_builder.icmp(lc.ICMP_SLE, l, r, 'leq_tmp'),
+    'GEQ': lambda l, r: g_llvm_builder.icmp(lc.ICMP_SGE, l, r, 'geq_tmp'),
     'PLUS': lambda l, r: g_llvm_builder.add(l, r, 'add_temp'),
     'MINUS': lambda l, r: g_llvm_builder.sub(l, r, 'sub_temp'),
     'TIMES': lambda l, r: g_llvm_builder.mul(l, r, 'mul_temp'),
