@@ -20,33 +20,7 @@ g_llvm_builder = None
 # and what their LLVM representation is.
 # TODO fix to get closures (using Scopes?)
 # FIXME make this non-global
-# g_named_values = {}
-
-
-class Scope(object):
-    """
-    Keeps track of the variable in the scope
-    """
-
-    def __init__(self, environment=None):
-        self.local = {}
-        self.environment = environment
-
-    def add(self, name, data):
-        self.local[name] = data
-
-    def get(self, name):
-        if name in self.local:
-            return self.local[name]
-        elif self.environment is not None and name in self.environment:
-            return self.environment[name]
-        else:
-            raise NameError("NameError : name '%s' is not defined" % name)
-
-    def copy(self):
-        obj_copy = Scope()
-        obj_copy.local = self.local.copy()
-        obj_copy.environment = self.environment.copy()
+g_named_values = {}
 
 
 # helper function

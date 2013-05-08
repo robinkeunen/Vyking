@@ -49,14 +49,14 @@ def main():
 
     parser = BasicVykingParser(debug=log)
     ast = parser.parse(data, debug=log)
-    ast.generate_code()
+    #ast.generate_code()
     # dot_tree = ast.make_tree_graph()
     # dot_tree.write("./tree", format="png")
 
     print(ast)
 
     # Print out all of the generated code.
-    print('', src.code_generation.g_llvm_module)
+    #print('', src.code_generation.g_llvm_module)
 
 if __name__ == '__main__':
    main()

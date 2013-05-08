@@ -158,7 +158,7 @@ class BasicVykingParser(Parser):
                          | return_statement NEWLINE
                          | funcall NEWLINE
                          | print NEWLINE
-                         | C_prototype NEWLINE
+                         | extern_declaration NEWLINE
         """
         p[0] = p[1]
 
@@ -215,14 +215,14 @@ class BasicVykingParser(Parser):
         else:
             p[0] = ast.Print(None, p.lineno(1), p.lexpos(1))
 
-    def p_C_prototype(self, p):
+    def p_prototype(self, p):
         """
-        C_prototype : EXTERN Vtype ID LPAREN typed_params RPAREN SEMICOLON
+        prototype : Vtype ID LPAREN typed_params RPAREN
         """
-        p[0] = ast.C_prototype(p[2],
-                               ast.ID(p[3], p.lineno(3), p.lexpos(3)),
-                               p[5],
-                               p.lineno(1), p.lexpos(1))
+        p[0] = ast.Prototype(p[1],
+                             ast.ID(p[2], p.lineno(2), p.lexpos(2)),
+                             p[4],
+                             p.lineno(1), p.lexpos(1))
 
     def p_typed_params(self, p):
         """
@@ -288,11 +288,19 @@ class BasicVykingParser(Parser):
         p[0] = ast.While(p[2], p[4], p.lineno(1), p.lexpos(1))
 
     def p_fundef(self, p):
-        'fundef : DEFUN ID LPAREN parameters RPAREN COLON suite'
-        p[0] = ast.Fundef(ast.ID(p[2], p.lineno(2), p.lexpos(2)),
-                          p[7],
-                          p.lineno(1), p.lexpos(1),
-                          parameters=p[4])
+        'fundef : DEFUN prototype COLON suite'
+        p[0] = ast.Fundef(p[2],
+                          p[4],
+                          p.lineno(1),
+                          p.lexpos(1))
+
+
+    def p_extern_declaration(self, p):
+        """
+        extern_declaration : EXTERN prototype
+        """
+        p[0] = ast.Fundef(p[2], None, p.lineno(1), p.lexpos(1))
+
 
     # resynchronization attempt
     def p_fundef_error(self, p):
@@ -428,7 +436,7 @@ class BasicVykingParser(Parser):
 if __name__ == "__main__":
     import src.draw_tree
 
-    data = inputs["extern"]
+    data = inputs["exp2"]
     for lino, line in enumerate(data.splitlines()):
         print("%d: %s" % (lino, line))
     print()

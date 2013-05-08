@@ -77,25 +77,17 @@ def make_tree_graph(self, dot=None, edgeLabels=True):
 @add_to_class(ast.Fundef)
 def make_tree_graph(self, dot=None, edgeLabels=True):
     """
-        Makes a dot object to write subtree to output
-        """
+    Makes a dot object to write subtree to output
+    """
     if not dot: dot = pydot.Dot()
     dot.add_node(pydot.Node(self.id, label=self.type))
     label = edgeLabels and len(self.get_children()) - 1
 
-    self.name.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
-    edge = pydot.Edge(self.id, self.name.id)
+    self.prototype.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
+    edge = pydot.Edge(self.id, self.prototype.id)
     if label:
         edge.set_label(str(0))
         dot.add_edge(edge)
-
-    for i, c in enumerate(self.parameters):
-        if issubclass(c.__class__, ast.ASTNode):
-            c.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
-            edge = pydot.Edge(self.id, c.id)
-            if label:
-                edge.set_label(str(i))
-            dot.add_edge(edge)
 
     self.suite.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
     edge = pydot.Edge(self.id, self.suite.id)
@@ -103,9 +95,26 @@ def make_tree_graph(self, dot=None, edgeLabels=True):
         edge.set_label(str(0))
         dot.add_edge(edge)
 
-
     return dot
 
+
+@add_to_class(ast.Prototype)
+def make_tree_graph(self, dot=None, edgeLabels=True):
+
+    if not dot: dot = pydot.Dot()
+    dot.add_node(pydot.Node(self.id, label=self.data))
+    label = edgeLabels and len(self.get_children()) - 1
+
+    for i, tp in enumerate(self.ty_params):
+        t, p = tp
+        if issubclass(p.__class__, ast.ASTNode):
+            dot.add_node(pydot.Node(t, label=t))
+
+            p.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
+            edge = pydot.Edge(self.id, p.id)
+            if label:
+                edge.set_label(str(i))
+            dot.add_edge(edge)
 
 @add_to_class(ast.Funcall)
 def make_tree_graph(self, dot=None, edgeLabels=True):
@@ -141,8 +150,8 @@ def make_tree_graph(self, dot=None, edgeLabels=True):
     dot.add_node(pydot.Node(self.id, label=self.type))
     label = edgeLabels and len(self.get_children()) - 1
 
-    self.name.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
-    edge = pydot.Edge(self.id, self.name.id)
+    self.left.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
+    edge = pydot.Edge(self.id, self.left.id)
     if label:
         edge.set_label(str(0))
         dot.add_edge(edge)

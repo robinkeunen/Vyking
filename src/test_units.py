@@ -26,8 +26,7 @@ else:
 """
 
 extern = """
-
-extern void strcat(string s);
+extern void strcat(string s)
 """
 
 printtest = """

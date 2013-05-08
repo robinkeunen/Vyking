@@ -79,7 +79,7 @@ class Assignment(Statement):
         return "(ASSIGN %s " % self.left + str(self.right) + ")"
 
     def get_children(self):
-        return [self.name, self.right]
+        return [self.left, self.right]
 
 
 class Return(Statement):
@@ -113,16 +113,22 @@ class Funcall(Statement):
         return [self.name, self.args]
 
 
-class C_prototype(Statement):
+class Prototype(Statement):
     def __init__(self, return_ty, name, ty_params, lineno, lexpos):
         super().__init__(lineno, lexpos)
-        self.type = "C_prototype"
+        self.type = "prototype"
         self.return_ty = return_ty
         self.name = name
         self.ty_params = ty_params
 
     def __str__(self):
-        return "extern " + str(self.return_ty) + " " + str(self.name)
+        parameters = "["
+        for t, p in self.ty_params:
+            parameters += "(%s, %s), " % (t, str(p))
+        parameters = parameters[:-2] + "]"
+        return "%s: %s %s" % (self.return_ty,
+                              str(self.name),
+                              parameters)
 
     def get_children(self):
         return [self.return_ty, self.name, self.ty_params]
@@ -209,7 +215,7 @@ class While(Statement):
 
 
 class Fundef(Statement):
-    def __init__(self, id, suite, lineno, lexpos, parameters=[]):
+    def __init__(self, prototype, suite, lineno, lexpos):
         """
 
         :param name:
@@ -217,19 +223,17 @@ class Fundef(Statement):
         :param parameters:
         """
         super().__init__(lineno, lexpos)
-        self.id = id
-        self.parameters = parameters
+        self.prototype = prototype
         self.suite = suite
 
     def __str__(self):
-        parameters = "("
-        for p in self.parameters:
-            parameters += str(p) + ' '
-        parameters += ")"
-        return "(DEFUN %s %s \n %s)" % (str(self.id), parameters, str(self.suite))
+        return "(DEFUN %s \n %s)" % (str(self.prototype), str(self.suite))
 
     def get_children(self):
-        return [self.id, self.parameters, self.suite]
+        if self.suite is None:
+            return [self.prototype]
+        else:
+            return [self.prototype, self.suite]
 
 
 class Clause(ASTNode):

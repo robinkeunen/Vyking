@@ -69,7 +69,6 @@ class BasicVykingLexer(Lexer):
               'LPAREN',
               'RPAREN',
               'COLON',
-              'SEMICOLON',
               'NEWLINE',
               'EQ',
               'LT',
@@ -104,7 +103,6 @@ class BasicVykingLexer(Lexer):
     t_GEQ = r'>='
     t_NEQ = r'!='
     t_COMMA = r','
-    t_SEMICOLON = r';'
 
     # Ignores whitespaces in lines
     t_ignore_WHITESPACE = r'\s+'
