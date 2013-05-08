@@ -48,10 +48,6 @@ class ASTNode(object):
         return dot
 
 
-class Statement(ASTNode):
-    pass
-
-
 class Statement_sequence(ASTNode):
     def __init__(self, statement_sequence, lineno, lexpos):
         super().__init__(lineno, lexpos)
@@ -66,6 +62,10 @@ class Statement_sequence(ASTNode):
 
     def get_children(self):
         return self.statement_sequence
+
+
+class Statement(ASTNode):
+    pass
 
 
 class Declaration(Statement):

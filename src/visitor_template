@@ -1,4 +1,4 @@
-__author__ = 'Robin Keunen', 'Robin Keunen'
+__author__ = 'Robin Keunen', 'Pierre Vyncke'
 
 from src.misc import add_to_class
 import src.ast as ast
@@ -6,6 +6,11 @@ import src.ast as ast
 
 @add_to_class(ast.Statement_sequence)
 def generate_code(self):
+    pass
+
+
+@add_to_class(ast.Declaration)
+def generate_class(self):
     pass
 
 
@@ -50,6 +55,11 @@ def generate_code(self):
 
 
 @add_to_class(ast.Fundef)
+def generate_code(self):
+    pass
+
+
+@add_to_class(ast.Prototype)
 def generate_code(self):
     pass
 

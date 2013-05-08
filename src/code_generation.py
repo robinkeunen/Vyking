@@ -35,6 +35,11 @@ def CreateEntryBlockAlloca(function, ty, var_name):
     return builder.alloca(ty, var_name)
 
 
+@add_to_class(ast.ASTNode)
+def generate_code(self):
+    raise NotImplementedError
+
+
 @add_to_class(ast.Statement_sequence)
 def generate_code(self):
     # create anonymous function to link statements
