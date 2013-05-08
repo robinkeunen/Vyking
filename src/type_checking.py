@@ -9,6 +9,11 @@ def generate_code(self):
     pass
 
 
+@add_to_class(ast.Declaration)
+def generate_class(self):
+    pass
+
+
 @add_to_class(ast.Assignment)
 def generate_code(self):
     pass
@@ -50,6 +55,11 @@ def generate_code(self):
 
 
 @add_to_class(ast.Fundef)
+def generate_code(self):
+    pass
+
+
+@add_to_class(ast.Prototype)
 def generate_code(self):
     pass
 

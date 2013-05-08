@@ -158,6 +158,7 @@ class BasicVykingParser(Parser):
                          | return_statement NEWLINE
                          | funcall NEWLINE
                          | print NEWLINE
+                         | name_declaration NEWLINE
                          | extern_declaration NEWLINE
         """
         p[0] = p[1]
@@ -245,7 +246,9 @@ class BasicVykingParser(Parser):
         Vtype : TY_INT
               | TY_FLOAT
               | TY_STRING
+              | TY_FUNC
               | TY_VOID
+              | TY_RT
         """
         p[0] = p[1]
 
@@ -294,6 +297,11 @@ class BasicVykingParser(Parser):
                           p.lineno(1),
                           p.lexpos(1))
 
+    def p_name_declaration(self, p):
+        'name_declaration : ID'
+        p[0] = ast.Declaration(
+            ast.ID(p[1], p.lineno(1), p.lexpos(1)),
+            p.lineno(1), p.lexpos(1))
 
     def p_extern_declaration(self, p):
         """
@@ -301,25 +309,15 @@ class BasicVykingParser(Parser):
         """
         p[0] = ast.Fundef(p[2], None, p.lineno(1), p.lexpos(1))
 
-
-    # resynchronization attempt
-    def p_fundef_error(self, p):
-        'fundef : DEFUN ID error parameters RPAREN COLON suite'
-        sys.stderr.write("line%d: expected opening parentheses, attempting to fix...")
-        p[0] = ast.Fundef(ast.ID(p[2], p.lineno(2), p.lexpos(2)),
-                          p[7], p[4],
-                          p.lineno(1), p.lexpos(1),
-                          parameters=p[4])
-
-    def p_parameters(self, p):
-        """
-        parameters : parameters COMMA ID
-                   | ID
-        """
-        if len(p) == 4:
-            p[0] = p[1] + [ast.ID(p[3], p.lineno(3), p.lexpos(3))]
-        else:
-            p[0] = [ast.ID(p[1], p.lineno(1), p.lexpos(1))]
+    # def p_parameters(self, p):
+    #     """
+    #     parameters : parameters COMMA ID
+    #                | ID
+    #     """
+    #     if len(p) == 4:
+    #         p[0] = p[1] + [ast.ID(p[3], p.lineno(3), p.lexpos(3))]
+    #     else:
+    #         p[0] = [ast.ID(p[1], p.lineno(1), p.lexpos(1))]
 
     def p_suite(self, p):
         """
@@ -436,24 +434,49 @@ class BasicVykingParser(Parser):
 if __name__ == "__main__":
     import src.draw_tree
 
-    data = inputs["exp2"]
-    for lino, line in enumerate(data.splitlines()):
-        print("%d: %s" % (lino, line))
-    print()
+    all = False
+    if all:
+        for item, data in inputs.items():
+            for lino, line in enumerate(data.splitlines()):
+                print("%d: %s" % (lino, line))
+            print()
 
-    # logger object
-    logging.basicConfig(
-        level=logging.DEBUG,
-        filename="parselog.txt",
-        filemode="w",
-        format="%(message)s"
-    )
-    log = logging.getLogger()
+            # logger object
+            logging.basicConfig(
+                level=logging.DEBUG,
+                filename="parselog.txt",
+                filemode="w",
+                format="%(message)s"
+            )
+            log = logging.getLogger()
 
-    parser = BasicVykingParser(debug=log)
-    result = parser.parse(data, debug=log)
-    tree = result.make_tree_graph()
-    tree.write("./tree", format="png")
-    print(result)
+            parser = BasicVykingParser(debug=log)
+            result = parser.parse(data, debug=log)
+            if result is not None:
+                tree = result.make_tree_graph()
+                tree.write("./trees/" + item, format="png")
+            print(result)
+    else:
+        data = inputs["dangling_else"]
+        for lino, line in enumerate(data.splitlines()):
+            print("%d: %s" % (lino, line))
+        print()
+
+        # logger object
+        logging.basicConfig(
+            level=logging.DEBUG,
+            filename="parselog.txt",
+            filemode="w",
+            format="%(message)s"
+        )
+        log = logging.getLogger()
+
+        parser = BasicVykingParser(debug=log)
+        result = parser.parse(data, debug=log)
+        if result is not None:
+            tree = result.make_tree_graph()
+            tree.write("./trees/tree", format="png")
+        print(result)
+
 
 

@@ -68,6 +68,19 @@ class Statement_sequence(ASTNode):
         return self.statement_sequence
 
 
+class Declaration(Statement):
+    def __init__(self, name, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.type = "declaration"
+        self.name = name
+
+    def __str__(self):
+        return "(LET %s)" % str(self.name)
+
+    def get_children(self):
+        return [self.name]
+
+
 class Assignment(Statement):
     def __init__(self, left, right, lineno, lexpos):
         super().__init__(lineno, lexpos)
@@ -111,27 +124,6 @@ class Funcall(Statement):
 
     def get_children(self):
         return [self.name, self.args]
-
-
-class Prototype(Statement):
-    def __init__(self, return_ty, name, ty_params, lineno, lexpos):
-        super().__init__(lineno, lexpos)
-        self.type = "prototype"
-        self.return_ty = return_ty
-        self.name = name
-        self.ty_params = ty_params
-
-    def __str__(self):
-        parameters = "["
-        for t, p in self.ty_params:
-            parameters += "(%s, %s), " % (t, str(p))
-        parameters = parameters[:-2] + "]"
-        return "%s: %s %s" % (self.return_ty,
-                              str(self.name),
-                              parameters)
-
-    def get_children(self):
-        return [self.return_ty, self.name, self.ty_params]
 
 
 class Print(Statement):
@@ -227,13 +219,37 @@ class Fundef(Statement):
         self.suite = suite
 
     def __str__(self):
-        return "(DEFUN %s \n %s)" % (str(self.prototype), str(self.suite))
+        if self.suite is None:
+            return "(EXTERN %s)" %(str(self.prototype))
+        else:
+            return "(DEFUN %s \n %s)" % (str(self.prototype), str(self.suite))
 
     def get_children(self):
         if self.suite is None:
             return [self.prototype]
         else:
             return [self.prototype, self.suite]
+
+
+class Prototype(ASTNode):
+    def __init__(self, return_ty, name, ty_params, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.type = "prototype"
+        self.return_ty = return_ty
+        self.name = name
+        self.ty_params = ty_params
+
+    def __str__(self):
+        parameters = "["
+        for t, p in self.ty_params:
+            parameters += "%s %s, " % (t, str(p))
+        parameters = parameters[:-2] + "]"
+        return "%s: %s %s" % (self.return_ty,
+                              str(self.name),
+                              parameters)
+
+    def get_children(self):
+        return [self.return_ty, self.name, self.ty_params]
 
 
 class Clause(ASTNode):

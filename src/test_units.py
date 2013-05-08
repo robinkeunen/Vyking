@@ -13,6 +13,7 @@ x = 3 + 42 * (s - t)
 
 dangling_else = """
 a = 2
+b
 b = a
 if a == b:
     a = a + 1
@@ -39,30 +40,30 @@ elif unNombre == "50" :
 else :
     print("Votre nombre est plus grand que 50.")
 
-    """
+"""
 
 elifStmt = """
 a = 2
 b = 2
 
-defun dummy(a, b):
+defun int dummy(int a, int b):
     if not a != b:
-
         return a + b
     elif a > 2:
+        robin = a + 2
+        pierre = b - 1
+        genie = 4
         if robin >= genie and not pierre < genie:
-            return yay
-        elif il or try(ceci):
-            print("this message")
-        lo += b/2.
+            return genie
+        dummy(robin, pierre)
     elif not a <= 3:
         return b
     else:
-        return end
+        return a
 """
 
 find_bounds = """
-defun find_bounds (f, y):
+defun float find_bounds (func f, float y):
     x = 1.
     while f(x) < y: x = x*2.
     if x == 1:
@@ -73,7 +74,7 @@ defun find_bounds (f, y):
 """
 
 function_def = """
-defun f2(s1, s2) :
+defun void f2(string s1, string s2) :
     print(s1)
     print(s2)
 
@@ -81,16 +82,16 @@ f2("HAHAHA !", 34)
 """
 
 addfun = """
-defun add(a, b):
+defun int add(int a, int b):
    r = a + b
    return r
 
-print(add(1, 2)
+print(add(1, 2))
 """
 
 slow_inverse = """
-defun slow_inverse(f, delta):
-    defun f_1(y):
+defun func slow_inverse(func f, float delta):
+    defun float f_1(float y):
         x = 0
         while f(x) < y:
             x += delta
@@ -120,7 +121,7 @@ while continuer_partie: # Tant qu'on doit continuer la partie
         nombre_mise = input("Tapez le nombre sur lequel vous voulez miser (entre 0 et 49) : ")
         # On convertit le nombre mise
 
-        nombre_mise = int(nombre_mise)
+        nombre_mise = nombre_mise
         if nombre_mise < 0:
             print("Ce nombre est negatif")
         if nombre_mise > 49:
@@ -131,7 +132,7 @@ while continuer_partie: # Tant qu'on doit continuer la partie
     while mise <= 0 or mise > argent:
         mise = input("Tapez le montant de votre mise : ")
         # On convertit la mise
-        mise = int(mise)
+        mise = mise
         if mise <= 0:
             print("La mise saisie est negative ou nulle.")
         if mise > argent:
@@ -169,7 +170,7 @@ while continuer_partie: # Tant qu'on doit continuer la partie
 """
 
 chain_add = addfun + """
-defun sum_list(l):
+defun int sum_list(list l):
     if tail(l) == []:
         return head(l)
     else:
@@ -180,7 +181,7 @@ print(sum_list(ll))
 """
 
 alt_map = """
-defun alt_map(f, l):
+defun list alt_map(func f, list l):
     if tail(l) == []:
         return list(f(head(l)))
     else:
@@ -188,25 +189,32 @@ defun alt_map(f, l):
 """
 
 fact = """
-def fact(n) :
+defun int fact(int n) :
     if n == 1 or n == 0 :
         return 1
     else :
         return n * fact(n - 1)
 
-print fact(6)
+print(fact(6))
 """
 
 n_ary = """
 
-defun len(l):
+defun int len(list l):
+    len_aux(l, 0)
+
+defun int len_aux(len l, int acc):
+    if tail(l) == []:
+       return acc + 1
+    else:
+       len_aux(tail(l), acc + 1)
 
 
-defun n_ary(f):
+defun func n_ary(func f):
     #Given binary function f(x, y), return an n_ary function such
     #that f([x, y, z]) = f(x, f([y, z])), etc. Also allow f(x) = x.
 
-    defun n_ary_f(argsl):
+    defun runtime_type n_ary_f(argsl):
         if len(argsl) == 2:
             return f(head(argsl), head(tail(argsl)))
         else:

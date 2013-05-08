@@ -21,7 +21,8 @@ class ListedVykingLexer(BasicVykingLexer):
         'map': 'MAP',
         'cons': 'CONS',
         'append': 'APPEND',
-        'list': 'LIST',
+        'mk_list: MK_LIST'
+        'list': 'TY_LIST',
         'head': 'HEAD',
         'tail': 'TAIL',
         'in': 'IN'

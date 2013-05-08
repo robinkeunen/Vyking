@@ -55,6 +55,11 @@ def generate_code(self):
         statement.generate_code()
 
 
+@add_to_class(ast.Declaration)
+def generate_class(self):
+    pass
+
+
 @add_to_class(ast.Assignment)
 def create_local_variable(self):
     """
@@ -311,6 +316,11 @@ int_binops = {
     'DIVIDE': lambda l, r: g_llvm_builder.sdiv(l, r, 'div_temp'),
     'MOD': lambda l, r: print("Modulo not implemented")
 }
+
+
+@add_to_class(ast.Prototype)
+def generate_code(self):
+    pass
 
 
 @add_to_class(ast.Clause)

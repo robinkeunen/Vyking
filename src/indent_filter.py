@@ -51,8 +51,8 @@ class IndentFilter():
         :param lexer: lexer must be an iterator returning tokens
         """
         self.lexer = lexer
-        # Get token list and update it
-        self.tokens = self.lexer.tokens  # __class__.tokens
+        # *copy* token list and update it
+        self.tokens = list(self.lexer.tokens)  # __class__.tokens
         self.tokens.append('INDENT')
         self.tokens.append('DEDENT')
         self.tokens.remove('WS')

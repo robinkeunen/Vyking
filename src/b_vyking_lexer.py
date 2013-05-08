@@ -49,7 +49,9 @@ class BasicVykingLexer(Lexer):
         'int'   : 'TY_INT',
         'float' : 'TY_FLOAT',
         'string': 'TY_STRING',
-        'void'  : 'TY_VOID'
+        'func'  : 'TY_FUNC',
+        'void'  : 'TY_VOID',
+ 'runtime_type' : 'TY_RT',  # undefined at compile time
     }
 
     # Token list
@@ -179,7 +181,7 @@ class BasicVykingLexer(Lexer):
         return t
 
     def t_ID(self, t):
-        r'[a-zA-Z_][a-zA-Z_0-9]*'
+        r'[a-zA-Z_][a-zA-Z0-9_]*'
         # type is reserved keyword if found in reserved else 'ID'
         t.type = self.reserved.get(t.value, 'ID')
         return t
