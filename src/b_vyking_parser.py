@@ -34,7 +34,6 @@ class Parser(object):
         :param kw: keyword arguments
         """
         self.debug = kw.get('debug', 0)
-        self.names = {}
         self.start = start
         # file name for the parse tables
         dbg_filename = self.__class__.__name__
