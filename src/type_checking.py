@@ -110,7 +110,6 @@ def type_check(self, **kw):
 def type_check(self, **kw):
     pass
 
-
 _allowed = {
     ('NOT', TY_BOOL),
     (TY_BOOL,   'AND', TY_BOOL),
