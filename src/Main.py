@@ -4,9 +4,10 @@ from src.test_units import inputs
 import logging
 
 from src.b_vyking_parser import BasicVykingParser
+
 # add methods to abstract syntax tree
 import src.draw_tree
-import src.code_generation
+import src.type_checking
 
 from llvm.passes import FunctionPassManager
 
@@ -30,14 +31,7 @@ def main():
    #
    # g_llvm_pass_manager.initialize()
 
-   # get test case and print
-    data = inputs["exp2"]
-    for lino, line in enumerate(data.splitlines()):
-        print("%d: %s" % (lino, line))
-    print()
-
-
-    # logger object
+   # logger object
     logging.basicConfig(
         level=logging.DEBUG,
         filename="parselog.txt",
@@ -47,8 +41,16 @@ def main():
     log = logging.getLogger()
 
 
+   # get test case and print
+    data = inputs["exp2"]
+
+    for lino, line in enumerate(data.splitlines()):
+        print("%d: %s" % (lino, line))
+    print()
+
     parser = BasicVykingParser(debug=log)
     ast = parser.parse(data, debug=log)
+    ast.type_check(entry_point=True)
     #ast.generate_code()
     # dot_tree = ast.make_tree_graph()
     # dot_tree.write("./tree", format="png")

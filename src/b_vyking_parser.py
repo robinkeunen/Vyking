@@ -207,7 +207,7 @@ class BasicVykingParser(Parser):
 
     def p_print(self, p):
         """
-        print : PRINT LPAREN expression RPAREN
+        print : PRINT LPAREN clause RPAREN
               | PRINT LPAREN RPAREN
         """
         if len(p) == 5:

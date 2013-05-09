@@ -109,11 +109,14 @@ class Return(Statement):
 
 
 class Funcall(Statement):
-    def __init__(self, name, lineno, lexpos, args=[]):
+    def __init__(self, name, lineno, lexpos, args=None):
         super().__init__(lineno, lexpos)
         self.type = "funcall"
         self.name = name
-        self.args = args
+        if args is None:
+            self.args = []
+        else:
+            self.args = args
 
     def __str__(self):
         args_repr = "("
@@ -127,16 +130,16 @@ class Funcall(Statement):
 
 
 class Print(Statement):
-    def __init__(self, expression, lineno, lexpos):
+    def __init__(self, clause, lineno, lexpos):
         super().__init__(lineno, lexpos)
         self.type = 'print'
-        self.expression = expression
+        self.clause = clause
 
     def __str__(self):
-        return "(print %s)" % str(self.expression)
+        return "(print %s)" % str(self.clause)
 
     def get_children(self):
-        return [self.expression]
+        return [self.clause]
 
 
 class If(Statement):

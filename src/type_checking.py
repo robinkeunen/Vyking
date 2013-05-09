@@ -2,7 +2,7 @@ import sys
 
 __author__ = 'Robin Keunen', 'Pierre Vyncke'
 
-from src.misc import add_to_class
+from src.misc import add_to_class, decorator
 import src.ast as ast
 
 TY_INT = "TY_INT"
@@ -27,8 +27,18 @@ class Environment(object):
         if defun_block:
             self.closed_variable = {}
 
-    def add(self, name, data):
-        self.local[name] = data
+    def __str__(self):
+        rep = 'local:' + str(self.local) + '\n'
+        rep += 'non_local:' + str(self.non_local) + '\n'
+        return rep
+
+    def assign(self, name, data):
+        if name in self.local:
+            self.local[name] = data
+        elif self.non_local.get(name) is not None:
+            self.non_local.assign(name, data)
+        else:
+            self.local[name] = data
 
     def get(self, name):
         if name in self.local:
@@ -46,128 +56,236 @@ class Environment(object):
         obj_copy.non_local = self.non_local.copy()
 
 
+_trace_level = 0
+
+
+@decorator
+def trace(f):
+    indent = '    '
+
+    def _f(self, **args):
+        global _trace_level
+        signature = '%s.tc(%s)' % (self.type, ', '.join(map(repr, args)))
+        print('%s--> %s' % (_trace_level * indent, signature))
+        _trace_level += 1
+        try:
+            result = f(self, **args)
+            if result is not None:
+                print('%s<-- %s == %s' % ((_trace_level - 1) * indent,
+                                          self.type, result))
+        finally:
+            _trace_level -= 1
+        return result
+
+    _trace_level = 0
+    return _f
+
+
+class VykingException(Exception):
+    pass
+
+
+@add_to_class(ast.ASTNode)
+def set_environment(self, **kw):
+    self.environment = kw.get('environment', None)
+    if self.environment is None:
+        raise VykingException("Environnement is not defined")
+
+
 @add_to_class(ast.ASTNode)
 def type_check(self, **kw):
     raise NotImplementedError
 
 
 @add_to_class(ast.Statement_sequence)
+@trace
 def type_check(self, **kw):
-    pass
+    entry_point = kw.pop('entry_point', False)
+    if entry_point:
+        self.environment = Environment()
+    else:
+        self.set_environment(**kw)
+
+    kw['environment'] = self.environment
+    for stmt in self.get_children():
+        stmt.type_check(**kw)
+
+    return None
 
 
 @add_to_class(ast.Declaration)
-def generate_class(self):
-    pass
+@trace
+def type_check(self, **kw):
+    self.set_environment(**kw)
+    self.environment.add(self.name.name)
+    return None
 
 
 @add_to_class(ast.Assignment)
+@trace
 def type_check(self, **kw):
-    pass
+    self.set_environment(**kw)
+    ty_rhs = self.right.type_check(**kw)
+    self.environment.add(self.left.name, ty_rhs)
+    return None
 
 
 @add_to_class(ast.Return)
+@trace
 def type_check(self, **kw):
-    pass
+    self.set_environment(**kw)
+    # get return constraints
+    constraint = kw.get('return_constraint', None)
+    ty, *t = self.value.type_check(**kw)
+    if constraint != ty:
+        raise TypeError("line %d: expected %s return type, given %s"
+                        % (self.lineno, constraint, ty))
+    return None
 
 
 @add_to_class(ast.Funcall)
+@trace
 def type_check(self, **kw):
-    pass
+    self.set_environment(**kw)
+    # get function return type
+    ty, prototype = self.environment.get(self.name)
+    if ty != TY_FUNC:
+        raise TypeError("line %d: %s is not a callable"
+                        % (self.lineno, self.name))
+
+    # prototype is (name, return type, args' type list)
+    _, ret_ty, args_ty = prototype
+
+    # check args type
+    if len(args_ty) != len(self.args):
+        raise TypeError(
+            "line %d: %s takes %d arguments, given %d."
+            % (self.lineno, self.name, len(args_ty), len(self.args)))
+    for arg_ty, arg in zip(args_ty, self.args):
+        given_ty = arg.type_check(**kw)
+        if arg_ty != given_ty:
+            raise TypeError("line %d: expected %s arg type, given %s"
+                            % (self.lineno, arg_ty, given_ty))
+
+    return ret_ty
 
 
 @add_to_class(ast.Print)
+@trace
 def type_check(self, **kw):
-    pass
+    self.set_environment(**kw)
+    return None
 
 
 @add_to_class(ast.If)
+@trace
 def type_check(self, **kw):
-    pass
+    self.set_environment(**kw)
+    ty_clause, *t = self.clause.type_check(**kw)
+    if ty_clause != TY_BOOL:
+        raise TypeError('line %d: "if" clause must be a bool, given %s'
+                        % (self.lineno, ty_clause))
+
+    # suite
+    nested_scope = Environment(self.environment)
+    kw['environment'] = nested_scope
+    self.suite.type_check(**kw)
 
 
 @add_to_class(ast.Elif)
+@trace
 def type_check(self, **kw):
+    self.set_environment(**kw)
     pass
 
 
 @add_to_class(ast.Else)
+@trace
 def type_check(self, **kw):
+    self.set_environment(**kw)
     pass
 
 
 @add_to_class(ast.While)
+@trace
 def type_check(self, **kw):
+    self.set_environment(**kw)
     pass
 
 
 @add_to_class(ast.Fundef)
+@trace
 def type_check(self, **kw):
+    self.set_environment(**kw)
+    # puch and pop return_constraint
     pass
 
 
 @add_to_class(ast.Prototype)
+@trace
 def type_check(self, **kw):
+    self.set_environment(**kw)
     pass
+
 
 _allowed = {
     ('NOT', TY_BOOL),
-    (TY_BOOL,   'AND', TY_BOOL),
-    (TY_BOOL,   'OR', TY_BOOL),
-    (TY_INT,    'EQ', TY_INT),
-    (TY_FLOAT,  'EQ', TY_FLOAT),
-    (TY_BOOL,   'EQ', TY_BOOL),
+    (TY_BOOL, 'AND', TY_BOOL),
+    (TY_BOOL, 'OR', TY_BOOL),
+    (TY_INT, 'EQ', TY_INT),
+    (TY_FLOAT, 'EQ', TY_FLOAT),
+    (TY_BOOL, 'EQ', TY_BOOL),
     (TY_STRING, 'EQ', TY_STRING),
-    (TY_FUNC,   'EQ', TY_FUNC),
-    (TY_VOID,   'EQ', TY_VOID),
-    (TY_RT,     'EQ', TY_RT),
-    (TY_INT,    'NEQ', TY_INT),
-    (TY_FLOAT,  'NEQ', TY_FLOAT),
-    (TY_BOOL,   'NEQ', TY_BOOL),
+    (TY_FUNC, 'EQ', TY_FUNC),
+    (TY_VOID, 'EQ', TY_VOID),
+    (TY_RT, 'EQ', TY_RT),
+    (TY_INT, 'NEQ', TY_INT),
+    (TY_FLOAT, 'NEQ', TY_FLOAT),
+    (TY_BOOL, 'NEQ', TY_BOOL),
     (TY_STRING, 'NEQ', TY_STRING),
-    (TY_FUNC,   'NEQ', TY_FUNC),
-    (TY_VOID,   'NEQ', TY_VOID),
-    (TY_RT,     'NEQ', TY_RT),
-    (TY_INT,    'LEQ', TY_INT),
-    (TY_FLOAT,  'LEQ', TY_FLOAT),
-    (TY_FLOAT,  'LEQ', TY_INT),
-    (TY_INT,    'LEQ', TY_FLOAT),
-    (TY_INT,    'GEQ', TY_INT),
-    (TY_FLOAT,  'GEQ', TY_FLOAT),
-    (TY_FLOAT,  'GEQ', TY_INT),
-    (TY_INT,    'GEQ', TY_FLOAT),
-    (TY_INT,    'LT', TY_INT),
-    (TY_FLOAT,  'LT', TY_FLOAT),
-    (TY_FLOAT,  'LT', TY_INT),
-    (TY_INT,    'LT', TY_FLOAT),
-    (TY_INT,    'GT', TY_INT),
-    (TY_FLOAT,  'GT', TY_FLOAT),
-    (TY_FLOAT,  'GT', TY_INT),
-    (TY_INT,    'GT', TY_FLOAT),
-    (TY_INT,    'PLUS', TY_INT),
-    (TY_FLOAT,  'PLUS', TY_FLOAT),
-    (TY_FLOAT,  'PLUS', TY_INT),
-    (TY_INT,    'PLUS', TY_FLOAT),
-    (TY_INT,    'MINUS', TY_INT),
-    (TY_FLOAT,  'MINUS', TY_FLOAT),
-    (TY_FLOAT,  'MINUS', TY_INT),
-    (TY_INT,    'MINUS', TY_FLOAT),
-    (TY_INT,    'TIMES', TY_INT),
-    (TY_FLOAT,  'TIMES', TY_FLOAT),
-    (TY_FLOAT,  'TIMES', TY_INT),
-    (TY_INT,    'TIMES', TY_FLOAT),
-    (TY_INT,    'DIVIDE', TY_INT),
-    (TY_FLOAT,  'DIVIDE', TY_FLOAT),
-    (TY_FLOAT,  'DIVIDE', TY_INT),
-    (TY_INT,    'DIVIDE', TY_FLOAT),
+    (TY_FUNC, 'NEQ', TY_FUNC),
+    (TY_VOID, 'NEQ', TY_VOID),
+    (TY_RT, 'NEQ', TY_RT),
+    (TY_INT, 'LEQ', TY_INT),
+    (TY_FLOAT, 'LEQ', TY_FLOAT),
+    (TY_FLOAT, 'LEQ', TY_INT),
+    (TY_INT, 'LEQ', TY_FLOAT),
+    (TY_INT, 'GEQ', TY_INT),
+    (TY_FLOAT, 'GEQ', TY_FLOAT),
+    (TY_FLOAT, 'GEQ', TY_INT),
+    (TY_INT, 'GEQ', TY_FLOAT),
+    (TY_INT, 'LT', TY_INT),
+    (TY_FLOAT, 'LT', TY_FLOAT),
+    (TY_FLOAT, 'LT', TY_INT),
+    (TY_INT, 'LT', TY_FLOAT),
+    (TY_INT, 'GT', TY_INT),
+    (TY_FLOAT, 'GT', TY_FLOAT),
+    (TY_FLOAT, 'GT', TY_INT),
+    (TY_INT, 'GT', TY_FLOAT),
+    (TY_INT, 'PLUS', TY_INT),
+    (TY_FLOAT, 'PLUS', TY_FLOAT),
+    (TY_FLOAT, 'PLUS', TY_INT),
+    (TY_INT, 'PLUS', TY_FLOAT),
+    (TY_INT, 'MINUS', TY_INT),
+    (TY_FLOAT, 'MINUS', TY_FLOAT),
+    (TY_FLOAT, 'MINUS', TY_INT),
+    (TY_INT, 'MINUS', TY_FLOAT),
+    (TY_INT, 'TIMES', TY_INT),
+    (TY_FLOAT, 'TIMES', TY_FLOAT),
+    (TY_FLOAT, 'TIMES', TY_INT),
+    (TY_INT, 'TIMES', TY_FLOAT),
+    (TY_INT, 'DIVIDE', TY_INT),
+    (TY_FLOAT, 'DIVIDE', TY_FLOAT),
+    (TY_FLOAT, 'DIVIDE', TY_INT),
+    (TY_INT, 'DIVIDE', TY_FLOAT),
     (TY_STRING, 'PLUS', TY_STRING),
     ('UMINUS', TY_INT),
     ('UNMINUS', TY_FLOAT),
 }
 
 
-
 @add_to_class(ast.Clause)
+@trace
 def type_check(self, **kw):
     self.environment = kw.get('environment', None)
 
@@ -198,8 +316,9 @@ def type_check(self, **kw):
 
 
 @add_to_class(ast.Expression)
+@trace
 def type_check(self, **kw):
-    self.environment = kw.get('environment', None)
+    self.set_environment(**kw)
 
     if self.op == 'UMINUS':
         ty_right, *t = self.right.type_check(**kw)
@@ -231,8 +350,9 @@ def type_check(self, **kw):
 
 
 @add_to_class(ast.ID)
+@trace
 def type_check(self, **kw):
-    self.environment = kw.get('environment', None)
+    self.set_environment(**kw)
     try:
         return self.environment.get(self.name)
     except NameError:
@@ -241,30 +361,36 @@ def type_check(self, **kw):
 
 
 @add_to_class(ast.Vinteger)
+@trace
 def type_check(self, **kw):
     return TY_INT,
 
 
 @add_to_class(ast.Vfloat)
+@trace
 def type_check(self, **kw):
     return TY_FLOAT,
 
 
 @add_to_class(ast.Vboolean)
+@trace
 def type_check(self, **kw):
     return TY_BOOL,
 
 
 @add_to_class(ast.Vstring)
+@trace
 def type_check(self, **kw):
     return TY_STRING, len(self.data)
 
 
 @add_to_class(ast.Map)
+@trace
 def type_check(self, **kw):
     pass
 
 
 @add_to_class(ast.Pair)
+@trace
 def type_check(self, **kw):
     pass

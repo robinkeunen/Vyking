@@ -25,3 +25,23 @@ def add_to_class(Cls):
         return f
 
     return dec_f
+
+
+@decorator
+def trace(f):
+    indent = '    '
+
+    def _f(*args):
+        signature = '%s(%s)' % (f.__name__, ', '.join(map(repr, args)))
+        print('%s--> %s' % (trace.level * indent, signature))
+        trace.level += 1
+        try:
+            result = f(*args)
+            print('%s<-- %s == %s' % ((trace.level - 1) * indent,
+                                      signature, result))
+        finally:
+            trace.level -= 1
+        return result
+
+    trace.level = 0
+    return _f
