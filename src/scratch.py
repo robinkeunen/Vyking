@@ -1,77 +1,79 @@
-__author__ = 'Robin Keunen'
-from llvm.core import *
+binops = ('AND', 'OR')
+types = (
+    "TY_INT",
+    "TY_FLOAT",
+    "TY_BOOL",
+    "TY_STRING",
+    "TY_FUNC",
+    "TY_VOID",
+    "TY_RT")
 
-#create a module
-module = Module.new("tut1")
+TY_INT = "TY_INT"
+TY_FLOAT = "TY_FLOAT"
+TY_BOOL = "TY_BOOL"
+TY_STRING = "TY_STRING"
+TY_FUNC = "TY_FUNC"
+TY_VOID = "TY_VOID"
+TY_RT = "TY_RT"
 
-#create a function type taking 3 32-bit integers, return a 32-bit integer
-ty_int = Type.int(32)
-func_type = Type.function(ty_int, (ty_int,)*3)
+allowed = []
+for op in binops:
+    allowed.append((TY_BOOL, op, TY_BOOL))
 
-#create a function of that type
-mul_add = Function.new (module, func_type, "mul_add")
-mul_add.calling_convention = CC_C
-x = mul_add.args[0]; x.name = "x"
-y = mul_add.args[1]; y.name = "y"
-z = mul_add.args[2]; z.name = "z"
+for t in allowed:
+    print(t, ',')
 
-#implement the function
-
-#new block
-blk = mul_add.append_basic_block("entry")
-
-#IR builder
-bldr = Builder.new(blk)
-tmp_1 = bldr.mul(x, y, "tmp_1")
-tmp_2 = bldr.add(tmp_1, z, "tmp_2")
-
-bldr.ret(tmp_2)
-
-print(module)
-
-
-#create a module
-module = Module.new("tut2")
-
-#create a function type taking 2 integers, return a 32-bit integer
-ty_int = Type.int(32)
-func_type = Type.function(ty_int, (ty_int, ty_int))
-
-#create a function of that type
-gcd = Function.new(module, func_type, "gcd")
-
-#name function args
-x = gcd.args[0]; x.name = "x"
-y = gcd.args[1]; y.name = "y"
-
-#implement the function
-
-entry = gcd.append_basic_block("entry")
-ret = gcd.append_basic_block("return")
-cond_false = gcd.append_basic_block("cond_false")
-cond_true = gcd.append_basic_block("cond_true")
-cond_false_2 = gcd.append_basic_block("cond_false_2")
-
-#create a llvm::IRBuilder
-bldr = Builder.new(entry)
-x_eq_y = bldr.icmp(IPRED_EQ, x, y, "tmp")
-bldr.cbranch(x_eq_y, ret, cond_false)
-
-bldr.position_at_end (ret)
-bldr.ret(x)
-
-bldr.position_at_end(cond_false)
-x_lt_y = bldr.icmp(IPRED_ULT, x, y, "tmp")
-bldr.cbranch(x_lt_y, cond_true, cond_false_2)
-
-bldr.position_at_end(cond_true)
-y_sub_x = bldr.sub(y, x, "tmp")
-recur_1 = bldr.call(gcd, (x, y_sub_x,), "tmp")
-bldr.ret(recur_1)
-
-bldr.position_at_end(cond_false_2)
-x_sub_y = bldr.sub(x, y, "x_sub_y")
-recur_2 = bldr.call(gcd, (x_sub_y, y,), "tmp")
-bldr.ret(recur_2)
-
-print(module)
+_allowed = {
+    ('NOT', TY_BOOL),
+    (TY_BOOL,   'AND', TY_BOOL),
+    (TY_BOOL,   'OR', TY_BOOL),
+    (TY_INT,    'EQ', TY_INT),
+    (TY_FLOAT,  'EQ', TY_FLOAT),
+    (TY_BOOL,   'EQ', TY_BOOL),
+    (TY_STRING, 'EQ', TY_STRING),
+    (TY_FUNC,   'EQ', TY_FUNC),
+    (TY_VOID,   'EQ', TY_VOID),
+    (TY_RT,     'EQ', TY_RT),
+    (TY_INT,    'NEQ', TY_INT),
+    (TY_FLOAT,  'NEQ', TY_FLOAT),
+    (TY_BOOL,   'NEQ', TY_BOOL),
+    (TY_STRING, 'NEQ', TY_STRING),
+    (TY_FUNC,   'NEQ', TY_FUNC),
+    (TY_VOID,   'NEQ', TY_VOID),
+    (TY_RT,     'NEQ', TY_RT),
+    (TY_INT,    'LEQ', TY_INT),
+    (TY_FLOAT,  'LEQ', TY_FLOAT),
+    (TY_FLOAT,  'LEQ', TY_INT),
+    (TY_INT,    'LEQ', TY_FLOAT),
+    (TY_INT,    'GEQ', TY_INT),
+    (TY_FLOAT,  'GEQ', TY_FLOAT),
+    (TY_FLOAT,  'GEQ', TY_INT),
+    (TY_INT,    'GEQ', TY_FLOAT),
+    (TY_INT,    'LT', TY_INT),
+    (TY_FLOAT,  'LT', TY_FLOAT),
+    (TY_FLOAT,  'LT', TY_INT),
+    (TY_INT,    'LT', TY_FLOAT),
+    (TY_INT,    'GT', TY_INT),
+    (TY_FLOAT,  'GT', TY_FLOAT),
+    (TY_FLOAT,  'GT', TY_INT),
+    (TY_INT,    'GT', TY_FLOAT),
+    (TY_INT,    'PLUS', TY_INT),
+    (TY_FLOAT,  'PLUS', TY_FLOAT),
+    (TY_FLOAT,  'PLUS', TY_INT),
+    (TY_INT,    'PLUS', TY_FLOAT),
+    (TY_INT,    'MINUS', TY_INT),
+    (TY_FLOAT,  'MINUS', TY_FLOAT),
+    (TY_FLOAT,  'MINUS', TY_INT),
+    (TY_INT,    'MINUS', TY_FLOAT),
+    (TY_INT,    'TIMES', TY_INT),
+    (TY_FLOAT,  'TIMES', TY_FLOAT),
+    (TY_FLOAT,  'TIMES', TY_INT),
+    (TY_INT,    'TIMES', TY_FLOAT),
+    (TY_INT,    'DIVIDE', TY_INT),
+    (TY_FLOAT,  'DIVIDE', TY_FLOAT),
+    (TY_FLOAT,  'DIVIDE', TY_INT),
+    (TY_INT,    'DIVIDE', TY_FLOAT),
+    (TY_STRING, 'PLUS', TY_STRING),
+    ('UMINUS', TY_INT),
+    ('UNMINUS', TY_FLOAT),
+}

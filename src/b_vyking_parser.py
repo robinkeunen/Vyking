@@ -56,7 +56,7 @@ class Parser(object):
                                 debugfile=self.debugfile,
                                 tabmodule=self.tabmodule,
                                 start=self.start,
-        )
+                                )
 
     def parse(self, input=None, lexer=None, debug=0, tracking=0, tokenfunc=None):
         """
