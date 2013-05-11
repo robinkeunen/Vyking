@@ -45,9 +45,6 @@ class Environment(object):
             self.local[name] = data
 
     def get(self, name):
-        print("searching -%s-" % name, type(name), 'dummy', str(name == 'dummy'))
-        if name == 'dummy':
-            print("WHERE IS DUMMY??")
         if name in self.local:
             return self.local[name]
         elif self.non_local.get(name) is not None:
@@ -150,17 +147,20 @@ def type_check(self, **kw):
 def type_check(self, **kw):
     self.set_environment(**kw)
     # get function return type
-    tp = self.environment.get(self.name)
-    print("================> %s <=====================" % str(tp))
+    tp = self.environment.get(self.name.get_name())
     if tp is None:
         raise NameError("line %d: %s is not defined"
                         % (self.lineno, self.name))
-    ty, prototype = tp
+    ty = tp[0]
+    if ty == TY_RT:
+        return TY_RT
     if ty != TY_FUNC:
         raise TypeError("line %d: %s is not a callable"
                         % (self.lineno, self.name))
 
     # prototype is (return type, [args' type])
+    print(tp)
+    prototype = tp[1]
     ret_ty, args_ty = prototype
 
     # check args type
@@ -169,7 +169,7 @@ def type_check(self, **kw):
             "line %d: %s takes %d arguments, given %d."
             % (self.lineno, self.name, len(args_ty), len(self.args)))
     for arg_ty, arg in zip(args_ty, self.args):
-        given_ty = arg.type_check(**kw)
+        given_ty, *t = arg.type_check(**kw)
         if arg_ty != given_ty:
             raise TypeError("line %d: expected %s arg type, given %s"
                             % (self.lineno, arg_ty, given_ty))
@@ -265,7 +265,8 @@ def type_check(self, **kw):
     # prototype : (return type, [args type])
     nested_scope = Environment(self.environment, defun_block=True)
     signature = self.prototype.type_check(environment=nested_scope)
-    self.environment.assign(self.prototype.get_name(), signature)
+    self.environment.assign(self.prototype.get_name(),
+                            (TY_FUNC, signature))
 
     if self.suite is not None:
         self.suite.type_check(environment=nested_scope,
@@ -282,6 +283,10 @@ def type_check(self, **kw):
 
     for arg in self.ty_params:
         ty, name = arg
+        if ty == TY_FUNC:
+            sys.stderr.write("Warning line %d: no static check of functions "
+                             "passed as argument" % (self.lineno))
+            self.environment.assign(name.get_name(), (TY_RT, TY_FUNC))
         self.environment.assign(name.get_name(), (ty,))
     return signature
 
@@ -390,7 +395,12 @@ def type_check(self, **kw):
     if TY_RT in combination:
         sys.stderr.write("line%d: warning: could not resolve type on operation %s"
                          % (self.lineno, self.op))
-        return TY_RT,
+        if combination[0] != TY_RT:
+            return combination[0],
+        elif len(combination) == 3 and combination[2] != 3:
+            return combination[2],
+        else:
+            return TY_RT,
 
     elif combination in _allowed:
         if len(combination) == 3 and ty_right != ty_left:

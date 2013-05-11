@@ -6,7 +6,7 @@ import logging
 from src.b_vyking_parser import BasicVykingParser
 
 # add methods to abstract syntax tree
-import src.draw_tree
+#import src.draw_tree
 import src.type_checking
 
 from llvm.passes import FunctionPassManager
@@ -42,7 +42,7 @@ def main():
 
 
    # get test case and print
-    data = inputs["elifStmt"]
+    data = inputs["find_bounds"]
 
     for lino, line in enumerate(data.splitlines()):
         print("%2d: %s" % (lino, line))
@@ -54,7 +54,7 @@ def main():
     #ast.generate_code()
     # dot_tree = ast.make_tree_graph()
     # dot_tree.write("./tree", format="png")
-
+    print()
     print(ast)
 
     # Print out all of the generated code.

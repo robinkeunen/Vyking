@@ -431,8 +431,6 @@ class BasicVykingParser(Parser):
 
 # Usage
 if __name__ == "__main__":
-    import src.draw_tree
-
     all = False
     if all:
         for item, data in inputs.items():

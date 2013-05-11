@@ -205,6 +205,7 @@ class Fundef(Statement):
         :param parameters:
         """
         super().__init__(lineno, lexpos)
+        self.type = 'Fundef'
         self.prototype = prototype
         self.suite = suite
 
