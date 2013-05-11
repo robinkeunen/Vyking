@@ -1,27 +1,44 @@
-binops = ('AND', 'OR')
-types = (
-    "TY_INT",
-    "TY_FLOAT",
-    "TY_BOOL",
-    "TY_STRING",
-    "TY_FUNC",
-    "TY_VOID",
-    "TY_RT")
 
-TY_INT = "TY_INT"
-TY_FLOAT = "TY_FLOAT"
-TY_BOOL = "TY_BOOL"
-TY_STRING = "TY_STRING"
-TY_FUNC = "TY_FUNC"
-TY_VOID = "TY_VOID"
-TY_RT = "TY_RT"
 
-allowed = []
-for op in binops:
-    allowed.append((TY_BOOL, op, TY_BOOL))
 
-for t in allowed:
-    print(t, ',')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 _allowed = {
     ('NOT', TY_BOOL),

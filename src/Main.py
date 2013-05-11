@@ -42,10 +42,10 @@ def main():
 
 
    # get test case and print
-    data = inputs["exp2"]
+    data = inputs["elifStmt"]
 
     for lino, line in enumerate(data.splitlines()):
-        print("%d: %s" % (lino, line))
+        print("%2d: %s" % (lino, line))
     print()
 
     parser = BasicVykingParser(debug=log)

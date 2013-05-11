@@ -56,7 +56,7 @@ class Parser(object):
                                 debugfile=self.debugfile,
                                 tabmodule=self.tabmodule,
                                 start=self.start,
-                                )
+        )
 
     def parse(self, input=None, lexer=None, debug=0, tracking=0, tokenfunc=None):
         """
@@ -97,19 +97,19 @@ class BasicVykingParser(Parser):
 
     # operation dictionary, allows for simpler rules definition.
     operations = {
-        'or':  lambda l, r, li, le: ast.Clause(l, 'OR', r, li, le),
+        'or': lambda l, r, li, le: ast.Clause(l, 'OR', r, li, le),
         'and': lambda l, r, li, le: ast.Clause(l, 'AND', r, li, le),
-        '==':  lambda l, r, li, le: ast.Clause(l, 'EQ', r, li, le),
-        '!=':  lambda l, r, li, le: ast.Clause(l, 'NEQ', r, li, le),
-        '<':   lambda l, r, li, le: ast.Clause(l, 'LT', r, li, le),
-        '>':   lambda l, r, li, le: ast.Clause(l, 'GT', r, li, le),
-        '<=':  lambda l, r, li, le: ast.Clause(l, 'LEQ', r, li, le),
-        '>=':  lambda l, r, li, le: ast.Clause(l, 'GEQ', r, li, le),
-        '+':   lambda l, r, li, le: ast.Expression(l, 'PLUS', r, li, le),
-        '-':   lambda l, r, li, le: ast.Expression(l, 'MINUS', r, li, le),
-        '*':   lambda l, r, li, le: ast.Expression(l, 'TIMES', r, li, le),
-        '/':   lambda l, r, li, le: ast.Expression(l, 'DIVIDE', r, li, le),
-        '%':   lambda l, r, li, le: ast.Expression(l, 'MOD', r, li, le),
+        '==': lambda l, r, li, le: ast.Clause(l, 'EQ', r, li, le),
+        '!=': lambda l, r, li, le: ast.Clause(l, 'NEQ', r, li, le),
+        '<': lambda l, r, li, le: ast.Clause(l, 'LT', r, li, le),
+        '>': lambda l, r, li, le: ast.Clause(l, 'GT', r, li, le),
+        '<=': lambda l, r, li, le: ast.Clause(l, 'LEQ', r, li, le),
+        '>=': lambda l, r, li, le: ast.Clause(l, 'GEQ', r, li, le),
+        '+': lambda l, r, li, le: ast.Expression(l, 'PLUS', r, li, le),
+        '-': lambda l, r, li, le: ast.Expression(l, 'MINUS', r, li, le),
+        '*': lambda l, r, li, le: ast.Expression(l, 'TIMES', r, li, le),
+        '/': lambda l, r, li, le: ast.Expression(l, 'DIVIDE', r, li, le),
+        '%': lambda l, r, li, le: ast.Expression(l, 'MOD', r, li, le),
     }
 
     def __init__(self, **kw):
@@ -190,7 +190,7 @@ class BasicVykingParser(Parser):
 
     def p_return_statement(self, p):
         'return_statement : RETURN expression'
-        p[0] = ast.Return(p[2], p.lineno(2), p.lexpos(2))
+        p[0] = ast.Return(p[2], p.lineno(1), p.lexpos(1))
 
     def p_funcall(self, p):
         """
@@ -249,7 +249,14 @@ class BasicVykingParser(Parser):
               | TY_VOID
               | TY_RT
         """
-        p[0] = p[1]
+        typemap = {
+            'int': 'TY_INT',
+            'float': 'TY_FLOAT',
+            'string': 'TY_STRING',
+            'func': 'TY_FUNC',
+            'void': 'TY_VOID',
+        }
+        p[0] = typemap[p[1]]
 
     def p_args(self, p):
         """

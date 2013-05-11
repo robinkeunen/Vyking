@@ -199,6 +199,7 @@ class BasicVykingLexer(Lexer):
 
     def t_STRING(self, t):
         r'(\'(.|\\\')*\'|"(.|\\")*")'
+        t.value = t.value.strip('"\'')
         return t
 
 

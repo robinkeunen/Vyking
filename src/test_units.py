@@ -31,11 +31,11 @@ extern void strcat(string s)
 """
 
 printtest = """
-print("Coucou !")
+print("Coucou !c")
 unNombre = 50
-if unNombre < "50" :
+if unNombre < 50 :
     print("Votre nombre est plus petit que 50.")
-elif unNombre == "50" :
+elif unNombre == 50 :
     print("Votre nombre est exactement 50")
 else :
     print("Votre nombre est plus grand que 50.")

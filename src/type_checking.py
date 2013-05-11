@@ -35,7 +35,8 @@ class Environment(object):
     def assign(self, name, data):
         if name in self.local:
             self.local[name] = data
-        elif self.non_local.get(name) is not None:
+        elif self.non_local is not None \
+            and self.non_local.get(name) is not None:
             self.non_local.assign(name, data)
         else:
             self.local[name] = data
@@ -43,12 +44,14 @@ class Environment(object):
     def get(self, name):
         if name in self.local:
             return self.local[name]
-        elif self.non_local is not None and name in self.non_local:
+        elif self.non_local is not None \
+            and self.non_local.get(name) is not None:
+            # remember closed names
             if self.defun_block:
-                self.closed_variable[name] = self.non_local[name]
-            return self.non_local[name]
+                self.closed_variable[name] = self.non_local.get(name)
+            return self.non_local.get(name)
         else:
-            raise NameError
+            return None
 
     def copy(self):
         obj_copy = Environment()
@@ -65,7 +68,9 @@ def trace(f):
 
     def _f(self, **args):
         global _trace_level
-        signature = '%s.tc(%s)' % (self.type, ', '.join(map(repr, args)))
+        rep_args = args.copy()
+        rep_args.pop('environment', None)
+        signature = '%s.tc(%s)' % (self.type, rep_args)
         print('%s--> %s' % (_trace_level * indent, signature))
         _trace_level += 1
         try:
@@ -117,7 +122,7 @@ def type_check(self, **kw):
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    self.environment.add(self.name.name)
+    self.environment.assign(self.name.name, (None,))
     return None
 
 
@@ -126,7 +131,7 @@ def type_check(self, **kw):
 def type_check(self, **kw):
     self.set_environment(**kw)
     ty_rhs = self.right.type_check(**kw)
-    self.environment.add(self.left.name, ty_rhs)
+    self.environment.assign(self.left.name, ty_rhs)
     return None
 
 
@@ -148,13 +153,17 @@ def type_check(self, **kw):
 def type_check(self, **kw):
     self.set_environment(**kw)
     # get function return type
-    ty, prototype = self.environment.get(self.name)
+    tp = self.environment.get(self.name)
+    if tp is None:
+        raise NameError("line %d: %s is not defined"
+                        % (self.lineno, self.name))
+    ty, prototype = tp
     if ty != TY_FUNC:
         raise TypeError("line %d: %s is not a callable"
                         % (self.lineno, self.name))
 
-    # prototype is (name, return type, args' type list)
-    _, ret_ty, args_ty = prototype
+    # prototype is (return type, [args' type])
+    ret_ty, args_ty = prototype
 
     # check args type
     if len(args_ty) != len(self.args):
@@ -174,6 +183,7 @@ def type_check(self, **kw):
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
+    self.ty = self.clause.type_check(**kw)
     return None
 
 
@@ -191,41 +201,91 @@ def type_check(self, **kw):
     kw['environment'] = nested_scope
     self.suite.type_check(**kw)
 
+    # closure
+    if self.if_closure is not None:
+        kw['environment'] = self.environment
+        self.if_closure.type_check(**kw)
+
+    return None
+
 
 @add_to_class(ast.Elif)
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    pass
+    ty_clause, *t = self.clause.type_check(**kw)
+    if ty_clause != TY_BOOL:
+        raise TypeError('line %d: "elif" clause must be a bool, given %s'
+                        % (self.lineno, ty_clause))
+
+    # suite
+    nested_scope = Environment(self.environment)
+    kw['environment'] = nested_scope
+    self.suite.type_check(**kw)
+
+    # closure
+    if self.if_closure is not None:
+        kw['environment'] = self.environment
+        self.if_closure.type_check(**kw)
+
+    return None
 
 
 @add_to_class(ast.Else)
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    pass
+
+    nested_scope = Environment(self.environment)
+    kw['environment'] = nested_scope
+    self.suite.type_check(**kw)
+
+    return None
 
 
 @add_to_class(ast.While)
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    pass
+    ty_clause, *t = self.clause.type_check(**kw)
+    if ty_clause != TY_BOOL:
+        raise TypeError('line %d: "while" clause must be a bool, given %s'
+                        % (self.lineno, ty_clause))
+
+    # suite
+    nested_scope = Environment(self.environment)
+    kw['environment'] = nested_scope
+    self.suite.type_check(**kw)
+
+    return None
 
 
 @add_to_class(ast.Fundef)
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    # puch and pop return_constraint
-    pass
+    # prototype : (return type, [args type])
+    nested_scope = Environment(self.environment, defun_block=True)
+    signature = self.prototype.type_check(environment=nested_scope)
+    self.environment.assign(self.prototype.name, signature)
+
+    if self.suite is not None:
+        self.suite.type_check(environment=nested_scope,
+                              return_constraint=signature[0])
+
+    return None
 
 
 @add_to_class(ast.Prototype)
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    pass
+    signature = (self.return_ty, tuple(tp[0] for tp in self.ty_params))
+    self.environment.assign(self.name, signature)
+
+    for arg in self.ty_params:
+        self.environment.assign(self.ty_params[1], self.ty_params[0])
+    return signature
 
 
 _allowed = {
@@ -353,33 +413,30 @@ def type_check(self, **kw):
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    try:
-        return self.environment.get(self.name)
-    except NameError:
+    res = self.environment.get(self.name)
+    if res is None:
         raise NameError("line%d: name error, %s is not defined."
                         % (self.lineno, self.name))
+    else:
+        return res
 
 
 @add_to_class(ast.Vinteger)
-@trace
 def type_check(self, **kw):
     return TY_INT,
 
 
 @add_to_class(ast.Vfloat)
-@trace
 def type_check(self, **kw):
     return TY_FLOAT,
 
 
 @add_to_class(ast.Vboolean)
-@trace
 def type_check(self, **kw):
     return TY_BOOL,
 
 
 @add_to_class(ast.Vstring)
-@trace
 def type_check(self, **kw):
     return TY_STRING, len(self.data)
 
