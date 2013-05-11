@@ -153,7 +153,7 @@ def type_check(self, **kw):
                         % (self.lineno, self.name))
     ty = tp[0]
     if ty == TY_RT:
-        return TY_RT
+        return TY_RT,
     if ty != TY_FUNC:
         raise TypeError("line %d: %s is not a callable"
                         % (self.lineno, self.name))
@@ -173,7 +173,6 @@ def type_check(self, **kw):
         if arg_ty != given_ty:
             raise TypeError("line %d: expected %s arg type, given %s"
                             % (self.lineno, arg_ty, given_ty))
-
     return ret_ty
 
 
@@ -267,7 +266,6 @@ def type_check(self, **kw):
     signature = self.prototype.type_check(environment=nested_scope)
     self.environment.assign(self.prototype.get_name(),
                             (TY_FUNC, signature))
-
     if self.suite is not None:
         self.suite.type_check(environment=nested_scope,
                               return_constraint=signature[0])
@@ -279,15 +277,24 @@ def type_check(self, **kw):
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    signature = (self.return_ty, tuple(tp[0] for tp in self.ty_params))
 
+    def helper(tp):
+        if tp[0] == TY_FUNC:
+            sys.stderr.write("Warning line %d: no static check of functions "
+                             "passed as argument\n" % (self.lineno))
+            return TY_RT,
+        else:
+            return tp[0],
+
+    signature = (self.return_ty, tuple(helper(tp) for tp in self.ty_params))
     for arg in self.ty_params:
         ty, name = arg
         if ty == TY_FUNC:
             sys.stderr.write("Warning line %d: no static check of functions "
-                             "passed as argument" % (self.lineno))
+                             "passed as argument\n" % (self.lineno))
             self.environment.assign(name.get_name(), (TY_RT, TY_FUNC))
-        self.environment.assign(name.get_name(), (ty,))
+        else:
+            self.environment.assign(name.get_name(), (ty,))
     return signature
 
 
@@ -297,6 +304,8 @@ _allowed = {
     (TY_BOOL, 'OR', TY_BOOL),
     (TY_INT, 'EQ', TY_INT),
     (TY_FLOAT, 'EQ', TY_FLOAT),
+    (TY_FLOAT, 'EQ', TY_FLOAT),
+    (TY_FLOAT, 'EQ', TY_INT),
     (TY_BOOL, 'EQ', TY_BOOL),
     (TY_STRING, 'EQ', TY_STRING),
     (TY_FUNC, 'EQ', TY_FUNC),
@@ -357,12 +366,14 @@ def type_check(self, **kw):
         combination = (self.op, ty_right)
 
     else:
+        print(self.left.type_check(**kw))
         ty_left, *t = self.left.type_check(**kw)
         ty_right, *t = self.right.type_check(**kw)
         combination = (ty_left, self.op, ty_right)
 
+    print(combination)
     if TY_RT in combination:
-        sys.stderr.write("line%d: warning: could not resolve type on operation %s"
+        sys.stderr.write("line %d: warning: could not resolve type on operation %s\n"
                          % (self.lineno, self.op))
         return TY_BOOL,
 
@@ -393,7 +404,7 @@ def type_check(self, **kw):
         combination = (ty_left, self.op, ty_right)
 
     if TY_RT in combination:
-        sys.stderr.write("line%d: warning: could not resolve type on operation %s"
+        sys.stderr.write("line%d: warning: could not resolve type on operation %s\n"
                          % (self.lineno, self.op))
         if combination[0] != TY_RT:
             return combination[0],

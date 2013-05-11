@@ -13,7 +13,6 @@ x = 3 + 42 * (s - t)
 
 dangling_else = """
 a = 2
-b
 b = a
 if a == b:
     a = a + 1
@@ -68,6 +67,7 @@ find_bounds = """
 defun float find_bounds (func f, float y):
     x = 1.
     while f(x) < y: x = x*2.
+    lo = 0
     if x == 1:
         lo = 0
     else:

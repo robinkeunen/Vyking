@@ -221,7 +221,7 @@ class BasicVykingParser(Parser):
         p[0] = ast.Prototype(p[1],
                              ast.ID(p[2], p.lineno(2), p.lexpos(2)),
                              p[4],
-                             p.lineno(1), p.lexpos(1))
+                             p.lineno(3), p.lexpos(3))
 
     def p_typed_params(self, p):
         """
