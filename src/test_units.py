@@ -43,8 +43,8 @@ else :
 """
 
 elifStmt = """
-a = 2
-b = 2
+x = 2
+y = 2
 
 defun int dummy(int a, int b):
     if not a != b:
@@ -60,6 +60,8 @@ defun int dummy(int a, int b):
         return b
     else:
         return a
+
+dummy(x, y)
 """
 
 find_bounds = """

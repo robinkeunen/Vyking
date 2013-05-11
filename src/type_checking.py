@@ -22,30 +22,35 @@ class Environment(object):
 
     def __init__(self, non_local=None, defun_block=False):
         self.local = {}
-        self.non_local = non_local
+        if non_local is None:
+            self.non_local = {}
+        else:
+            self.non_local = non_local
         self.defun_block = defun_block
         if defun_block:
             self.closed_variable = {}
 
     def __str__(self):
-        rep = 'local:' + str(self.local) + '\n'
-        rep += 'non_local:' + str(self.non_local) + '\n'
+        rep = str(self.local) + '\n'
+        rep += 'up:' + str(self.non_local) + '\n'
         return rep
 
     def assign(self, name, data):
         if name in self.local:
             self.local[name] = data
         elif self.non_local is not None \
-            and self.non_local.get(name) is not None:
+                and self.non_local.get(name) is not None:
             self.non_local.assign(name, data)
         else:
             self.local[name] = data
 
     def get(self, name):
+        print("searching -%s-" % name, type(name), 'dummy', str(name == 'dummy'))
+        if name == 'dummy':
+            print("WHERE IS DUMMY??")
         if name in self.local:
             return self.local[name]
-        elif self.non_local is not None \
-            and self.non_local.get(name) is not None:
+        elif self.non_local.get(name) is not None:
             # remember closed names
             if self.defun_block:
                 self.closed_variable[name] = self.non_local.get(name)
@@ -118,20 +123,12 @@ def type_check(self, **kw):
     return None
 
 
-@add_to_class(ast.Declaration)
-@trace
-def type_check(self, **kw):
-    self.set_environment(**kw)
-    self.environment.assign(self.name.name, (None,))
-    return None
-
-
 @add_to_class(ast.Assignment)
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
     ty_rhs = self.right.type_check(**kw)
-    self.environment.assign(self.left.name, ty_rhs)
+    self.environment.assign(self.left.get_name(), ty_rhs)
     return None
 
 
@@ -154,6 +151,7 @@ def type_check(self, **kw):
     self.set_environment(**kw)
     # get function return type
     tp = self.environment.get(self.name)
+    print("================> %s <=====================" % str(tp))
     if tp is None:
         raise NameError("line %d: %s is not defined"
                         % (self.lineno, self.name))
@@ -267,7 +265,7 @@ def type_check(self, **kw):
     # prototype : (return type, [args type])
     nested_scope = Environment(self.environment, defun_block=True)
     signature = self.prototype.type_check(environment=nested_scope)
-    self.environment.assign(self.prototype.name, signature)
+    self.environment.assign(self.prototype.get_name(), signature)
 
     if self.suite is not None:
         self.suite.type_check(environment=nested_scope,
@@ -281,10 +279,10 @@ def type_check(self, **kw):
 def type_check(self, **kw):
     self.set_environment(**kw)
     signature = (self.return_ty, tuple(tp[0] for tp in self.ty_params))
-    self.environment.assign(self.name, signature)
 
     for arg in self.ty_params:
-        self.environment.assign(self.ty_params[1], self.ty_params[0])
+        ty, name = arg
+        self.environment.assign(name.get_name(), (ty,))
     return signature
 
 

@@ -163,24 +163,6 @@ def make_tree_graph(self, dot=None, edgeLabels=True):
     return dot
 
 
-@add_to_class(ast.Declaration)
-def make_tree_graph(self, dot=None, edgeLabels=True):
-    """
-        Makes a dot object to write subtree to output
-        """
-    if not dot: dot = pydot.Dot()
-    dot.add_node(pydot.Node(self.id, label=self.type))
-    label = edgeLabels and len(self.get_children()) - 1
-
-    self.name.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
-    edge = pydot.Edge(self.id, self.name.id)
-
-    edge.set_label(str(0))
-    dot.add_edge(edge)
-
-    return dot
-
-
 @add_to_class(ast.ID)
 def make_tree_graph(self, dot=None, edgeLabels=True):
     """

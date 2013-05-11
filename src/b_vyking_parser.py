@@ -157,7 +157,6 @@ class BasicVykingParser(Parser):
                          | return_statement NEWLINE
                          | funcall NEWLINE
                          | print NEWLINE
-                         | name_declaration NEWLINE
                          | extern_declaration NEWLINE
         """
         p[0] = p[1]
@@ -302,12 +301,6 @@ class BasicVykingParser(Parser):
                           p[4],
                           p.lineno(1),
                           p.lexpos(1))
-
-    def p_name_declaration(self, p):
-        'name_declaration : ID'
-        p[0] = ast.Declaration(
-            ast.ID(p[1], p.lineno(1), p.lexpos(1)),
-            p.lineno(1), p.lexpos(1))
 
     def p_extern_declaration(self, p):
         """

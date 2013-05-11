@@ -68,19 +68,6 @@ class Statement(ASTNode):
     pass
 
 
-class Declaration(Statement):
-    def __init__(self, name, lineno, lexpos):
-        super().__init__(lineno, lexpos)
-        self.type = "declaration"
-        self.name = name
-
-    def __str__(self):
-        return "(LET %s)" % str(self.name)
-
-    def get_children(self):
-        return [self.name]
-
-
 class Assignment(Statement):
     def __init__(self, left, right, lineno, lexpos):
         super().__init__(lineno, lexpos)
@@ -251,6 +238,9 @@ class Prototype(ASTNode):
                               str(self.name),
                               parameters)
 
+    def get_name(self):
+        return self.name.get_name()
+
     def get_children(self):
         return [self.return_ty, self.name, self.ty_params]
 
@@ -333,6 +323,9 @@ class ID(Atom):
         self.name = name
 
     def __str__(self):
+        return self.name
+
+    def get_name(self):
         return self.name
 
     def get_children(self):
