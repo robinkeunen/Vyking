@@ -39,7 +39,6 @@ def CreateEntryBlockAlloca(function, ty, var_name):
 def generate_code(self):
     raise NotImplementedError
 
-
 @add_to_class(ast.Statement_sequence)
 def generate_code(self):
     # create anonymous function to link statements
@@ -266,42 +265,48 @@ def generate_code(self):
     func_type = lc.Type.function(lc.Type.int(),
                                  (lc.Type.int(),) * len(self.parameters),
                                  False)
-    function = lc.Function.new(g_llvm_module,
-                               func_type,
-                               self.id.name)
 
-    # FIXME check
-    # check if defined?
-    # if function.name != self.name:
+    if self.suite is None:
+        function = lc.Function.new(g_llvm_module, func_type, self.name)
 
-    # TODO closures
-    # add parameters to function block
-    for param, p_name in zip(function.args, self.parameters):
-        param.name = p_name
+    else:
 
-    # Create a new basic block to start insertion into.
-    block = function.append_basic_block('entry')
-    # FIXME make non global
-    global g_llvm_builder
-    g_llvm_builder = lc.Builder.new(block)
+        function = lc.Function.new(g_llvm_module,
+                                   func_type,
+                                   self.id.name)
 
-    # Add all arguments to the symbol table and create their allocas.
-    self.CreateArgumentAllocas(function)
+        # FIXME check
+        # check if defined?
+        # if function.name != self.name:
 
-    # Finish off the function.
-    try:
-        return_value = self.suite.generate_code()
-        g_llvm_builder.ret(return_value)
+        # TODO closures
+        # add parameters to function block
+        for param, p_name in zip(function.args, self.parameters):
+            param.name = p_name
 
-        # Validate the generated code, checking for consistency.
-        function.verify()
+        # Create a new basic block to start insertion into.
+        block = function.append_basic_block('entry')
+        # FIXME make non global
+        global g_llvm_builder
+        g_llvm_builder = lc.Builder.new(block)
 
-        # Optimize the function.
-        # TODO optimizer support
-        # g_llvm_pass_manager.run(function)
-    except:
-        function.delete()
-        raise
+        # Add all arguments to the symbol table and create their allocas.
+        self.CreateArgumentAllocas(function)
+
+        # Finish off the function.
+        try:
+            return_value = self.suite.generate_code()
+            g_llvm_builder.ret(return_value)
+
+            # Validate the generated code, checking for consistency.
+            function.verify()
+
+            # Optimize the function.
+            # TODO optimizer support
+            # g_llvm_pass_manager.run(function)
+        except:
+            function.delete()
+            raise
 
     return function
 
