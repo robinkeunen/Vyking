@@ -1,6 +1,11 @@
-from src.type_checking import Environment
+# -----------------------------------------------------------------------------
+# code_generation.py
+# Generates the LLVM code
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
 
-__author__ = 'Robin Keunen', 'Robin Keunen'
+
+from src.type_checking import Environment
 
 from src.misc import add_to_class
 import src.ast as ast

@@ -12,6 +12,10 @@ from src.test_units import lex_test
 class Lexer():
     def __init__(self, **kw):
     # Get arguments
+        """
+        Init
+        :param kw: TODO
+        """
         self.debug = kw.get('debug', 0)
         self.optimize = kw.get('optimize', 0)
         # initialize lexer
@@ -19,6 +23,11 @@ class Lexer():
                              optimize=self.optimize)
 
     def __iter__(self):
+        """
+        TODO
+
+        :return:
+        """
         return self.lexer
 
 
@@ -118,6 +127,11 @@ class BasicVykingLexer(Lexer):
     )
 
     def __next__(self):
+        """
+        TODO
+
+        :raise:
+        """
         for tok in self.lexer.token():
             yield tok
 

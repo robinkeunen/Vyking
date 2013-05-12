@@ -13,6 +13,9 @@ import src.ast as ast
 def make_tree_graph(self, dot=None, edgeLabels=True):
     """
         Makes a dot object to write subtree to output
+    :param self: TODO
+    :param dot:
+    :param edgeLabels:
         """
 
     children = self.get_children()
@@ -38,6 +41,9 @@ def make_tree_graph(self, dot=None, edgeLabels=True):
 def make_tree_graph(self, dot=None, edgeLabels=True):
     """
         Makes a dot object to write subtree to output
+    :param self: TODO
+    :param dot:
+    :param edgeLabels:
         """
     if not dot: dot = pydot.Dot()
     dot.add_node(pydot.Node(self.id, label=self.op))

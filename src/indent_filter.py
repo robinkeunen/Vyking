@@ -67,6 +67,11 @@ class IndentFilter():
         return self.filter_tokens()
 
     def __next__(self):
+        """
+        TODO
+
+        :return: :raise:
+        """
         while True:
             token = self.token()
             if token is None:

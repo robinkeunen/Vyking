@@ -18,43 +18,46 @@ class ASTNode(object):
     """
 
     def __init__(self, lineno, lexpos):
+        """
+        Initialization function
+        :param lineno: line number
+        :param lexpos: position
+        """
         self.type = None
         self.lineno = lineno
         self.lexpos = lexpos
         self.id = counter.__next__()
 
     def get_type(self):
+        """
+        returns the type of the node
+        :return: the type of the node
+        """
         return self.type
 
     def get_children(self):
-        """Returns a list of the node's children"""
+        """Returns a list of the node's children
+        """
         raise NotImplementedError("Should have implemented this")
-
-    def make_tree_graph(self, dot=None, edgeLabels=True):
-        """
-        Makes a dot object to write subtree to output
-        """
-        if not dot: dot = pydot.Dot()
-        dot.add_node(pydot.Node(self.id, label=self.type))
-        label = edgeLabels and len(self.get_children()) - 1
-
-        for i, c in enumerate(self.get_children()):
-            if issubclass(c.__class__, ASTNode):
-                c.make_tree_graph(dot=dot, edgeLabels=edgeLabels)
-                edge = pydot.Edge(self.id, c.id)
-                if label:
-                    edge.set_label(str(i))
-                dot.add_edge(edge)
-        return dot
 
 
 class Statement_sequence(ASTNode):
     def __init__(self, statement_sequence, lineno, lexpos):
+        """
+        Initialization function
+        :param statement_sequence: Instructions list
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "statement_sequence"
         self.statement_sequence = statement_sequence
 
     def __str__(self):
+        """
+        Returns a string representation of the class
+        :return: a string representation of the class
+        """
         result = ""
         for st in self.statement_sequence:
             result += str(st) + "\n"
@@ -70,6 +73,13 @@ class Statement(ASTNode):
 
 class Assignment(Statement):
     def __init__(self, left, right, lineno, lexpos):
+        """
+        Initialization function
+        :param left: the left member of the assignment
+        :param right: the right member of the assignmenet
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "assignment"
         self.left = left
@@ -84,6 +94,12 @@ class Assignment(Statement):
 
 class Return(Statement):
     def __init__(self, value, lineno, lexpos):
+        """
+        Initialization function
+        :param value: Value of the return
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "return_statement"
         self.value = value
@@ -97,6 +113,13 @@ class Return(Statement):
 
 class Funcall(Statement):
     def __init__(self, name, lineno, lexpos, args=None):
+        """
+        Initialization function
+        :param name: name of the function
+        :param lineno: line number
+        :param lexpos: position
+        :param args: arguments
+        """
         super().__init__(lineno, lexpos)
         self.type = "funcall"
         self.name = name
@@ -118,6 +141,12 @@ class Funcall(Statement):
 
 class Print(Statement):
     def __init__(self, clause, lineno, lexpos):
+        """
+        Initialization function
+        :param clause: the clause of the print
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = 'print'
         self.clause = clause
@@ -131,6 +160,14 @@ class Print(Statement):
 
 class If(Statement):
     def __init__(self, clause, suite, lineno, lexpos, if_closure=None):
+        """
+        Initialization function
+        :param clause: The clause
+        :param suite: The suite block
+        :param lineno: Line Number
+        :param lexpos: Position
+        :param if_closure: The Closure
+        """
         super().__init__(lineno, lexpos)
         self.type = "if_statement"
         self.clause = clause
@@ -151,6 +188,14 @@ class If(Statement):
 
 class Elif(Statement):
     def __init__(self, clause, suite, lineno, lexpos, if_closure=None):
+        """
+        Init function
+        :param clause: The Clause
+        :param suite: The Suite Block
+        :param lineno: Line Number
+        :param lexpos: Position
+        :param if_closure: The Closure Block
+        """
         super().__init__(lineno, lexpos)
         self.type = "elif_statement"
         self.clause = clause
@@ -171,6 +216,12 @@ class Elif(Statement):
 
 class Else(Statement):
     def __init__(self, suite, lineno, lexpos):
+        """
+        Init function
+        :param suite: The Suite Block
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "else"
         self.suite = suite
@@ -184,6 +235,13 @@ class Else(Statement):
 
 class While(Statement):
     def __init__(self, clause, suite, lineno, lexpos):
+        """
+        Init
+        :param clause: The clause
+        :param suite: The suite block
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "while"
         self.clause = clause
@@ -199,10 +257,11 @@ class While(Statement):
 class Fundef(Statement):
     def __init__(self, prototype, suite, lineno, lexpos):
         """
-
-        :param name:
-        :param suite:
-        :param parameters:
+        Init
+        :param prototype: Prototype of the fundef
+        :param suite: The suite block
+        :param lineno: line number
+        :param lexpos: position
         """
         super().__init__(lineno, lexpos)
         self.type = 'Fundef'
@@ -224,6 +283,14 @@ class Fundef(Statement):
 
 class Prototype(ASTNode):
     def __init__(self, return_ty, name, ty_params, lineno, lexpos):
+        """
+        Init for a function prototype
+        :param return_ty: return type
+        :param name: name of the function
+        :param ty_params: parametres types
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "prototype"
         self.return_ty = return_ty
@@ -248,6 +315,14 @@ class Prototype(ASTNode):
 
 class Clause(ASTNode):
     def __init__(self, left, op, right, lineno, lexpos):
+        """
+        Init
+        :param left: Left term of the clause
+        :param op: Clause operator
+        :param right: Right term of the clause
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = 'clause'
         self.left = left
@@ -266,6 +341,14 @@ class Clause(ASTNode):
 
 class Expression(ASTNode):
     def __init__(self, left, op, right, lineno, lexpos):
+        """
+        Init
+        :param left: left term of the expression
+        :param op: expression operator
+        :param right: right term of the expression
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "Expression"
         self.left = left
@@ -288,6 +371,12 @@ class Atom(ASTNode):
 
 class Vinteger(Atom):
     def __init__(self, value, lineno, lexpos):
+        """
+        Init
+        :param value: value of the integer
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "INT"
         self.value = value
@@ -301,6 +390,12 @@ class Vinteger(Atom):
 
 class Vfloat(Atom):
     def __init__(self, value, lineno, lexpos):
+        """
+        Init
+        :param value: value of the float
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "FLOAT"
         self.value = value
@@ -319,6 +414,12 @@ class ID(Atom):
     """
 
     def __init__(self, name, lineno, lexpos):
+        """
+        Init
+        :param name: id name
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "ID"
         self.name = name
@@ -335,6 +436,12 @@ class ID(Atom):
 
 class Vstring(Atom):
     def __init__(self, data, lineno, lexpos):
+        """
+        init
+        :param data: content of the string
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "string"
         self.value = data
@@ -348,6 +455,12 @@ class Vstring(Atom):
 
 class Vboolean(Atom):
     def __init__(self, value, lineno, lexpos):
+        """
+        Init
+        :param value: boolean value
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.type = "boolean"
         self.value = value
@@ -361,6 +474,13 @@ class Vboolean(Atom):
 
 class Map(Statement):
     def __init__(self, funcname, vlist, lineno, lexpos):
+        """
+        Init
+        :param funcname: name of the function
+        :param vlist: list
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.funcname = funcname
         self.vlist = vlist
@@ -374,6 +494,13 @@ class Map(Statement):
 
 class Pair(Atom):
     def __init__(self, head, tail, lineno, lexpos):
+        """
+        Init
+        :param head: head of the pair
+        :param tail: tail of the pair
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.head = head
         self.tail = tail
@@ -386,6 +513,12 @@ class Pair(Atom):
 
 class Head(Atom):
     def __init__(self, pair, lineno, lexpos):
+        """
+        Init
+        :param pair: pair of which this is the head
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.pair = pair
 
@@ -397,6 +530,12 @@ class Head(Atom):
 
 class Tail(Atom):
     def __init__(self, pair, lineno, lexpos):
+        """
+        Init
+        :param pair: pair of which this is the tail
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.pair = pair
 
@@ -408,6 +547,13 @@ class Tail(Atom):
 
 class Append(Atom):
     def __init__(self, pair1, pair2, lineno, lexpos):
+        """
+        Init
+        :param pair1: 1st pair
+        :param pair2: 2nd pair
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.pair1 = pair1
         self.pair2 = pair2
@@ -420,6 +566,13 @@ class Append(Atom):
 
 class Cons(Atom):
     def __init__(self, data, pair, lineno, lexpos):
+        """
+        Init
+        :param data: clause
+        :param pair: pair
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.data = data
         self.pair = pair
@@ -432,6 +585,13 @@ class Cons(Atom):
 
 class Map(Atom):
     def __init__(self, id, pair, lineno, lexpos):
+        """
+        Init
+        :param id: id
+        :param pair: pair
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.id = id
         self.pair = pair
@@ -444,6 +604,13 @@ class Map(Atom):
 
 class Apply(Atom):
     def __init__(self, id, pair, lineno, lexpos):
+        """
+        Init
+        :param id: id
+        :param pair: pair
+        :param lineno: line number
+        :param lexpos: position
+        """
         super().__init__(lineno, lexpos)
         self.id = id
         self.pair = pair

@@ -26,6 +26,11 @@ class Stack:
         return 'top is ', self.read()
 
     def next(self):
+        """
+        Get next element
+
+        :raise: TODO
+        """
         next_node = self.head
         while next_node is not None:
             yield next_node
@@ -35,10 +40,15 @@ class Stack:
     def empty(self):
         """
          Returns True if node is empty
+        :rtype : bool
         """
         return self.head is None
 
     def push(self, element):
+        """
+        add element to stack
+        :param element: element to add
+        """
         self.head = Node(element, self.head)
 
     def read(self):

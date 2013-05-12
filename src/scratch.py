@@ -13,9 +13,18 @@ class ExpressionNode(object):
 class NumberExpressionNode(ExpressionNode):
 
    def __init__(self, value):
+      """
+        INIT
+      :param value: value
+      """
       self.value = value
 
    def CodeGen(self):
+      """
+
+      Generates de code
+      :return:
+      """
       return Constant.real(Type.double(), self.value)
 
 # Expression class for referencing a variable, like "a".
@@ -25,6 +34,11 @@ class VariableExpressionNode(ExpressionNode):
       self.name = name
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       if self.name in g_named_values:
          return g_llvm_builder.load(g_named_values[self.name], self.name)
       else:
@@ -39,6 +53,11 @@ class BinaryOperatorExpressionNode(ExpressionNode):
       self.right = right
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       # A special case for '=' because we don't want to emit the LHS as an # expression.
       if self.operator == '=':
          # Assignment requires the LHS to be an identifier.
@@ -81,6 +100,11 @@ class CallExpressionNode(ExpressionNode):
       self.args = args
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       # Look up the name in the global module table.
       callee = g_llvm_module.get_function_named(self.callee)
 
@@ -101,6 +125,11 @@ class IfExpressionNode(ExpressionNode):
       self.else_branch = else_branch
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       condition = self.condition.CodeGen()
 
       # Convert condition to a bool by comparing equal to 0.0.
@@ -154,6 +183,11 @@ class ForExpressionNode(ExpressionNode):
       self.body = body
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       # Output this as:
       #   var = alloca double
       #   ...
@@ -249,6 +283,11 @@ class UnaryExpressionNode(ExpressionNode):
       self.operand = operand
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       operand = self.operand.CodeGen()
       function = g_llvm_module.get_function_named('unary' + self.operator)
       return g_llvm_builder.call(function, [operand], 'unop')
@@ -261,6 +300,11 @@ class VarExpressionNode(ExpressionNode):
       self.body = body
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       old_bindings = {}
       function = g_llvm_builder.basic_block.function
 
@@ -305,19 +349,41 @@ class VarExpressionNode(ExpressionNode):
 class PrototypeNode(object):
 
    def __init__(self, name, args, is_operator=False, precedence=0):
+      """
+
+      :param name: Name of the function
+      :param args: Arguments
+      :param is_operator: TODO
+      :param precedence:
+      """
       self.name = name
       self.args = args
       self.is_operator = is_operator
       self.precedence = precedence
 
    def IsBinaryOp(self):
+      """
+        Checks if this is a binary operator or not
+
+      :return: true if this is a binary operator
+      """
       return self.is_operator and len(self.args) == 2
 
    def GetOperatorName(self):
+      """
+        get the name of the operator
+
+      :return: the name of the operator
+      """
       assert self.is_operator
       return self.name[-1]
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       # Make the function type, eg. double(double,double).
       funct_type = Type.function(
          Type.double(), [Type.double()] * len(self.args), False)
@@ -361,6 +427,11 @@ class FunctionNode(object):
       self.body = body
 
    def CodeGen(self):
+            """
+
+      Generates de code
+      :return:
+      """
       # Clear scope.
       g_named_values.clear()
 
