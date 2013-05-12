@@ -136,3 +136,7 @@ if __name__ == '__main__':
     data = inputs["chain_add"]
 
     parser = ListedVykingParser(debug=log)
+
+    ast = parser.parse(data, debug=log)
+
+    print(ast)
