@@ -337,7 +337,7 @@ class Vstring(Atom):
     def __init__(self, data, lineno, lexpos):
         super().__init__(lineno, lexpos)
         self.type = "string"
-        self.data = data
+        self.value = data
 
     def __str__(self):
         return self.data

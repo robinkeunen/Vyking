@@ -39,7 +39,7 @@ class Environment(object):
         if name in self.local:
             self.local[name] = data
         elif self.non_local is not None \
-                and self.non_local.get(name) is not None:
+                and name in self.non_local:
             self.non_local.assign(name, data)
         else:
             self.local[name] = data
@@ -47,7 +47,7 @@ class Environment(object):
     def get(self, name):
         if name in self.local:
             return self.local[name]
-        elif self.non_local.get(name) is not None:
+        elif name in self.non_local:
             # remember closed names
             if self.defun_block:
                 self.closed_variable[name] = self.non_local.get(name)
@@ -59,6 +59,20 @@ class Environment(object):
         obj_copy = Environment()
         obj_copy.local = self.local.copy()
         obj_copy.non_local = self.non_local.copy()
+
+    def __contains__(self, name):
+        if name in self.local:
+            return True
+        elif name in self.non_local:
+            return True
+        else:
+            return False
+
+    def __getitem__(self, name):
+        return self.get(name)
+
+    def __setitem__(self, name, value):
+        self.assign(name, value)
 
 
 _trace_level = 0

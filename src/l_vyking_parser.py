@@ -61,7 +61,7 @@ class ListedVykingParser(BasicVykingParser):
     def p_append_fun(self, p):
         """append_fun : APPEND LPAREN pair pair RPAREN
                        | pair PLUS pair"""
-         = p[4]
+        #immutable?
 
     def p_pair_fun(self, p):
         'pair_fun : LIST LPAREN args RPAREN'
