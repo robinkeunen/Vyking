@@ -4,7 +4,7 @@
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
 import itertools
-from src import pydot
+#from src import pydot
 
 
 counter = itertools.count()
