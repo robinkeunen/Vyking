@@ -43,7 +43,7 @@ def main():
 
 
     # get test case and print
-    data = inputs["dangling_else"]
+    data = inputs["exp2"]
 
     for lino, line in enumerate(data.splitlines()):
         print("%2d: %s" % (lino, line))

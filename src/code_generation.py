@@ -110,7 +110,6 @@ def generate_code(self, named_values):
         value = self.right.generate_code(named_values)
         g_llvm_builder.store(value, variable)
     else:
-        pass
         self.create_local_variable(named_values)
 
 
@@ -254,21 +253,14 @@ def CreateArgumentAllocas(self, function, named_values):
 def generate_code(self, named_values):
     # Create an alloca for each argument and register the argument in the symbol
     # table so that references to it will succeed.
-    pass
 
-
-@add_to_class(ast.Fundef)
-def generate_code(self, named_values):
-    # clear scope
-    # FIXME closures, might have to play here
-    named_values.clear()
+    func_type = lc.Type.function(lc.Type.int(),
+                                (lc.Type.int(),) * len(self.parameters),
+                                False)
 
     # create function signature
     # FIXME other function types
 
-    func_type = lc.Type.function(lc.Type.int(),
-                                 (lc.Type.int(),) * len(self.parameters),
-                                 False)
     function = lc.Function.new(g_llvm_module,
                                func_type,
                                self.id.name)
@@ -281,6 +273,15 @@ def generate_code(self, named_values):
     # add parameters to function block
     for param, p_name in zip(function.args, self.parameters):
         param.name = p_name
+
+
+@add_to_class(ast.Fundef)
+def generate_code(self, named_values):
+    # clear scope
+    # FIXME closures, might have to play here
+    named_values.clear()
+
+
 
     # Create a new basic block to start insertion into.
     block = function.append_basic_block('entry')
