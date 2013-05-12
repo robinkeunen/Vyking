@@ -77,45 +77,49 @@ class ListedVykingParser(BasicVykingParser):
         p[0] = p[1]
 
     def p_list(self, p):
-        'list : LBRACK args RBRACK'
-        args = p[2]
-        pair = ast.Pair(args[-1], None)
-        args.reverse()
-        for i in args[1:]:
-            pair = ast.Pair(i, pair)
-        p[0] = pair
+        """list : LBRACK args RBRACK
+                | LBRACK RBRACK"""
+        if len(p) == 4:
+            args = p[2]
+            pair = ast.Pair(args[-1], None, p.lineno(1), p.lexpos(1))
+            args.reverse()
+            for i in args[1:]:
+                pair = ast.Pair(i, pair, p.lineno(1), p.lexpos(1))
+            p[0] = pair
+        else:
+            p[0] = ast.Pair(None, None, p.lineno(1), p.lexpos(1))
 
     def p_cons_fun(self, p):
         'cons_fun : CONS LPAREN clause COMMA pair RPAREN'
         if len(p) == 7:
-            p[0] = ast.Cons(p[3], p[5])
+            p[0] = ast.Cons(p[3], p[5], p.lineno(1), p.lexpos(1))
         else:
-            p[0] = ast.Cons(p[1], p[3])
+            p[0] = ast.Cons(p[1], p[3], p.lineno(1), p.lexpos(1))
 
     def p_append_fun(self, p):
         """append_fun : APPEND LPAREN pair pair RPAREN
                        | pair PLUS pair"""
         #immutable?
         if len(p) == 6:
-            p[0] = ast.Append(p[3], p[4])
+            p[0] = ast.Append(p[3], p[4], p.lineno(1), p.lexpos(1))
         else:
-            p[0] = ast.Append(p[1], p[3])
+            p[0] = ast.Append(p[1], p[3], p.lineno(1), p.lexpos(1))
 
     def p_head_fun(self, p):
         'head_fun : HEAD LPAREN pair RPAREN'
-        p[0] = ast.Head(p[3])
+        p[0] = ast.Head(p[3], p.lineno(1), p.lexpos(1))
 
     def p_tail_fun(self, p):
         'tail_fun : TAIL LPAREN pair RPAREN'
-        p[0] = ast.Tail(p[3])
+        p[0] = ast.Tail(p[3], p.lineno(1), p.lexpos(1))
 
     def p_map_fun(self, p):
         'map_fun : MAP LPAREN ID COMMA pair RPAREN'
-        p[0] = ast.Map(p[3], p[5])
+        p[0] = ast.Map(p[3], p[5], p.lineno(1), p.lexpos(1))
 
     def p_apply_fun(self, p):
         'apply_fun : APPLY LPAREN ID COMMA pair RPAREN'
-        p[0] = ast.Apply(p[3], p[5])
+        p[0] = ast.Apply(p[3], p[5], p.lineno(1), p.lexpos(1))
 
 
 for it in ListedVykingParser.__dict__:
