@@ -112,15 +112,23 @@ class BasicVykingParser(Parser):
         '%': lambda l, r, li, le: ast.Expression(l, 'MOD', r, li, le),
     }
 
-    def __init__(self, **kw):
+    def __init__(self, lexer=None, start=None, **kw):
         """
         Parser initializer
         :param kw: keyword arguments
         """
-        mylexer = IndentFilter(BasicVykingLexer())
-        #super(BasicVykingParser, self).__init__(lexer=mylexer,
+        if lexer is None:
+            mylexer = IndentFilter(BasicVykingLexer())
+        else:
+            mylexer = lexer
+
+        if start is None:
+            mystart = "vyking_input"
+        else:
+            mystart = start
+
         super().__init__(lexer=mylexer,
-                         start="vyking_input",
+                         start=mystart,
                          **kw)
         self.tokens = self.lexer.tokens
 
@@ -198,7 +206,7 @@ class BasicVykingParser(Parser):
         """
         if len(p) == 5:
             p[0] = ast.Funcall(ast.ID(p[1], p.lineno(1), p.lexpos(1)),
-                               p.lineno(0), p.lexpos(0),
+                               p.lineno(1), p.lexpos(1),
                                args=p[3])
         else:
             p[0] = ast.Funcall(ast.ID(p[1], p.lineno(2), p.lexpos(2)),
@@ -221,7 +229,7 @@ class BasicVykingParser(Parser):
         p[0] = ast.Prototype(p[1],
                              ast.ID(p[2], p.lineno(2), p.lexpos(2)),
                              p[4],
-                             p.lineno(1), p.lexpos(1))
+                             p.lineno(3), p.lexpos(3))
 
     def p_typed_params(self, p):
         """

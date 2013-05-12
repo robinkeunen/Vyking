@@ -8,6 +8,7 @@ from src.b_vyking_parser import BasicVykingParser
 # add methods to abstract syntax tree
 #import src.draw_tree
 import src.type_checking
+import src.code_generation
 
 from llvm.passes import FunctionPassManager
 
@@ -41,8 +42,8 @@ def main():
     log = logging.getLogger()
 
 
-   # get test case and print
-    data = inputs["find_bounds"]
+    # get test case and print
+    data = inputs["exp1"]
 
     for lino, line in enumerate(data.splitlines()):
         print("%2d: %s" % (lino, line))
@@ -51,14 +52,14 @@ def main():
     parser = BasicVykingParser(debug=log)
     ast = parser.parse(data, debug=log)
     ast.type_check(entry_point=True)
-    #ast.generate_code()
+    ast.generate_code()
     # dot_tree = ast.make_tree_graph()
     # dot_tree.write("./tree", format="png")
     print()
     print(ast)
 
     # Print out all of the generated code.
-    #print('', src.code_generation.g_llvm_module)
+    print(src.code_generation.g_llvm_module)
 
 if __name__ == '__main__':
    main()

@@ -1,40 +1,50 @@
 from src.test_units import lex_test
-from .b_vyking_lexer import BasicVykingLexer
+from src.b_vyking_lexer import BasicVykingLexer
+
 __author__ = 'Robin Keunen'
 __author__ = 'pierrevyncke'
 
 
 class ListedVykingLexer(BasicVykingLexer):
 
-    reserved = {
-        'if':     'IF',
-        'elif':   'ELIF',
-        'else':   'ELSE',
-        'while':  'WHILE',
-        'and':    'AND',
-        'or':     'OR',
-        'not':    'NOT',
-        'defun':  'DEFUN',
-        'return': 'RETURN',
-        'for': 'FOR',
+    new_reserved = {
         'apply': 'APPLY',
         'map': 'MAP',
         'cons': 'CONS',
         'append': 'APPEND',
-        'mk_list: MK_LIST'
         'list': 'TY_LIST',
         'head': 'HEAD',
         'tail': 'TAIL',
-        'in': 'IN'
     }
 
-    tokens = tokens + [
+    reserved = BasicVykingLexer.reserved
+    for n, i in new_reserved.items():
+        reserved[n] = i
+
+    tokens = BasicVykingLexer.tokens + [
         'LBRACK',
         'RBRACK',
-    ]
+    ] + list(new_reserved.values())
 
     t_LBRACK = r'\['
     t_RBRACK = r'\]'
 
-lexer = ListedVykingLexer()
-lex_test(lexer)
+
+addfun = """
+defun int add(int a, int b):
+   r = a + b
+   return r
+
+print(add(1, 2))
+"""
+
+chain_add = addfun + """
+defun int sum_list(list l):
+    if tail(l) == []:
+        return head(l)
+    else:
+        return head(l) + sum_list(tail(l))
+
+ll = [1, 2, 3, 4]
+print(sum_list(ll))
+"""

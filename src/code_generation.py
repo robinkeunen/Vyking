@@ -1,3 +1,5 @@
+from src.type_checking import Environment
+
 __author__ = 'Robin Keunen', 'Robin Keunen'
 
 from src.misc import add_to_class
@@ -16,12 +18,17 @@ g_llvm_builder = None
 # FIXME make this non-global
 # ast.ASTNode.llvm_builder = None
 
+# named value
 # A dictionary that keeps track of which values are defined in the current scope
 # and what their LLVM representation is.
-# TODO fix to get closures (using Scopes?)
-# FIXME make this non-global
-g_named_values = {}
 
+TY_INT = "TY_INT"
+TY_FLOAT = "TY_FLOAT"
+TY_BOOL = "TY_BOOL"
+TY_STRING = "TY_STRING"
+TY_FUNC = "TY_FUNC"
+TY_VOID = "TY_VOID"
+TY_RT = "TY_RT"
 
 # helper function
 def CreateEntryBlockAlloca(function, ty, var_name):
@@ -36,11 +43,12 @@ def CreateEntryBlockAlloca(function, ty, var_name):
 
 
 @add_to_class(ast.ASTNode)
-def generate_code(self):
+def generate_code(self, named_values):
     raise NotImplementedError
 
+
 @add_to_class(ast.Statement_sequence)
-def generate_code(self):
+def generate_code(self, named_values):
     # create anonymous function to link statements
     # FIXME global module
     # FIXME only
@@ -56,12 +64,7 @@ def generate_code(self):
         g_llvm_builder = lc.Builder.new(block)
 
     for statement in self.statement_sequence:
-        statement.generate_code()
-
-
-@add_to_class(ast.Declaration)
-def generate_class(self):
-    pass
+        statement.generate_code(named_value)
 
 
 @add_to_class(ast.Assignment)
@@ -69,14 +72,12 @@ def create_local_variable(self):
     """
     Creates a local variable into scope
     """
-    # TODO scoping
-    old_bindings = {}
     function = g_llvm_builder.basic_block.function
 
     # Register all variables and emit their initializer.
     var_name = self.left.name
     var_expression = self.right
-    var_value = var_expression.generate_code()
+    var_value = var_expression.generate_code(named_value)
 
     # FIXME type
     alloca = CreateEntryBlockAlloca(function, lc.Type.int(), var_name)
@@ -84,44 +85,42 @@ def create_local_variable(self):
 
     # Remember the old variable binding so that we can restore the binding
     # when we unrecurse.
-    old_bindings[var_name] = g_named_values.get(var_name, None)
+    old_bindings[var_name] = self.named_values.get(var_name, None)
 
     # Remember this binding.
-    g_named_values[var_name] = alloca
+    self.named_values[var_name] = alloca
 
     # FIXME clean local variables
     # # Pop all our variables from scope.
     # for var_name in self.variables:
     #     if old_bindings[var_name] is not None:
-    #         g_named_values[var_name] = old_bindings[var_name]
+    #         named_values[var_name] = old_bindings[var_name]
     #     else:
-    #         del g_named_values[var_name]
+    #         del named_values[var_name]
 
     # Return the body computation.
     return alloca
 
 
 @add_to_class(ast.Assignment)
-def generate_code(self):
-    if not isinstance(self.left, ast.ID):
-        raise SyntaxError("line %d: can't assign to %s"
-                          % (self.lineno, self.left.type))
-
-    try:
-        variable = g_named_values[self.left.name]
-        value = self.right.generate_code()
+def generate_code(self, named_values):
+    name = self.left.get_name()
+    if name in named_values:
+        variable = named_values[name]
+        value = self.right.generate_code(named_value)
         g_llvm_builder.store(value, variable)
-    except KeyError:
+    else:
+        pass
         self.create_local_variable()
 
 
 @add_to_class(ast.Return)
-def generate_code(self):
+def generate_code(self, named_values):
     pass
 
 
 @add_to_class(ast.Funcall)
-def generate_code(self):
+def generate_code(self, named_values):
     # Look up the name in the global module table.
     f = g_llvm_module.get_function_named(self.name)
 
@@ -135,13 +134,13 @@ def generate_code(self):
 
 
 @add_to_class(ast.Print)
-def generate_code(self):
+def generate_code(self, named_values):
     pass
 
 
 @add_to_class(ast.If)
-def generate_code(self):
-    clause = self.clause.generate_code()
+def generate_code(self, named_values):
+    clause = self.clause.generate_code(named_value)
 
     # convert to 1-bit bool
     # FIXME type
@@ -160,7 +159,7 @@ def generate_code(self):
 
     # Build suite block
     g_llvm_builder.position_at_end(suite_block)
-    suite_value = self.suite.generate_code()
+    suite_value = self.suite.generate_code(named_value)
     g_llvm_builder.branch(merge_block)
 
     # Computation of suite can change de block, get block for the phi node
@@ -183,10 +182,9 @@ def generate_code(self):
     return phi
 
 
-
 @add_to_class(ast.Elif)
-def generate_code(self):
-    clause = self.clause.generate_code()
+def generate_code(self, named_values):
+    clause = self.clause.generate_code(named_value)
 
     # convert to 1-bit bool
     # FIXME type
@@ -205,7 +203,7 @@ def generate_code(self):
 
     # Build suite block
     g_llvm_builder.position_at_end(suite_block)
-    suite_value = self.suite.generate_code()
+    suite_value = self.suite.generate_code(named_value)
     g_llvm_builder.branch(merge_block)
 
     # Computation of suite can change de block, get block for the phi node
@@ -229,35 +227,50 @@ def generate_code(self):
 
 
 @add_to_class(ast.Else)
-def generate_code(self):
-    return self.suite.generate_code()
+def generate_code(self, named_values):
+    return self.suite.generate_code(named_value)
 
 
 @add_to_class(ast.While)
-def generate_code(self):
+def generate_code(self, named_values):
     pass
 
 
+type_code = {
+    TY_BOOL: lc.Type.int(1),
+    TY_INT: lc.Type.int(),
+    TY_FLOAT: lc.Type.float(),
+    TY_STRING: None,  # TODO string type as arg http://bit.ly/10PRVKW
+    TY_FUNC: None,  # TODO func type as arg
+}
+
+
 # helper function
-@add_to_class(ast.Fundef)
+@add_to_class(ast.Prototype)
 def CreateArgumentAllocas(self, function):
     """
     Create an alloca for each argument and register the argument in the symbol
     table so that references to it will succeed.
     """
-    for arg_name, arg in zip(self.parameters, function.args):
-        # FIXME type
-        alloca = CreateEntryBlockAlloca(function, lc.Type.int(), arg_name)
+    for type_name, arg in zip(self.ty_params, function.args):
+        ty, name = type_name
+        alloca = CreateEntryBlockAlloca(function, lc.Type.int(), name)
         g_llvm_builder.store(arg, alloca)
-        # FIXME scope
-        g_named_values[arg_name] = alloca
+        named_values[name] = alloca
+
+
+@add_to_class(ast.Prototype)
+def generate_code(self, named_values):
+    # Create an alloca for each argument and register the argument in the symbol
+    # table so that references to it will succeed.
+    pass
 
 
 @add_to_class(ast.Fundef)
-def generate_code(self):
+def generate_code(self, named_values):
     # clear scope
     # FIXME closures, might have to play here
-    g_named_values.clear()
+    named_values.clear()
 
     # create function signature
     # FIXME other function types
@@ -265,48 +278,42 @@ def generate_code(self):
     func_type = lc.Type.function(lc.Type.int(),
                                  (lc.Type.int(),) * len(self.parameters),
                                  False)
+    function = lc.Function.new(g_llvm_module,
+                               func_type,
+                               self.id.name)
 
-    if self.suite is None:
-        function = lc.Function.new(g_llvm_module, func_type, self.name)
+    # FIXME check
+    # check if defined?
+    # if function.name != self.name:
 
-    else:
+    # TODO closures
+    # add parameters to function block
+    for param, p_name in zip(function.args, self.parameters):
+        param.name = p_name
 
-        function = lc.Function.new(g_llvm_module,
-                                   func_type,
-                                   self.id.name)
+    # Create a new basic block to start insertion into.
+    block = function.append_basic_block('entry')
+    # FIXME make non global
+    global g_llvm_builder
+    g_llvm_builder = lc.Builder.new(block)
 
-        # FIXME check
-        # check if defined?
-        # if function.name != self.name:
+    # Add all arguments to the symbol table and create their allocas.
+    self.CreateArgumentAllocas(function)
 
-        # TODO closures
-        # add parameters to function block
-        for param, p_name in zip(function.args, self.parameters):
-            param.name = p_name
+    # Finish off the function.
+    try:
+        return_value = self.suite.generate_code(named_value)
+        g_llvm_builder.ret(return_value)
 
-        # Create a new basic block to start insertion into.
-        block = function.append_basic_block('entry')
-        # FIXME make non global
-        global g_llvm_builder
-        g_llvm_builder = lc.Builder.new(block)
+        # Validate the generated code, checking for consistency.
+        function.verify()
 
-        # Add all arguments to the symbol table and create their allocas.
-        self.CreateArgumentAllocas(function)
-
-        # Finish off the function.
-        try:
-            return_value = self.suite.generate_code()
-            g_llvm_builder.ret(return_value)
-
-            # Validate the generated code, checking for consistency.
-            function.verify()
-
-            # Optimize the function.
-            # TODO optimizer support
-            # g_llvm_pass_manager.run(function)
-        except:
-            function.delete()
-            raise
+        # Optimize the function.
+        # TODO optimizer support
+        # g_llvm_pass_manager.run(function)
+    except:
+        function.delete()
+        raise
 
     return function
 
@@ -328,57 +335,52 @@ int_binops = {
 }
 
 
-@add_to_class(ast.Prototype)
-def generate_code(self):
-    pass
-
-
 @add_to_class(ast.Clause)
-def generate_code(self):
+def generate_code(self, named_values):
     # TODO type check
     # TODO NOT operand
     # TODO grouped clauses or useless? note: p[0] = p[2]
 
-    left = self.left.generate_code()
-    right = self.right.generate_code()
+    left = self.left.generate_code(named_value)
+    right = self.right.generate_code(named_value)
 
     return int_binops[self.op](left, right)
 
 
 @add_to_class(ast.Expression)
-def generate_code(self):
+def generate_code(self, named_values):
     # TODO type check
     # TODO Uminus -> deal in ast
 
-    left = self.left.generate_code()
-    right = self.right.generate_code()
+    left = self.left.generate_code(named_value)
+    right = self.right.generate_code(named_value)
 
     return int_binops[self.op](left, right)
 
 
 @add_to_class(ast.ID)
-def generate_code(self):
+def generate_code(self, named_values):
     # TODO scope lookup
-    if self.name in g_named_values:
+    if self.name in named_values:
         # load from stack
-        return g_llvm_builder.load(g_named_values[self.name], self.name)
+        return g_llvm_builder.load(named_values[self.name], self.name)
     else:
         raise NameError("line %d: NameError : name '%s' is not defined"
                         % (self.lineno, self.name))
 
 
 @add_to_class(ast.Vinteger)
-def generate_code(self):
+def generate_code(self, named_values):
     return lc.Constant.int(lc.Type.int(), self.value)
 
 
 @add_to_class(ast.Vfloat)
-def generate_code(self):
+def generate_code(self, named_values):
     return lc.Constant.real(lc.Type.float(), self.value)
 
 
 @add_to_class(ast.Vboolean)
-def generate_code(self):
+def generate_code(self, named_values):
     if self.value:
         v = 1
     else:
@@ -387,15 +389,15 @@ def generate_code(self):
 
 
 @add_to_class(ast.Vstring)
-def generate_code(self):
+def generate_code(self, named_values):
     return lc.Constant.string(self.data)
 
 
 @add_to_class(ast.Map)
-def generate_code(self):
+def generate_code(self, named_values):
     pass
 
 
 @add_to_class(ast.Pair)
-def generate_code(self):
+def generate_code(self, named_values):
     pass

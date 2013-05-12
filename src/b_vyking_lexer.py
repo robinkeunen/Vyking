@@ -51,7 +51,7 @@ class BasicVykingLexer(Lexer):
         'string': 'TY_STRING',
         'func'  : 'TY_FUNC',
         'void'  : 'TY_VOID',
- 'runtime_type' : 'TY_RT',  # undefined at compile time
+        'runtime_type' : 'TY_RT',  # undefined at compile time
     }
 
     # Token list
@@ -198,7 +198,7 @@ class BasicVykingLexer(Lexer):
         return t
 
     def t_STRING(self, t):
-        r'(\'(.|\\\')*\'|"(.|\\")*")'
+        r'(\'(.|\\\')*?\' | "(.|\\")*?")'
         t.value = t.value.strip('"\'')
         return t
 

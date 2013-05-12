@@ -39,7 +39,7 @@ class Environment(object):
         if name in self.local:
             self.local[name] = data
         elif self.non_local is not None \
-                and self.non_local.get(name) is not None:
+                and name in self.non_local:
             self.non_local.assign(name, data)
         else:
             self.local[name] = data
@@ -47,7 +47,7 @@ class Environment(object):
     def get(self, name):
         if name in self.local:
             return self.local[name]
-        elif self.non_local.get(name) is not None:
+        elif name in self.non_local:
             # remember closed names
             if self.defun_block:
                 self.closed_variable[name] = self.non_local.get(name)
@@ -59,6 +59,20 @@ class Environment(object):
         obj_copy = Environment()
         obj_copy.local = self.local.copy()
         obj_copy.non_local = self.non_local.copy()
+
+    def __contains__(self, name):
+        if name in self.local:
+            return True
+        elif name in self.non_local:
+            return True
+        else:
+            return False
+
+    def __getitem__(self, name):
+        return self.get(name)
+
+    def __setitem__(self, name, value):
+        self.assign(name, value)
 
 
 _trace_level = 0
@@ -136,6 +150,8 @@ def type_check(self, **kw):
     # get return constraints
     constraint = kw.get('return_constraint', None)
     ty, *t = self.value.type_check(**kw)
+    if self.value is None and constraint == TY_VOID:
+        return None
     if constraint != ty:
         raise TypeError("line %d: expected %s return type, given %s"
                         % (self.lineno, constraint, ty))
@@ -153,27 +169,27 @@ def type_check(self, **kw):
                         % (self.lineno, self.name))
     ty = tp[0]
     if ty == TY_RT:
-        return TY_RT
+        return TY_RT,
     if ty != TY_FUNC:
         raise TypeError("line %d: %s is not a callable"
                         % (self.lineno, self.name))
 
     # prototype is (return type, [args' type])
-    print(tp)
     prototype = tp[1]
     ret_ty, args_ty = prototype
 
-    # check args type
+    # check args number and type
+    print(str(self.args[0]))
     if len(args_ty) != len(self.args):
         raise TypeError(
             "line %d: %s takes %d arguments, given %d."
             % (self.lineno, self.name, len(args_ty), len(self.args)))
     for arg_ty, arg in zip(args_ty, self.args):
+        expected_type = arg_ty[0]
         given_ty, *t = arg.type_check(**kw)
-        if arg_ty != given_ty:
+        if expected_type != given_ty:
             raise TypeError("line %d: expected %s arg type, given %s"
-                            % (self.lineno, arg_ty, given_ty))
-
+                            % (self.lineno, expected_type, given_ty))
     return ret_ty
 
 
@@ -267,7 +283,6 @@ def type_check(self, **kw):
     signature = self.prototype.type_check(environment=nested_scope)
     self.environment.assign(self.prototype.get_name(),
                             (TY_FUNC, signature))
-
     if self.suite is not None:
         self.suite.type_check(environment=nested_scope,
                               return_constraint=signature[0])
@@ -279,15 +294,24 @@ def type_check(self, **kw):
 @trace
 def type_check(self, **kw):
     self.set_environment(**kw)
-    signature = (self.return_ty, tuple(tp[0] for tp in self.ty_params))
 
+    def helper(tp):
+        if tp[0] == TY_FUNC:
+            sys.stderr.write("Warning line %d: no static check of functions "
+                             "passed as argument\n" % (self.lineno))
+            return TY_RT,
+        else:
+            return tp[0],
+
+    signature = (self.return_ty, tuple(helper(tp) for tp in self.ty_params))
     for arg in self.ty_params:
         ty, name = arg
         if ty == TY_FUNC:
             sys.stderr.write("Warning line %d: no static check of functions "
-                             "passed as argument" % (self.lineno))
+                             "passed as argument\n" % (self.lineno))
             self.environment.assign(name.get_name(), (TY_RT, TY_FUNC))
-        self.environment.assign(name.get_name(), (ty,))
+        else:
+            self.environment.assign(name.get_name(), (ty,))
     return signature
 
 
@@ -297,6 +321,8 @@ _allowed = {
     (TY_BOOL, 'OR', TY_BOOL),
     (TY_INT, 'EQ', TY_INT),
     (TY_FLOAT, 'EQ', TY_FLOAT),
+    (TY_FLOAT, 'EQ', TY_FLOAT),
+    (TY_FLOAT, 'EQ', TY_INT),
     (TY_BOOL, 'EQ', TY_BOOL),
     (TY_STRING, 'EQ', TY_STRING),
     (TY_FUNC, 'EQ', TY_FUNC),
@@ -362,7 +388,7 @@ def type_check(self, **kw):
         combination = (ty_left, self.op, ty_right)
 
     if TY_RT in combination:
-        sys.stderr.write("line%d: warning: could not resolve type on operation %s"
+        sys.stderr.write("line %d: warning: could not resolve type on operation %s\n"
                          % (self.lineno, self.op))
         return TY_BOOL,
 
@@ -393,7 +419,7 @@ def type_check(self, **kw):
         combination = (ty_left, self.op, ty_right)
 
     if TY_RT in combination:
-        sys.stderr.write("line%d: warning: could not resolve type on operation %s"
+        sys.stderr.write("line%d: warning: could not resolve type on operation %s\n"
                          % (self.lineno, self.op))
         if combination[0] != TY_RT:
             return combination[0],
