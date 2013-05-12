@@ -430,7 +430,7 @@ class Cons(Atom):
     def get_children(self):
         return [self.data, self.pair]
 
-class Map(Atom)
+class Map(Atom):
     def __init__(self, id, pair, lineno, lexpos):
         super().__init__(lineno, lexpos)
         self.id = id

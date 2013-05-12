@@ -69,6 +69,12 @@ class ListedVykingParser(BasicVykingParser):
 
     def p_pair_fun(self, p):
         'pair_fun : LIST LPAREN args RPAREN'
+        args = p[3]
+        pair = ast.Pair(args[-1], None)
+        args.reverse()
+        for i in args[1:]:
+            pair = ast.Pair(i, pair)
+        p[0] = pair
 
     def p_head_fun(self, p):
         'head_fun : HEAD LPAREN pair RPAREN'
@@ -80,7 +86,7 @@ class ListedVykingParser(BasicVykingParser):
 
     def p_map_fun(self, p):
         'map_fun : MAP LAPREN id COMMA pair RPAREN'
-        p[0] =
+        p[0] = ast.Map(p[3], p[5])
 
 if __name__ == '__main__':
     # logger object
