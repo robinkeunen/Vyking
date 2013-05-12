@@ -59,6 +59,7 @@ class ListedVykingParser(BasicVykingParser):
                           | head_fun
                           | tail_fun
                           | map_fun
+                          | apply_fun
                           | list"""
         p[0] = p[1]
 
@@ -102,6 +103,11 @@ class ListedVykingParser(BasicVykingParser):
     def p_map_fun(self, p):
         'map_fun : MAP LPAREN ID COMMA pair RPAREN'
         p[0] = ast.Map(p[3], p[5])
+
+    def p_apply_fun(self, p):
+        'apply_fun : APPLY LPAREN ID COMMA pair RPAREN'
+        p[0] = ast.Apply(p[3], p[5])
+
 
 for it in ListedVykingParser.__dict__:
     print(it)

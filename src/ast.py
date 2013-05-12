@@ -441,3 +441,15 @@ class Map(Atom):
 
     def get_children(self):
         return [self.id, self.pair]
+
+class Apply(Atom):
+    def __init__(self, id, pair, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.id = id
+        self.pair = pair
+
+    def __str__(self):
+        return "[Apply : %s %s]" % (self.id, self.pair)
+
+    def get_children(self):
+        return [self.id, self.pair]
