@@ -223,10 +223,10 @@ defun func n_ary(func f):
             return f(head(argsl), n_ary_f(tail(argsl)))
     return n_ary_f
 
-def int add(int a, int b):
+defun func add(int a, int b):
     return a + b
 
-add_n = n_ary(add)
+func add_n = n_ary(add)
 
 print add_n([1, 2, 3, 4, 5])
 """
