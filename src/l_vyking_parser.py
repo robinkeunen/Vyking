@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
 
     # get test case and print
-    data = inputs["chain_add"]
+    data = inputs["exp1"]
 
     parser = ListedVykingParser(debug=log)
 

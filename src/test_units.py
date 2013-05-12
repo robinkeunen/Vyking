@@ -185,7 +185,7 @@ print(sum_list(ll))
 alt_map = """
 defun list alt_map(func f, list l):
     if tail(l) == []:
-        return list(f(head(l)))
+        return [f(head(l))]
     else:
         return cons(f(head(l)), alt_map(f, tail(l)))
 """
