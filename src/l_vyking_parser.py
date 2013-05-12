@@ -26,7 +26,6 @@ class ListedVykingParser(BasicVykingParser):
                          start="vyking_input",
                          **kw)
         self.tokens = self.lexer.tokens
-        print(self.tokens)
 
     def p_Vtype(self, p):
         """
@@ -46,7 +45,8 @@ class ListedVykingParser(BasicVykingParser):
             'void': 'TY_VOID',
             'list': 'TY_LIST'
         }
-        p[0] = typemap[p[1]]
+        p[0] = p[1]
+        #p[0] = typemap[p[1]]
 
     def p_expression_funcall(self, p):
         """expression : funcall
@@ -113,9 +113,6 @@ class ListedVykingParser(BasicVykingParser):
         p[0] = ast.Apply(p[3], p[5], p.lineno(1), p.lexpos(1))
 
 
-for it in ListedVykingParser.__dict__:
-    print(it)
-
 if __name__ == '__main__':
     # logger object
     logging.basicConfig(
@@ -129,6 +126,8 @@ if __name__ == '__main__':
 
     # get test case and print
     data = inputs["n_ary"]
+    for i, line in enumerate(data.splitlines()):
+        print("%2d: %s" % (i, line))
 
     parser = ListedVykingParser(debug=log)
 
