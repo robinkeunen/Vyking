@@ -392,7 +392,7 @@ class Head(Atom):
     def __str__(self):
         return "[Head : %s]" % (self.pair)
 
-    def get_pair(self):
+    def get_children(self):
         return [self.pair]
 
 class Tail(Atom):
@@ -403,10 +403,10 @@ class Tail(Atom):
     def __str__(self):
         return "[Tail : %s]" % (self.pair)
 
-    def get_pair(self):
+    def get_children(self):
         return [self.pair]
 
-class Append(atom):
+class Append(Atom):
     def __init__(self, pair1, pair2, lineno, lexpos):
         super().__init__(lineno, lexpos)
         self.pair1 = pair1
@@ -415,23 +415,29 @@ class Append(atom):
     def __str__(self):
         return "[Append : %s %s]" % (self.pair1, self.pair2)
 
-    def get_pair1(self):
-        return [self.pair1]
+    def get_children(self):
+        return [self.pair1, self.pair2]
 
-    def get_pair2(self):
-        return [self.pair2]
-
-class Cons(atom):
-    def __init__(self, atom, pair, lineno, lexpos):
+class Cons(Atom):
+    def __init__(self, data, pair, lineno, lexpos):
         super().__init__(lineno, lexpos)
-        self.atom = atom
+        self.data = data
         self.pair = pair
 
     def __str__(self):
-        return "[Cons : %s %s]" % (self.atom, self.pair)
+        return "[Cons : %s %s]" % (self.data, self.pair)
 
-    def get_atom(self):
-        return [self.atom]
+    def get_children(self):
+        return [self.data, self.pair]
 
-    def get_pair(self):
-        return [self.pair]
+class Map(Atom)
+    def __init__(self, id, pair, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.id = id
+        self.pair = pair
+
+    def __str__(self):
+        return "[Map : %s %s]" % (self.id, self.pair)
+
+    def get_children(self):
+        return [self.id, self.pair]

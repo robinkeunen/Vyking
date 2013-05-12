@@ -80,6 +80,7 @@ class ListedVykingParser(BasicVykingParser):
 
     def p_map_fun(self, p):
         'map_fun : MAP LAPREN id COMMA pair RPAREN'
+        p[0] =
 
 if __name__ == '__main__':
     # logger object
