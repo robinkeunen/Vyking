@@ -48,6 +48,9 @@ def CreateEntryBlockAlloca(function, type_tuple, var_name):
     """
     Creates an alloca instruction in the entry block of the function.
     This is used for mutable variables.
+    :param function: TODO
+    :param type_tuple:
+    :param var_name:
     """
     entry = function.entry_basic_block
     builder = lc.Builder.new(entry)
@@ -61,11 +64,19 @@ def CreateEntryBlockAlloca(function, type_tuple, var_name):
 
 @add_to_class(ast.ASTNode)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     raise NotImplementedError
 
 
 @add_to_class(ast.Statement_sequence)
 def generate_code(self, named_values=None):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     # create anonymous function to link statements
     # FIXME global module
     # FIXME only
@@ -91,6 +102,7 @@ def generate_code(self, named_values=None):
 def create_local_variable(self, named_values):
     """
     Creates a local variable into scope
+    :param named_values: TODO
     """
     function = g_llvm_builder.basic_block.function
 
@@ -109,6 +121,10 @@ def create_local_variable(self, named_values):
 
 @add_to_class(ast.Assignment)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     name = self.left.get_name()
     if name in named_values:
         variable = named_values[name]
@@ -120,11 +136,19 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Return)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     pass
 
 
 @add_to_class(ast.Funcall)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     # Look up the name in the global module table.
     f = g_llvm_module.get_function_named(self.name)
 
@@ -139,11 +163,20 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Print)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     pass
 
 
 @add_to_class(ast.If)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
+
     clause = self.clause.generate_code(named_values)
 
     # convert to 1-bit bool
@@ -188,6 +221,10 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Elif)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     clause = self.clause.generate_code(named_values)
 
     # convert to 1-bit bool
@@ -232,11 +269,19 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Else)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     return self.suite.generate_code(named_values)
 
 
 @add_to_class(ast.While)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     pass
 
 
@@ -256,6 +301,10 @@ def CreateArgumentAllocas(self, function, named_values):
 
 @add_to_class(ast.Prototype)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     # Create an alloca for each argument and register the argument in the symbol
     # table so that references to it will succeed.
 
@@ -282,6 +331,10 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Fundef)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     # clear scope
     # FIXME closures, might have to play here
     named_values.clear()
@@ -334,6 +387,10 @@ int_binops = {
 
 @add_to_class(ast.Clause)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     # TODO type check
     # TODO NOT operand
     # TODO grouped clauses or useless? note: p[0] = p[2]
@@ -346,6 +403,10 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Expression)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     # TODO type check
     # TODO Uminus -> deal in ast
 
@@ -357,6 +418,10 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.ID)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     # TODO scope lookup
     if self.name in named_values:
         # load from stack
@@ -368,16 +433,28 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Vinteger)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     return lc.Constant.int(lc.Type.int(), self.value)
 
 
 @add_to_class(ast.Vfloat)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     return lc.Constant.real(lc.Type.float(), self.value)
 
 
 @add_to_class(ast.Vboolean)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     if self.value:
         v = 1
     else:
@@ -387,14 +464,26 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Vstring)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     return lc.Constant.string(self.data)
 
 
 @add_to_class(ast.Map)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     pass
 
 
 @add_to_class(ast.Pair)
 def generate_code(self, named_values):
+    """
+Generates the LLVM code
+    :param named_values: The environment
+    """
     pass

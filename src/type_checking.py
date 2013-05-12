@@ -36,6 +36,11 @@ class Environment(object):
         return rep
 
     def assign(self, name, data):
+        """
+        TODO
+        :param name:
+        :param data:
+        """
         if name in self.local:
             self.local[name] = data
         elif self.non_local is not None \
@@ -45,6 +50,11 @@ class Environment(object):
             self.local[name] = data
 
     def get(self, name):
+        """
+        Get the type from its name
+        :param name: its name
+        :return: the type
+        """
         if name in self.local:
             return self.local[name]
         elif name in self.non_local:
@@ -56,6 +66,10 @@ class Environment(object):
             return None
 
     def copy(self):
+        """
+        Copy the object
+
+        """
         obj_copy = Environment()
         obj_copy.local = self.local.copy()
         obj_copy.non_local = self.non_local.copy()
@@ -80,9 +94,20 @@ _trace_level = 0
 
 @decorator
 def trace(f):
+    """
+    TODO
+    :param f:
+    :return:
+    """
     indent = '    '
 
     def _f(self, **args):
+        """
+        TODO
+        :param self:
+        :param args:
+        :return:
+        """
         global _trace_level
         rep_args = args.copy()
         rep_args.pop('environment', None)
@@ -108,6 +133,12 @@ class VykingException(Exception):
 
 @add_to_class(ast.ASTNode)
 def set_environment(self, **kw):
+    """
+        TODO
+    :param self:
+    :param kw:
+    :raise:
+    """
     self.environment = kw.get('environment', None)
     if self.environment is None:
         raise VykingException("Environnement is not defined")
@@ -115,12 +146,22 @@ def set_environment(self, **kw):
 
 @add_to_class(ast.ASTNode)
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     raise NotImplementedError
 
 
 @add_to_class(ast.Statement_sequence)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     entry_point = kw.pop('entry_point', False)
     if entry_point:
         self.environment = Environment()
@@ -137,6 +178,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Assignment)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     ty_rhs = self.right.type_check(**kw)
     self.environment.assign(self.left.get_name(), ty_rhs)
@@ -146,6 +192,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Return)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     # get return constraints
     constraint = kw.get('return_constraint', None)
@@ -161,6 +212,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Funcall)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     # get function return type
     tp = self.environment.get(self.name.get_name())
@@ -196,6 +252,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Print)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     self.ty = self.clause.type_check(**kw)
     return None
@@ -204,6 +265,11 @@ def type_check(self, **kw):
 @add_to_class(ast.If)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     ty_clause, *t = self.clause.type_check(**kw)
     if ty_clause != TY_BOOL:
@@ -226,6 +292,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Elif)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     ty_clause, *t = self.clause.type_check(**kw)
     if ty_clause != TY_BOOL:
@@ -248,6 +319,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Else)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
 
     nested_scope = Environment(self.environment)
@@ -260,6 +336,11 @@ def type_check(self, **kw):
 @add_to_class(ast.While)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     ty_clause, *t = self.clause.type_check(**kw)
     if ty_clause != TY_BOOL:
@@ -277,6 +358,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Fundef)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     # prototype : (return type, [args type])
     nested_scope = Environment(self.environment, defun_block=True)
@@ -293,6 +379,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Prototype)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
 
     def helper(tp):
@@ -376,6 +467,11 @@ _allowed = {
 @add_to_class(ast.Clause)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.environment = kw.get('environment', None)
 
     if self.op == 'NOT':
@@ -407,6 +503,11 @@ def type_check(self, **kw):
 @add_to_class(ast.Expression)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
 
     if self.op == 'UMINUS':
@@ -446,6 +547,11 @@ def type_check(self, **kw):
 @add_to_class(ast.ID)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     self.set_environment(**kw)
     res = self.environment.get(self.name)
     if res is None:
@@ -457,31 +563,61 @@ def type_check(self, **kw):
 
 @add_to_class(ast.Vinteger)
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     return TY_INT,
 
 
 @add_to_class(ast.Vfloat)
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     return TY_FLOAT,
 
 
 @add_to_class(ast.Vboolean)
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     return TY_BOOL,
 
 
 @add_to_class(ast.Vstring)
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     return TY_STRING, len(self.value)
 
 
 @add_to_class(ast.Map)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     pass
 
 
 @add_to_class(ast.Pair)
 @trace
 def type_check(self, **kw):
+    """
+    checks if the type of the children is consistent with the semantics of the node
+    :param kw: dictionnary carrying inherited attributes
+    :raise: TypeError if types don't match with the semantics
+    """
     pass
