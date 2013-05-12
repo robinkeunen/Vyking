@@ -4,7 +4,7 @@
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
 import itertools
-from src import pydot
+# from src import pydot
 
 
 counter = itertools.count()
@@ -383,3 +383,26 @@ class Pair(Atom):
 
     def get_children(self):
         return [self.head, self.tail]
+
+class Head(Atom):
+    def __init__(self, pair, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.pair = pair
+
+    def __str__(self):
+        return "[%s]" % (self.pair)
+
+    def get_pair(self):
+        return [self.pair]
+
+class Tail(Atom):
+    def __init__(self, pair, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.pair = pair
+
+    def __str__(self):
+        return "[%s]" % (self.pair)
+
+    def get_pair(self):
+        return [self.pair]
+
