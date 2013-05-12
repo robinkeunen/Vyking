@@ -43,10 +43,10 @@ class ListedVykingParser(BasicVykingParser):
             'string': 'TY_STRING',
             'func': 'TY_FUNC',
             'void': 'TY_VOID',
-            'list': 'TY_LIST'
+            'list': 'TY_LIST',
+            'runtime_type': 'TY_RT',
         }
-        p[0] = p[1]
-        #p[0] = typemap[p[1]]
+        p[0] = typemap[p[1]]
 
     def p_expression_funcall(self, p):
         """expression : funcall

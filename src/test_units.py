@@ -216,14 +216,14 @@ defun func n_ary(func f):
     #Given binary function f(x, y), return an n_ary function such
     #that f([x, y, z]) = f(x, f([y, z])), etc. Also allow f(x) = x.
 
-    defun runtime_type n_ary_f(argsl):
+    defun runtime_type n_ary_f(list argsl):
         if len(argsl) == 2:
             return f(head(argsl), head(tail(argsl)))
         else:
             return f(head(argsl), n_ary_f(tail(argsl)))
     return n_ary_f
 
-def add(a, b):
+def int add(int a, int b):
     return a + b
 
 add_n = n_ary(add)
