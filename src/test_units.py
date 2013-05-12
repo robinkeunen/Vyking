@@ -205,7 +205,7 @@ n_ary = """
 defun int len(list l):
     len_aux(l, 0)
 
-defun int len_aux(len l, int acc):
+defun int len_aux(list l, int acc):
     if tail(l) == []:
        return acc + 1
     else:
