@@ -16,6 +16,15 @@ from src.test_units import inputs
 
 class ListedVykingParser(BasicVykingParser):
 
+    precedence = (
+        ('left', 'AND', 'OR'),
+        ('right', 'NOT'),
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'TIMES', 'DIVIDE', 'MOD'),
+        ('nonassoc', 'LPAREN', 'RPAREN'),
+        ('right', 'UMINUS')  # unary minus operator
+    )
+
     def __init__(self, **kw):
         """
         Parser initializer
