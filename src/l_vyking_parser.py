@@ -4,7 +4,6 @@
 # -----------------------------------------------------------------------------
 import logging
 
-import sys
 import src.ast as ast
 import ply.lex as lex
 import ply.yacc as yacc
@@ -23,13 +22,11 @@ class ListedVykingParser(BasicVykingParser):
         :param kw: keyword arguments
         """
         mylexer = IndentFilter(ListedVykingLexer())
-        # FIXME this is very ugly
         super().__init__(lexer=mylexer,
                          start="vyking_input",
                          **kw)
         self.tokens = self.lexer.tokens
         print(self.tokens)
-
 
     def p_list_functions(self, p):
         """list_functions : cons_fun
@@ -41,8 +38,12 @@ class ListedVykingParser(BasicVykingParser):
                           | list"""
         p[0] = p[1]
 
+    def p_pair(self, p):
+        'pair : clause'
+        p[0] = p[1]
+
     def p_list(self, p):
-        'list: LBRACK args RBRACK'
+        'list : LBRACK args RBRACK'
         args = p[2]
         pair = ast.Pair(args[-1], None)
         args.reverse()
@@ -88,6 +89,9 @@ class ListedVykingParser(BasicVykingParser):
         'map_fun : MAP LAPREN id COMMA pair RPAREN'
         p[0] = ast.Map(p[3], p[5])
 
+for it in ListedVykingParser.__dict__:
+    print(it)
+
 if __name__ == '__main__':
     # logger object
     logging.basicConfig(
@@ -100,6 +104,6 @@ if __name__ == '__main__':
 
 
     # get test case and print
-    data = inputs["fundef"]
+    data = inputs["chain_add"]
 
     parser = ListedVykingParser(debug=log)

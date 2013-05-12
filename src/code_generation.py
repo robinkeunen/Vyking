@@ -64,11 +64,11 @@ def generate_code(self, named_values):
         g_llvm_builder = lc.Builder.new(block)
 
     for statement in self.statement_sequence:
-        statement.generate_code(named_value)
+        statement.generate_code(named_values)
 
 
 @add_to_class(ast.Assignment)
-def create_local_variable(self):
+def create_local_variable(self, named_values):
     """
     Creates a local variable into scope
     """
@@ -77,7 +77,7 @@ def create_local_variable(self):
     # Register all variables and emit their initializer.
     var_name = self.left.name
     var_expression = self.right
-    var_value = var_expression.generate_code(named_value)
+    var_value = var_expression.generate_code(named_values)
 
     # FIXME type
     alloca = CreateEntryBlockAlloca(function, lc.Type.int(), var_name)
@@ -107,7 +107,7 @@ def generate_code(self, named_values):
     name = self.left.get_name()
     if name in named_values:
         variable = named_values[name]
-        value = self.right.generate_code(named_value)
+        value = self.right.generate_code(named_values)
         g_llvm_builder.store(value, variable)
     else:
         pass
@@ -140,7 +140,7 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.If)
 def generate_code(self, named_values):
-    clause = self.clause.generate_code(named_value)
+    clause = self.clause.generate_code(named_values)
 
     # convert to 1-bit bool
     # FIXME type
@@ -159,7 +159,7 @@ def generate_code(self, named_values):
 
     # Build suite block
     g_llvm_builder.position_at_end(suite_block)
-    suite_value = self.suite.generate_code(named_value)
+    suite_value = self.suite.generate_code(named_values)
     g_llvm_builder.branch(merge_block)
 
     # Computation of suite can change de block, get block for the phi node
@@ -184,7 +184,7 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Elif)
 def generate_code(self, named_values):
-    clause = self.clause.generate_code(named_value)
+    clause = self.clause.generate_code(named_values)
 
     # convert to 1-bit bool
     # FIXME type
@@ -203,7 +203,7 @@ def generate_code(self, named_values):
 
     # Build suite block
     g_llvm_builder.position_at_end(suite_block)
-    suite_value = self.suite.generate_code(named_value)
+    suite_value = self.suite.generate_code(named_values)
     g_llvm_builder.branch(merge_block)
 
     # Computation of suite can change de block, get block for the phi node
@@ -228,7 +228,7 @@ def generate_code(self, named_values):
 
 @add_to_class(ast.Else)
 def generate_code(self, named_values):
-    return self.suite.generate_code(named_value)
+    return self.suite.generate_code(named_values)
 
 
 @add_to_class(ast.While)
@@ -247,7 +247,7 @@ type_code = {
 
 # helper function
 @add_to_class(ast.Prototype)
-def CreateArgumentAllocas(self, function):
+def CreateArgumentAllocas(self, function, named_values):
     """
     Create an alloca for each argument and register the argument in the symbol
     table so that references to it will succeed.
@@ -302,7 +302,7 @@ def generate_code(self, named_values):
 
     # Finish off the function.
     try:
-        return_value = self.suite.generate_code(named_value)
+        return_value = self.suite.generate_code(named_values)
         g_llvm_builder.ret(return_value)
 
         # Validate the generated code, checking for consistency.
@@ -341,8 +341,8 @@ def generate_code(self, named_values):
     # TODO NOT operand
     # TODO grouped clauses or useless? note: p[0] = p[2]
 
-    left = self.left.generate_code(named_value)
-    right = self.right.generate_code(named_value)
+    left = self.left.generate_code(named_values)
+    right = self.right.generate_code(named_values)
 
     return int_binops[self.op](left, right)
 
@@ -352,8 +352,8 @@ def generate_code(self, named_values):
     # TODO type check
     # TODO Uminus -> deal in ast
 
-    left = self.left.generate_code(named_value)
-    right = self.right.generate_code(named_value)
+    left = self.left.generate_code(named_values)
+    right = self.right.generate_code(named_values)
 
     return int_binops[self.op](left, right)
 

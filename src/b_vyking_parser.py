@@ -84,9 +84,6 @@ class BasicVykingParser(Parser):
     """
     #precedence rules
     precedence = (
-        #('nonassoc', 'unmatched_if'),
-        #('nonassoc', 'ELSE'),
-        #('nonassoc', 'ELIF'),
         ('left', 'AND', 'OR'),
         ('right', 'NOT'),
         ('left', 'PLUS', 'MINUS'),
@@ -437,6 +434,10 @@ class BasicVykingParser(Parser):
         tok.lexpos = self.lexer.get_lexpos()
         return tok
 
+
+for it in BasicVykingParser.__dict__:
+    print(it)
+
 # Usage
 if __name__ == "__main__":
     all = False
@@ -482,6 +483,3 @@ if __name__ == "__main__":
             tree = result.make_tree_graph()
             tree.write("./trees/tree", format="png")
         print(result)
-
-
-

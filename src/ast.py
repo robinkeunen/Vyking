@@ -4,7 +4,7 @@
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
 import itertools
-# from src import pydot
+from src import pydot
 
 
 counter = itertools.count()
@@ -340,7 +340,7 @@ class Vstring(Atom):
         self.value = data
 
     def __str__(self):
-        return self.data
+        return self.value
 
     def get_children(self):
         return list()
