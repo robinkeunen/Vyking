@@ -31,7 +31,6 @@ class ListedVykingParser(BasicVykingParser):
     def p_list_functions(self, p):
         """list_functions : cons_fun
                           | append_fun
-                          | pair_fun
                           | head_fun
                           | tail_fun
                           | map_fun
@@ -76,7 +75,7 @@ class ListedVykingParser(BasicVykingParser):
         p[0] = ast.Tail(p[3])
 
     def p_map_fun(self, p):
-        'map_fun : MAP LPAREN expression_id COMMA pair RPAREN'
+        'map_fun : MAP LPAREN ID COMMA pair RPAREN'
         p[0] = ast.Map(p[3], p[5])
 
 for it in ListedVykingParser.__dict__:
