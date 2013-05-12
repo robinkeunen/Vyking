@@ -1,7 +1,9 @@
 # -----------------------------------------------------------------------------
-# b_vyking_parser.py
+# l_vyking_parser.py
+# Parser for the full vyking language (with lists)
 # authors : Robin Keunen, Pierre Vyncke
 # -----------------------------------------------------------------------------
+
 import logging
 
 import src.ast as ast

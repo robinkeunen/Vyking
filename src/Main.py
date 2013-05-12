@@ -10,9 +10,11 @@ from src.b_vyking_parser import BasicVykingParser
 import src.type_checking
 import src.code_generation
 
-from llvm.passes import FunctionPassManager
+#from llvm.passes import FunctionPassManager
 
 import llvm.passes as lp
+
+import src.code_generation
 
 
 def main():

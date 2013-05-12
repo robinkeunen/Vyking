@@ -1,4 +1,11 @@
+# -----------------------------------------------------------------------------
+# scratch.py
 # Base class for all expression nodes.
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
+
+
+
 class ExpressionNode(object):
    pass
 

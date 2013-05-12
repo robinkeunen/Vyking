@@ -1,5 +1,9 @@
-# defines some usefull functions
-__author__ = 'Robin Keunen'
+# -----------------------------------------------------------------------------
+# misc.py
+# Defines some usefull functions
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
+
 
 from functools import update_wrapper
 

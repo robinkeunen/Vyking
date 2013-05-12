@@ -1,3 +1,10 @@
+# -----------------------------------------------------------------------------
+# l_vyking_lexer.py
+# Lexer for the full vyking language (with lists)
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
+
+
 from src.test_units import lex_test
 from src.b_vyking_lexer import BasicVykingLexer
 

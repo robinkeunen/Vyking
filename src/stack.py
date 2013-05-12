@@ -1,4 +1,8 @@
-__author__ = 'Robin Keunen'
+# -----------------------------------------------------------------------------
+# stack.py
+# Stack used in the indent filter.
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
 
 
 class EmptyStackException(Exception):

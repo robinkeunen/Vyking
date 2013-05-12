@@ -226,9 +226,9 @@ defun func n_ary(func f):
 defun func add(int a, int b):
     return a + b
 
-func add_n = n_ary(add)
+add_n = n_ary(add)
 
-print add_n([1, 2, 3, 4, 5])
+print (add_n([1, 2, 3, 4, 5]))
 """
 
 inputs = {"exp1": exp1,

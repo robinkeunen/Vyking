@@ -1,4 +1,8 @@
-__author__ = 'Robin Keunen'
+# -----------------------------------------------------------------------------
+# draw_tree.py
+# Draws the tree graph
+# authors : Robin Keunen, Pierre Vyncke
+# -----------------------------------------------------------------------------
 
 from src import pydot
 from src.misc import add_to_class
