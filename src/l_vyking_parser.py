@@ -28,6 +28,31 @@ class ListedVykingParser(BasicVykingParser):
         self.tokens = self.lexer.tokens
         print(self.tokens)
 
+    def p_Vtype(self, p):
+        """
+        Vtype : TY_INT
+              | TY_FLOAT
+              | TY_STRING
+              | TY_FUNC
+              | TY_VOID
+              | TY_RT
+              | TY_LIST
+        """
+        typemap = {
+            'int': 'TY_INT',
+            'float': 'TY_FLOAT',
+            'string': 'TY_STRING',
+            'func': 'TY_FUNC',
+            'void': 'TY_VOID',
+            'list': 'TY_LIST'
+        }
+        p[0] = typemap[p[1]]
+
+    def p_expression_funcall(self, p):
+        """expression : funcall
+                      | list_functions"""
+        p[0] = p[1]
+
     def p_list_functions(self, p):
         """list_functions : cons_fun
                           | append_fun
