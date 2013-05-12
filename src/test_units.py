@@ -80,7 +80,7 @@ defun void f2(string s1, string s2) :
     print(s1)
     print(s2)
 
-f2("HAHAHA !", 34)
+f2('HAHAHA !', '34')
 """
 
 addfun = """

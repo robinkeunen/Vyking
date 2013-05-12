@@ -379,7 +379,7 @@ class Pair(Atom):
         self.tail = tail
 
     def __str__(self):
-        pass
+        return "[%s, %s]" % ( self.head, self.tail)
 
     def get_children(self):
         return [self.head, self.tail]

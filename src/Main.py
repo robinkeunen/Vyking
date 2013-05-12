@@ -41,8 +41,8 @@ def main():
     log = logging.getLogger()
 
 
-   # get test case and print
-    data = inputs["find_bounds"]
+    # get test case and print
+    data = inputs["fundef"]
 
     for lino, line in enumerate(data.splitlines()):
         print("%2d: %s" % (lino, line))

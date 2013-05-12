@@ -136,6 +136,8 @@ def type_check(self, **kw):
     # get return constraints
     constraint = kw.get('return_constraint', None)
     ty, *t = self.value.type_check(**kw)
+    if self.value is None and constraint == TY_VOID:
+        return None
     if constraint != ty:
         raise TypeError("line %d: expected %s return type, given %s"
                         % (self.lineno, constraint, ty))
@@ -159,20 +161,21 @@ def type_check(self, **kw):
                         % (self.lineno, self.name))
 
     # prototype is (return type, [args' type])
-    print(tp)
     prototype = tp[1]
     ret_ty, args_ty = prototype
 
-    # check args type
+    # check args number and type
+    print(str(self.args[0]))
     if len(args_ty) != len(self.args):
         raise TypeError(
             "line %d: %s takes %d arguments, given %d."
             % (self.lineno, self.name, len(args_ty), len(self.args)))
     for arg_ty, arg in zip(args_ty, self.args):
+        expected_type = arg_ty[0]
         given_ty, *t = arg.type_check(**kw)
-        if arg_ty != given_ty:
+        if expected_type != given_ty:
             raise TypeError("line %d: expected %s arg type, given %s"
-                            % (self.lineno, arg_ty, given_ty))
+                            % (self.lineno, expected_type, given_ty))
     return ret_ty
 
 
@@ -366,12 +369,10 @@ def type_check(self, **kw):
         combination = (self.op, ty_right)
 
     else:
-        print(self.left.type_check(**kw))
         ty_left, *t = self.left.type_check(**kw)
         ty_right, *t = self.right.type_check(**kw)
         combination = (ty_left, self.op, ty_right)
 
-    print(combination)
     if TY_RT in combination:
         sys.stderr.write("line %d: warning: could not resolve type on operation %s\n"
                          % (self.lineno, self.op))
