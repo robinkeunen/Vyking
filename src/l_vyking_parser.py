@@ -54,25 +54,29 @@ class ListedVykingParser(BasicVykingParser):
         """cons_fun : CONS LPAREN clause COMMA pair RPAREN
                      | atom PLUS pair"""
         if len(p) == 7:
-            p[0] = ast.Pair(p[3], p[5])
+            p[0] = ast.Cons(p[3], p[5])
         else:
-            p[0] = ast.Pair(p[1], p[3])
+            p[0] = ast.Cons(p[1], p[3])
 
     def p_append_fun(self, p):
         """append_fun : APPEND LPAREN pair pair RPAREN
                        | pair PLUS pair"""
         #immutable?
+        if len(p) == 6:
+            p[0] = ast.Append(p[3], p[4])
+        else:
+            p[0] = ast.Append(p[1], p[3])
 
     def p_pair_fun(self, p):
         'pair_fun : LIST LPAREN args RPAREN'
 
     def p_head_fun(self, p):
         'head_fun : HEAD LPAREN pair RPAREN'
-        p[0] = p[3].head
+        p[0] = ast.Head(p[3])
 
     def p_tail_fun(self, p):
         'tail_fun : TAIL LPAREN pair RPAREN'
-        p[0] = p[3].tail
+        p[0] = ast.Tail(p[3])
 
     def p_map_fun(self, p):
         'map_fun : MAP LAPREN id COMMA pair RPAREN'

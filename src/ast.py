@@ -390,7 +390,7 @@ class Head(Atom):
         self.pair = pair
 
     def __str__(self):
-        return "[%s]" % (self.pair)
+        return "[Head : %s]" % (self.pair)
 
     def get_pair(self):
         return [self.pair]
@@ -401,8 +401,37 @@ class Tail(Atom):
         self.pair = pair
 
     def __str__(self):
-        return "[%s]" % (self.pair)
+        return "[Tail : %s]" % (self.pair)
 
     def get_pair(self):
         return [self.pair]
 
+class Append(atom):
+    def __init__(self, pair1, pair2, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.pair1 = pair1
+        self.pair2 = pair2
+
+    def __str__(self):
+        return "[Append : %s %s]" % (self.pair1, self.pair2)
+
+    def get_pair1(self):
+        return [self.pair1]
+
+    def get_pair2(self):
+        return [self.pair2]
+
+class Cons(atom):
+    def __init__(self, atom, pair, lineno, lexpos):
+        super().__init__(lineno, lexpos)
+        self.atom = atom
+        self.pair = pair
+
+    def __str__(self):
+        return "[Cons : %s %s]" % (self.atom, self.pair)
+
+    def get_atom(self):
+        return [self.atom]
+
+    def get_pair(self):
+        return [self.pair]
