@@ -30,8 +30,16 @@ TY_FUNC = "TY_FUNC"
 TY_VOID = "TY_VOID"
 TY_RT = "TY_RT"
 
+llvm_type = {
+    TY_BOOL: lc.Type.int(1),
+    TY_INT: lc.Type.int(),
+    TY_FLOAT: lc.Type.float(),
+    TY_STRING: None,  # TODO string type as arg http://bit.ly/10PRVKW
+    TY_FUNC: None,  # TODO func type as arg
+}
+
 # helper function
-def CreateEntryBlockAlloca(function, ty, var_name):
+def CreateEntryBlockAlloca(function, type_tuple, var_name):
     """
     Creates an alloca instruction in the entry block of the function.
     This is used for mutable variables.
@@ -39,7 +47,11 @@ def CreateEntryBlockAlloca(function, ty, var_name):
     entry = function.entry_basic_block
     builder = lc.Builder.new(entry)
     builder.position_at_beginning(entry)
-    return builder.alloca(ty, var_name)
+    # unpack
+    ty, *t = type_tuple
+    if ty in (TY_FUNC, TY_VOID, TY_RT):
+        raise TypeError("think more")  # FIXME block alloca
+    return builder.alloca(llvm_type[ty], var_name)
 
 
 @add_to_class(ast.ASTNode)
@@ -48,10 +60,13 @@ def generate_code(self, named_values):
 
 
 @add_to_class(ast.Statement_sequence)
-def generate_code(self, named_values):
+def generate_code(self, named_values=None):
     # create anonymous function to link statements
     # FIXME global module
     # FIXME only
+
+    if named_values is None:
+        named_values = Environment()
 
     # make anonymous function on entry point
     global g_llvm_builder
@@ -75,30 +90,15 @@ def create_local_variable(self, named_values):
     function = g_llvm_builder.basic_block.function
 
     # Register all variables and emit their initializer.
-    var_name = self.left.name
-    var_expression = self.right
-    var_value = var_expression.generate_code(named_values)
+    var_name = self.left.get_name()
+    var_value = self.right.generate_code(named_values)
 
-    # FIXME type
-    alloca = CreateEntryBlockAlloca(function, lc.Type.int(), var_name)
+    ty = self.environment[var_name]
+    alloca = CreateEntryBlockAlloca(function, ty, var_name)
     g_llvm_builder.store(var_value, alloca)
 
-    # Remember the old variable binding so that we can restore the binding
-    # when we unrecurse.
-    old_bindings[var_name] = self.named_values.get(var_name, None)
+    named_values[var_name] = alloca
 
-    # Remember this binding.
-    self.named_values[var_name] = alloca
-
-    # FIXME clean local variables
-    # # Pop all our variables from scope.
-    # for var_name in self.variables:
-    #     if old_bindings[var_name] is not None:
-    #         named_values[var_name] = old_bindings[var_name]
-    #     else:
-    #         del named_values[var_name]
-
-    # Return the body computation.
     return alloca
 
 
@@ -111,7 +111,7 @@ def generate_code(self, named_values):
         g_llvm_builder.store(value, variable)
     else:
         pass
-        self.create_local_variable()
+        self.create_local_variable(named_values)
 
 
 @add_to_class(ast.Return)
@@ -234,15 +234,6 @@ def generate_code(self, named_values):
 @add_to_class(ast.While)
 def generate_code(self, named_values):
     pass
-
-
-type_code = {
-    TY_BOOL: lc.Type.int(1),
-    TY_INT: lc.Type.int(),
-    TY_FLOAT: lc.Type.float(),
-    TY_STRING: None,  # TODO string type as arg http://bit.ly/10PRVKW
-    TY_FUNC: None,  # TODO func type as arg
-}
 
 
 # helper function

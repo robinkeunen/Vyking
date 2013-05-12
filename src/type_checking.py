@@ -472,7 +472,7 @@ def type_check(self, **kw):
 
 @add_to_class(ast.Vstring)
 def type_check(self, **kw):
-    return TY_STRING, len(self.data)
+    return TY_STRING, len(self.value)
 
 
 @add_to_class(ast.Map)

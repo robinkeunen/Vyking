@@ -435,9 +435,6 @@ class BasicVykingParser(Parser):
         return tok
 
 
-for it in BasicVykingParser.__dict__:
-    print(it)
-
 # Usage
 if __name__ == "__main__":
     all = False

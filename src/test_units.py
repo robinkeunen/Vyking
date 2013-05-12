@@ -22,7 +22,7 @@ if a == b:
         a = b + 6
         print(b)
 else:
-    print("diff")
+    print(a)
 """
 
 extern = """
