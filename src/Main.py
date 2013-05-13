@@ -6,35 +6,54 @@ import logging
 from src.b_vyking_parser import BasicVykingParser
 
 # add methods to abstract syntax tree
-#import src.draw_tree
+
 import src.type_checking
 import src.code_generation
 
-#from llvm.passes import FunctionPassManager
+welcome = """
+Hi,
 
-import llvm.passes as lp
+Welcome to the vyking compiler.
+Would you like to
+ 1. load a file to compile,
+ 2. compile one of the test units (cf test_units.py) ?
 
-import src.code_generation
+>> """
 
+action = """
+Would you like to :
+ 1. print the abstract syntax tree
+ 2. type_check the code
+ 3. generate llvm code (broken) ?
+
+>> """
 
 def main():
-   # # Set up the optimizer pipeline. Start with registering info about how the
-   # # target lays out data structures.
-   # g_llvm_pass_manager.add(g_llvm_executor.target_data)
-   # # Promote allocas to registers.
-   # g_llvm_pass_manager.add(PASS_PROMOTE_MEMORY_TO_REGISTER)
-   # # Do simple "peephole" optimizations and bit-twiddling optzns.
-   # g_llvm_pass_manager.add(PASS_INSTRUCTION_COMBINING)
-   # # Reassociate expressions.
-   # g_llvm_pass_manager.add(PASS_REASSOCIATE)
-   # # Eliminate Common SubExpressions.
-   # g_llvm_pass_manager.add(PASS_GVN)
-   # # Simplify the control flow graph (deleting unreachable blocks, etc).
-   # g_llvm_pass_manager.add(PASS_CFG_SIMPLIFICATION)
-   #
-   # g_llvm_pass_manager.initialize()
 
-   # logger object
+    data = ''
+
+    # while True:
+    #     w = input(welcome)
+    #     if w == '1':
+    #         name = input('Enter filename: ')
+    #         with open('name', 'r') as input_file:
+    #             for line in input_file:
+    #                 data += line
+    #     elif w == '2':
+    #         print('Choose from the list :')
+    #         for i, tu in enumerate(inputs.keys()):
+    #             print(' ', tu)
+    #         test = input('>> ')
+    #         try:
+    #             data = inputs[test]
+    #         except KeyError:
+    #             print('unknown test unit')
+    #             continue
+    #         break
+    #     else:
+    #         print("choose 1 or 2")
+
+    # logger object
     logging.basicConfig(
         level=logging.DEBUG,
         filename="parselog.txt",
@@ -43,9 +62,8 @@ def main():
     )
     log = logging.getLogger()
 
-
     # get test case and print
-    data = inputs["exp2"]
+    data = inputs["dangling_else"]
 
     for lino, line in enumerate(data.splitlines()):
         print("%2d: %s" % (lino, line))
@@ -53,15 +71,25 @@ def main():
 
     parser = BasicVykingParser(debug=log)
     ast = parser.parse(data, debug=log)
-    ast.type_check(entry_point=True)
-    ast.generate_code()
-    # dot_tree = ast.make_tree_graph()
-    # dot_tree.write("./tree", format="png")
-    print()
-    print(ast)
 
-    # Print out all of the generated code.
-    print(src.code_generation.g_llvm_module)
+    while True:
+        #a = input(action)
+        a = '3'
+        if a == '1':
+            print(ast)
+            break
+        elif a == '2':
+            ast.type_check(entry_point=True)
+            break
+        elif a == '3':
+            ast.type_check(entry_point=True)
+            print()
+            ast.generate_code()
+            # Print out all of the generated code.
+            print(src.code_generation.g_llvm_module)
+            break
+        else:
+            print("choose 1, 2 or 3")
 
 if __name__ == '__main__':
    main()

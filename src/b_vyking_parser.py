@@ -241,8 +241,12 @@ class BasicVykingParser(Parser):
     def p_ty_param(self, p):
         """
         ty_param : Vtype ID
+                 | empty
         """
-        p[0] = (p[1], ast.ID(p[2], p.lineno(2), p.lexpos(2)))
+        if len(p) == 3:
+            p[0] = (p[1], ast.ID(p[2], p.lineno(2), p.lexpos(2)))
+        else:
+            return tuple()
 
     def p_Vtype(self, p):
         """

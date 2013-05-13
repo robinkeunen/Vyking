@@ -201,6 +201,7 @@ def type_check(self, **kw):
     # get return constraints
     constraint = kw.get('return_constraint', None)
     ty, *t = self.value.type_check(**kw)
+    self.ret_ty = ty
     if self.value is None and constraint == TY_VOID:
         return None
     if constraint != ty:
@@ -235,7 +236,7 @@ def type_check(self, **kw):
     ret_ty, args_ty = prototype
 
     # check args number and type
-    print(str(self.args[0]))
+
     if len(args_ty) != len(self.args):
         raise TypeError(
             "line %d: %s takes %d arguments, given %d."
@@ -246,7 +247,7 @@ def type_check(self, **kw):
         if expected_type != given_ty:
             raise TypeError("line %d: expected %s arg type, given %s"
                             % (self.lineno, expected_type, given_ty))
-    return ret_ty
+    return ret_ty,
 
 
 @add_to_class(ast.Print)
@@ -394,15 +395,19 @@ def type_check(self, **kw):
         else:
             return tp[0],
 
-    signature = (self.return_ty, tuple(helper(tp) for tp in self.ty_params))
-    for arg in self.ty_params:
-        ty, name = arg
-        if ty == TY_FUNC:
-            sys.stderr.write("Warning line %d: no static check of functions "
-                             "passed as argument\n" % (self.lineno))
-            self.environment.assign(name.get_name(), (TY_RT, TY_FUNC))
-        else:
-            self.environment.assign(name.get_name(), (ty,))
+    if self.ty_params[0] is None:
+        signature = (self.return_ty, tuple())
+    else:
+        signature = (self.return_ty, tuple(helper(tp) for tp in self.ty_params))
+        for arg in self.ty_params:
+            ty, name = arg
+            if ty == TY_FUNC:
+                sys.stderr.write("Warning line %d: no static check of functions "
+                                 "passed as argument\n" % (self.lineno))
+                self.environment.assign(name.get_name(), (TY_RT, TY_FUNC))
+            else:
+                self.environment.assign(name.get_name(), (ty,))
+    self.signature = signature
     return signature
 
 
@@ -483,6 +488,8 @@ def type_check(self, **kw):
         ty_right, *t = self.right.type_check(**kw)
         combination = (ty_left, self.op, ty_right)
 
+    self.type = combination
+
     if TY_RT in combination:
         sys.stderr.write("line %d: warning: could not resolve type on operation %s\n"
                          % (self.lineno, self.op))
@@ -518,6 +525,8 @@ def type_check(self, **kw):
         ty_left, *t = self.left.type_check(**kw)
         ty_right, *t = self.right.type_check(**kw)
         combination = (ty_left, self.op, ty_right)
+
+    self.type = combination
 
     if TY_RT in combination:
         sys.stderr.write("line%d: warning: could not resolve type on operation %s\n"

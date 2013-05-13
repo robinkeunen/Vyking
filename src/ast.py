@@ -477,7 +477,7 @@ class Map(Statement):
         """
         Init
         :param funcname: name of the function
-        :param vlist: list
+        :param vlist: list on which the function will be applied
         :param lineno: line number
         :param lexpos: position
         """

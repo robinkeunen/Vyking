@@ -5,24 +5,25 @@ exp1 = """x = 3 + 42 * (2 - 8)
 """
 
 exp2 = """
-t = 3
+t = 3.
 s = 5
 x = 3 + 42 * (s - t)
 #print(x)
 """
 
 dangling_else = """
-a = 2
-b = a
-if a == b:
+defun int f():
+ a = 2
+ b = a
+ if a == b:
     a = a + 1
     if a == 2:
-        print(a)
+        return a
     else:
         a = b + 6
-        print(b)
-else:
-    print(a)
+        return b -2
+ else:
+    return a
 """
 
 extern = """
