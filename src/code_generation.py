@@ -89,7 +89,6 @@ Generates the LLVM code
 
 
 @add_to_class(ast.Statement_sequence)
-@trace
 def generate_code(self, named_values=None):
     """
 Generates the LLVM code
@@ -195,7 +194,6 @@ Generates the LLVM code
 
 
 @add_to_class(ast.If)
-@trace
 def generate_code(self, named_values):
     """
 Generates the LLVM code
@@ -252,7 +250,7 @@ Generates the LLVM code
 @add_to_class(ast.Elif)
 def generate_code(self, named_values):
     """
-Generates the LLVM code
+    Generates the LLVM code
     :param named_values: The environment
     """
     clause = self.clause.generate_code(named_values)

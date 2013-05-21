@@ -189,15 +189,17 @@ class BasicVykingLexer(Lexer):
         t.value = int(t.value)
         return t
 
-    def t_BOOLEAN(self, t):
-        r'(True | False)'
-        t.value = t.value == "True"
-        return t
+
 
     def t_ID(self, t):
         r'[a-zA-Z_][a-zA-Z0-9_]*'
         # type is reserved keyword if found in reserved else 'ID'
         t.type = self.reserved.get(t.value, 'ID')
+        return t
+
+    def t_BOOLEAN(self, t):
+        r'(True | False)'
+        t.value = t.value == "True"
         return t
 
     def t_COMMENT(self, t):
@@ -216,16 +218,13 @@ class BasicVykingLexer(Lexer):
         t.value = t.value.strip('"\'')
         return t
 
-
     def t_bol_NEWLINE(self, t):
         r'(\n|\n\r|\r\n)'
         t.lexer.lineno += 1
         pass
 
-    # single line comments
     def t_bol_COMMENT(self, t):
         r'\s*\#.*'
-        #t.lexer.lineno += 1
         pass
         # token discarded
 

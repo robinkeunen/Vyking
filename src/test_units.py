@@ -26,6 +26,7 @@ defun int f():
     return a
 """
 
+
 extern = """
 extern void strcat(string s)
 """

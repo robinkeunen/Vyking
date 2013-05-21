@@ -22,6 +22,19 @@ class Environment(object):
 
     def __init__(self, non_local=None, defun_block=False):
         self.local = {}
+        self.non_local = non_local
+        self.defun_block = defun_block
+        if defun_block:
+            self.closed_variable = {}
+
+class Environment(object):
+    """
+    Keeps track of the variables and functions in the scope
+    and their type
+    """
+
+    def __init__(self, non_local=None, defun_block=False):
+        self.local = {}
         if non_local is None:
             self.non_local = {}
         else:

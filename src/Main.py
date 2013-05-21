@@ -28,6 +28,7 @@ Would you like to :
 
 >> """
 
+
 def main():
 
     data = ''
@@ -63,7 +64,7 @@ def main():
     log = logging.getLogger()
 
     # get test case and print
-    data = inputs["dangling_else"]
+    data = inputs["exp2"]
 
     for lino, line in enumerate(data.splitlines()):
         print("%2d: %s" % (lino, line))
@@ -71,6 +72,7 @@ def main():
 
     parser = BasicVykingParser(debug=log)
     ast = parser.parse(data, debug=log)
+    print(ast)
 
     while True:
         #a = input(action)
