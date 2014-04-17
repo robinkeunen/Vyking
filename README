@@ -3,13 +3,9 @@ Vyking compiler
 Robin Keunen
 Pierre Vyncke
 
-This projects aims to develop a simple compiler for the Vyking language.
-The syntax is inspired from Python.
+This projects aims to develop a simple compiler for the Vyking language. The syntax is inspired from Python. The compiler was built as an assignment at the University of Liège.
 
-The compiler is written in Python and uses PLY lexer/parser.
-The compiler targets LLVM bytecode
+The compiler is written in Python and uses PLY lexer/parser. The compiler targets LLVM bytecode
 
-Lexing and parsing are done.
-Type checking is only a stub, it does not go very far in the analysis.
-Code generation is not finished yet.
+Lexing and parsing are done. Type checking is only a stub, it does not go very far in the analysis. Code generation is not finished yet.
 
